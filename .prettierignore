@@ -1,0 +1,14 @@
+node_modules
+android
+ios
+.expo
+dist
+coverage
+content-source
+docs
+assets/db
+package-lock.json
+.local
+research
+# Generated from the owner's description (scripts/adwamuha/owner-texts.ts)
+src/features/adwamuha/owner-texts.ts

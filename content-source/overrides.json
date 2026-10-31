@@ -1,0 +1,223 @@
+{
+  "$comment": "Every change we make to the source content. Applied by scripts/content/build-content-db.ts and listed in docs/content-changes.md. Ids are SOURCE ids (category id, dhikr id inside that category).",
+  "categorySplits": [
+    {
+      "sourceCategoryId": 1,
+      "reason": "Owner decision 2026-10-16: morning and evening adhkar are separate categories.",
+      "parts": [
+        {
+          "id": 1,
+          "titles": {
+            "ar": "أذكار الصباح"
+          },
+          "excludeDhikr": [
+            23
+          ],
+          "excludeReason": "23 is evening-only: (ثلاثَ مرَّاتٍ إذا أمسى)",
+          "removePatterns": [
+            "\\[\\s*وإذا أمسى[^\\]]*\\]"
+          ],
+          "removeReason": "The evening wording notes [وإذا أمسى قال: ...] are removed from the morning text. Nothing is added."
+        },
+        {
+          "id": 133,
+          "titles": {
+            "ar": "أذكار المساء"
+          },
+          "excludeDhikr": [
+            19,
+            20,
+            21
+          ],
+          "excludeReason": "19, 20 and 21 are morning-only: (إذا أصبحَ)",
+          "textFixes": [
+            {
+              "dhikrId": 6,
+              "find": "اللَّهُمَّ إِنِّي أَصْبَحْتُ أُشْهِدُكَ",
+              "replace": "اللَّهُمَّ إني أمسيت أشهدك",
+              "reason": "Evening words, as given by the owner.",
+              "evidence": "Owner decision 2026-10-17 (evening wording)"
+            },
+            {
+              "dhikrId": 7,
+              "find": "اللَّهُمَّ مَا أَصْبَحَ بِي مِنْ نِعْمَةٍ",
+              "replace": "اللَّهُمَّ مَا أمسى بي مِنْ نعمةٍ",
+              "reason": "Evening words, as given by the owner.",
+              "evidence": "Owner decision 2026-10-17 (evening wording)"
+            },
+            {
+              "dhikrId": 15,
+              "find": "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+              "replace": "أمسينا وأمسى الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+              "reason": "Evening words, as given by the owner. الملك keeps the book's own marks (الْمُلْكُ): only the verbs change in the evening.",
+              "evidence": "Owner decision 2026-10-17 (evening wording)"
+            },
+            {
+              "dhikrId": 15,
+              "find": "اللَّهُـمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذَا الْيَوْمِ:فَتْحَهُ، وَنَصْرَهُ، وَنورَهُ، وَبَرَكَتَهُ، وَهُدَاهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِيهِ وَشَرِّ مَا بَعْدَهُ",
+              "replace": "اللَّهم إني أسألك خير هذه الليلة: فتحها، ونصرها، ونورها، وبركتها، وهداها، وأعوذ بك من شر ما فيها، وشر ما بعدها",
+              "reason": "The rest of the evening words, from the book's own evening note for this dhikr.",
+              "evidence": "Owner decision 2026-10-17 (evening wording)"
+            }
+          ],
+          "removePatterns": [
+            "\\[\\s*وإذا أمسى[^\\]]*\\]"
+          ],
+          "removeReason": "The evening notes [وإذا أمسى قال: ...] are removed: the evening words now replace the morning words (owner decision 2026-10-17)."
+        }
+      ]
+    }
+  ],
+  "countFixes": [
+    {
+      "categoryId": 1,
+      "dhikrId": 9,
+      "from": 1,
+      "to": 7,
+      "reason": "The text itself says (سَبْعَ مَرّاتٍ)."
+    },
+    {
+      "categoryId": 37,
+      "dhikrId": 2,
+      "from": 1,
+      "to": 3,
+      "reason": "The text itself says (ثلاثَ مرَّاتٍ)."
+    },
+    {
+      "categoryId": 49,
+      "dhikrId": 2,
+      "from": 1,
+      "to": 7,
+      "reason": "The text itself says (سبع مرات)."
+    }
+  ],
+  "textFixes": [
+    {
+      "target": "title",
+      "categoryId": 14,
+      "find": "ُل",
+      "replace": "لُ",
+      "reason": "Lone damma before the word (PDF glitch) moved onto its letter: ُلبْس → لُبْس.",
+      "evidence": "Owner approved 2026-10-16 (docs/content-review.md A1)"
+    },
+    {
+      "target": "title",
+      "categoryId": 15,
+      "find": "ُل",
+      "replace": "لُ",
+      "reason": "Lone damma before the word (PDF glitch) moved onto its letter: ُلبْس → لُبْس.",
+      "evidence": "Owner approved 2026-10-16 (docs/content-review.md A2)"
+    },
+    {
+      "target": "title",
+      "categoryId": 46,
+      "find": "ُ غ",
+      "replace": "غُ",
+      "reason": "Lone damma before the word (PDF glitch) moved onto its letter: ُ غلب → غُلب.",
+      "evidence": "Owner approved 2026-10-16 (docs/content-review.md A3)"
+    },
+    {
+      "target": "title",
+      "categoryId": 104,
+      "find": "مترلا",
+      "replace": "منزلا",
+      "reason": "Known PDF glitch where نز became تر.",
+      "evidence": "Owner approved 2026-10-16 (docs/content-review.md A4)"
+    },
+    {
+      "target": "text",
+      "categoryId": 2,
+      "dhikrId": 12,
+      "find": "ة ِ",
+      "replace": "ةِ",
+      "reason": "A space split the kasra from its letter (السَّجْدَة ِ). Only the space is removed.",
+      "evidence": "Owner approved 2026-10-16 (docs/content-review.md A5)"
+    }
+  ],
+  "addedAdhkar": [
+    {
+      "dhikrId": 901,
+      "categoryIds": [
+        1,
+        133
+      ],
+      "position": "first",
+      "count": 1,
+      "texts": {
+        "ar": "الْحَمْدُ للهِ وَحْدَهُ، وَالصَّلَاةُ وَالسَّلامُ عَلَى مَنْ لاَ نَبِيَّ بَعْدَهُ"
+      },
+      "reason": "Owner request 2026-10-22 (words corrected by the owner the same day): start the morning and the evening adhkar with it.",
+      "evidence": "The owner's own words, not from the book. No source, no audio yet."
+    }
+  ],
+  "removeQuoteMarks": {
+    "reason": "Owner decision 2026-10-22: the book wraps quoted words in (( )); they are not needed. Single parentheses (notes such as (ثلاث مرات)) stay.",
+    "evidence": "scripts/content/lib/quote-marks.ts"
+  },
+  "lineBreaks": {
+    "reason": "Each part of a long dhikr on its own line: each surah, the isti'adha and the verse after it, the step after a verse, and the steps of a list.",
+    "evidence": "Owner decision 2026-10-22 (option a); scripts/content/lib/line-breaks.ts",
+    "stepListIds": [
+      31001
+    ]
+  },
+  "audioRepeats": {
+    "reason": "How many times the dhikr is said in one recording (owner, 2026-10-23). A recording not listed says it once. Key: the audio file name (npm run db:peek shows it).",
+    "files": {
+      "1017.m4a": 5,
+      "1022.m4a": 5
+    }
+  },
+  "audioRecordings": {
+    "reason": "The owner's own recordings of the morning and evening adhkar (milestone 11, 2026-10-31), as recorded (m4a, not converted); a dhikr not listed plays the book's.",
+    "sheet": "docs/audio/morning-evening-audio.csv",
+    "adhkar": {
+      "1001": "1001.m4a",
+      "1002": "1002.m4a",
+      "1003": "1003.m4a",
+      "1004": "1004.m4a",
+      "1005": "1005.m4a",
+      "1006": "1006.m4a",
+      "1007": "1007.m4a",
+      "1008": "1008.m4a",
+      "1009": "1009.m4a",
+      "1010": "1010.m4a",
+      "1011": "1011.m4a",
+      "1012": "1012.m4a",
+      "1013": "1013.m4a",
+      "1014": "1014.m4a",
+      "1015": "1015.m4a",
+      "1016": "1016.m4a",
+      "1017": "1017.m4a",
+      "1018": "1018.m4a",
+      "1019": "1018.m4a",
+      "1020": "1020.m4a",
+      "1021": "1021.m4a",
+      "1022": "1022.m4a",
+      "1024": "1024.m4a",
+      "1901": "1901.m4a",
+      "133001": "1001.m4a",
+      "133002": "1002.m4a",
+      "133003": "133003.m4a",
+      "133004": "133004.m4a",
+      "133005": "1005.m4a",
+      "133006": "133006.m4a",
+      "133007": "133007.m4a",
+      "133008": "1008.m4a",
+      "133009": "1009.m4a",
+      "133010": "1010.m4a",
+      "133011": "1011.m4a",
+      "133012": "1012.m4a",
+      "133013": "1013.m4a",
+      "133014": "1014.m4a",
+      "133015": "133015.m4a",
+      "133016": "133016.m4a",
+      "133017": "1017.m4a",
+      "133018": "1018.m4a",
+      "133022": "1022.m4a",
+      "133023": "133023.m4a",
+      "133024": "1024.m4a",
+      "133901": "1901.m4a"
+    }
+  }
+}

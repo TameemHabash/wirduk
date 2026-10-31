@@ -1,0 +1,9 @@
+{
+  "repo": "https://github.com/rn0x/Adhkar-json",
+  "commit": "93dc3fc489e4291da8816265920b3cb7e2c3b569",
+  "copiedOn": "2026-10-16",
+  "license": "The source README says: هذه الملفات بدون رخصة استخدام، يحق لك فعل ما تريد بها مجانا وبدون أي مسائلة قانونية. Audio rights (reciter: حمد الدريهم) must be confirmed separately before publishing.",
+  "files": {
+    "adhkar.json": "Copied unchanged from the source repo. Never edit it; put changes in overrides.json."
+  }
+}

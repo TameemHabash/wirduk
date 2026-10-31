@@ -1,0 +1,13 @@
+# Store text files with LF in the repo, whatever the OS.
+* text=auto eol=lf
+
+# Exact copy of the upstream source: keep it byte-identical (it uses CRLF).
+content-source/adhkar.json -text
+
+# Binary files: never touch line endings or try to diff them.
+*.db binary
+*.mp3 binary
+*.png binary
+*.jpg binary
+*.ttf binary
+*.otf binary

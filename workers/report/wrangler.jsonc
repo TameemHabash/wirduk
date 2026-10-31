@@ -1,0 +1,20 @@
+// The "report an issue" relay. Deploy steps: README.md in this folder.
+{
+  "name": "wirduk-report",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  // No Cloudflare logs of requests (they would hold IP addresses).
+  "observability": { "enabled": false },
+  "vars": {
+    // The private repo that receives the reports (created by the owner).
+    "GITHUB_REPO": "TameemHabash/wirduk-reports",
+  },
+  // Approximate, per Cloudflare location. Periods can only be 10 or 60 seconds.
+  "ratelimits": [
+    // One phone: 2 reports a minute.
+    { "name": "IP_LIMITER", "namespace_id": "9101", "simple": { "limit": 2, "period": 60 } },
+    // Everyone together: 10 reports a minute.
+    { "name": "GLOBAL_LIMITER", "namespace_id": "9102", "simple": { "limit": 10, "period": 60 } },
+  ],
+}

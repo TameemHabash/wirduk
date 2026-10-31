@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android's automatic backup, Android 6 to 11 (Android 12+: wirduk_data_extraction_rules.xml).
+  Only the user's own small data: user.db (favorites, settings, own adhkar, Adwamuha) and the
+  date of the last backup. Never the content database or any audio: Android skips the whole
+  backup when an app has more than 25 MB, and those files come back with the app or a download.
+  expo-sqlite keeps its databases in files/SQLite.
+-->
+<full-backup-content>
+  <include domain="file" path="SQLite/user.db" />
+  <include domain="file" path="SQLite/user.db-wal" />
+  <include domain="sharedpref" path="wirduk_backup.xml" />
+</full-backup-content>

@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أدومها: التدفق الكامل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Colors approximate the app's dark theme. Claude Code: use the app's real theme tokens and fonts instead. */
+:root{
+  --bg:#111a1d; --surface:#172427; --surface2:#1e2f33; --text:#eef3f2; --muted:#93a3a4; --line:#25393d;
+  --teal:#6ec1c8; --teal-soft:#1d3b3f; --on-teal:#0d2023; --gold:#d8b45c; --gold-soft:#2a2418; --gold-line:#4a3d22;
+  --empty:#3a4d51;
+}
+:root[data-theme="light"]{
+  --bg:#f6f4ef; --surface:#ffffff; --surface2:#efece4; --text:#1d2a2c; --muted:#6b7577; --line:#e3dfd5;
+  --teal:#2f9aa0; --teal-soft:#d6eeee; --on-teal:#ffffff; --gold:#a97f22; --gold-soft:#f6eedb; --gold-line:#e5d3a6;
+  --empty:#c9c5bb;
+}
+*{box-sizing:border-box;margin:0}
+body{background:#0a0f11;color:var(--text);font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root[data-theme="light"] body{background:#dcd8cf}
+button{font-family:inherit;color:inherit}
+
+/* ---------- Preview chrome (NOT part of the app) ---------- */
+.nav{position:sticky;top:0;z-index:20;background:#0a0f11ee;backdrop-filter:blur(8px);padding:10px 12px;border-bottom:1px solid #22313a}
+:root[data-theme="light"] .nav{background:#dcd8cfee;border-color:#c8c3b8}
+.nav-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;max-width:860px;margin:0 auto}
+.nav-row::-webkit-scrollbar{display:none}
+.nav button{flex:none;border:1px solid #33454c;background:transparent;color:#b9c6c8;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+:root[data-theme="light"] .nav button{border-color:#bdb7aa;color:#4b5557}
+.nav button.on{background:var(--teal);color:var(--on-teal);border-color:var(--teal)}
+.nav .sub{margin-top:8px}
+.nav .sub button{font-size:12px;padding:4px 10px}
+.stage{display:flex;gap:28px;justify-content:center;align-items:flex-start;padding:20px 12px 60px;flex-wrap:wrap}
+.phone{width:390px;max-width:100%;min-height:780px;background:var(--bg);border-radius:32px;overflow:hidden;position:relative;
+  box-shadow:0 0 0 8px #000,0 20px 60px rgba(0,0,0,.5)}
+.notes{width:400px;max-width:100%;background:#151f23;color:#dfe7e8;border-radius:20px;padding:20px;font-size:14px;line-height:1.8}
+:root[data-theme="light"] .notes{background:#fff;color:#1d2a2c}
+.notes h2{font-size:17px;margin-bottom:8px}
+.notes ul{padding-inline-start:18px;display:grid;gap:6px}
+.notes code{direction:ltr;unicode-bidi:embed;background:rgba(127,127,127,.18);padding:1px 6px;border-radius:6px;font-size:12px}
+@media (max-width:860px){.phone{box-shadow:none;border-radius:0;width:100%}.stage{padding:0 0 40px;gap:16px}.notes{border-radius:0}}
+
+/* Placeholder (variable text from the DB) */
+.ph{outline:1.5px dashed var(--teal);outline-offset:3px;border-radius:6px}
+.ph::before{content:"{{" attr(data-key) "}}";display:block;direction:ltr;text-align:left;font:500 10px ui-monospace,Menlo,monospace;color:var(--teal);margin-bottom:2px}
+.hide-ph .ph{outline:0}.hide-ph .ph::before{display:none}
+
+/* ---------- App components ---------- */
+.screen{padding:0 16px 28px}
+.topbar{display:flex;align-items:center;justify-content:space-between;height:60px}
+.topbar h1{font-size:19px;font-weight:600}
+.ibtn{width:42px;height:42px;border:0;background:transparent;border-radius:12px;display:grid;place-items:center;cursor:pointer}
+.logo{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,#1f4b55,#173840);border:2px solid #2a6470;display:grid;place-items:center;
+  font-family:"Amiri",serif;font-weight:700;font-size:15px;color:#f3e6c4}
+.search{height:52px;border-radius:16px;background:var(--surface);border:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 16px;color:var(--muted);font-size:16px;margin-bottom:16px}
+.btn{width:100%;height:54px;border:0;border-radius:16px;background:var(--teal);color:var(--on-teal);font-weight:600;font-size:16px;cursor:pointer}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--text);font-weight:500}
+.btn + .btn{margin-top:10px}
+.link{background:none;border:0;color:var(--muted);font-weight:500;font-size:14px;padding:8px;cursor:pointer;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--line)}
+.hadith{font-family:"Amiri",serif;font-weight:700;color:var(--text)}
+.orn{display:block;margin:0 auto;color:var(--gold)}
+.dots{display:flex;gap:6px;justify-content:center;margin:18px 0}
+.dots i{width:8px;height:8px;border-radius:4px;background:var(--empty)}
+.dots i.on{width:22px;background:var(--teal)}
+
+/* Onboarding */
+.ob-hadith{text-align:center;padding:28px 18px;border-radius:24px;margin-top:8px;
+  background:linear-gradient(160deg,var(--gold-soft),var(--surface) 85%);border:1px solid var(--gold-line)}
+.ob-hadith .hadith{font-size:30px;line-height:1.9;margin:10px 0}
+.ob-title{font-size:22px;font-weight:700;margin:24px 0 14px}
+.feat{display:flex;gap:14px;align-items:flex-start;padding:10px 0;font-size:16px;line-height:1.6}
+.feat .n{flex:none;width:32px;height:32px;border-radius:10px;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font-weight:700}
+.feat small{display:block;color:var(--muted);font-size:13px}
+.ob-sub{color:var(--muted);font-size:15px;line-height:1.7;margin-bottom:18px}
+.choice{display:block;width:100%;text-align:right;background:var(--surface);border:1.5px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;margin-bottom:12px}
+.choice.on{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset}
+.choice b{display:flex;align-items:center;gap:8px;font-size:16px}
+.choice b .tag{font-size:11px;font-weight:600;background:var(--teal-soft);color:var(--teal);padding:2px 8px;border-radius:999px}
+.choice span{display:block;color:var(--muted);font-size:14px;margin-top:4px;line-height:1.6}
+.radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--empty);flex:none;margin-inline-start:auto}
+.choice.on .radio{border:6px solid var(--teal)}
+.stepper{display:flex;align-items:center;justify-content:space-between;margin-top:14px;background:var(--surface2);border-radius:14px;padding:6px}
+.stepper button{width:44px;height:44px;border:0;border-radius:10px;background:var(--surface);font-size:22px;cursor:pointer}
+.stepper b{font-size:18px}
+.preview-list{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.preview-list .pchip{background:var(--surface2);border-radius:10px;padding:5px 10px;font-family:"Amiri",serif;font-size:15px}
+.warn{font-size:13px;color:var(--gold);margin-top:10px;line-height:1.6}
+.rem{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:12px}
+.rem .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--surface2)}
+.rem .t{flex:1}.rem .t b{display:block;font-size:16px}.rem .t span{font-size:13px;color:var(--muted)}
+.time{background:var(--surface2);border:0;border-radius:10px;padding:8px 12px;font-size:16px;font-weight:600;direction:ltr}
+.sw{width:48px;height:28px;border-radius:14px;background:var(--empty);position:relative;border:0;cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on{background:var(--teal)}.sw.on::after{right:23px}
+.hint{font-size:13px;color:var(--muted);text-align:center;margin:6px 0 18px;line-height:1.6}
+
+/* Home: today card */
+.today{background:var(--surface);border:1.5px solid var(--teal);border-radius:24px;padding:18px 16px 16px;margin-bottom:22px}
+.today-head{display:flex;align-items:center;justify-content:space-between}
+.today-head h2{font-size:19px;font-weight:700}
+.stepchip{display:flex;align-items:center;gap:4px;background:var(--teal-soft);color:var(--teal);border:0;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.mini-hadith{font-family:"Amiri",serif;font-weight:700;font-size:18px;color:var(--gold);margin:10px 0 14px;line-height:1.6}
+.once{background:var(--surface2);border-radius:16px;padding:14px;margin-bottom:14px;font-size:15px;line-height:1.7}
+.once .row{display:flex;justify-content:flex-start;margin-top:10px}
+.once .ok{background:transparent;border:1px solid var(--line);border-radius:10px;padding:6px 18px;font-size:14px;cursor:pointer}
+.sessions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ses{display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:16px;padding:12px;border:1.5px solid transparent}
+.ses.now{border-color:var(--teal)}
+.ses .st{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ses .st.done{background:var(--teal);color:var(--on-teal)}
+.ses .st.late{background:var(--gold);color:var(--on-teal)}
+.ses .st.wait{border:2px dashed var(--empty)}
+.ses .st.now{border:2px solid var(--teal)}
+.ses b{display:block;font-size:15px}.ses small{font-size:12px;color:var(--muted)}
+.ward-count{font-size:13px;color:var(--muted);text-align:center;margin-top:8px}
+
+/* Home: categories */
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;margin:6px 2px 12px}
+.sec-head h3{font-size:19px;font-weight:700}
+.sec-head a{color:var(--teal);font-size:14px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.big{border-radius:24px;padding:18px;min-height:150px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column}
+.big.now{background:var(--teal);color:var(--on-teal);border-color:var(--teal)}
+.big .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:auto}
+.big .badge{font-size:12px;padding:4px 12px;border-radius:999px;background:var(--gold-soft);color:var(--gold)}
+.big.now .badge{background:rgba(255,255,255,.35);color:var(--on-teal)}
+.big b{font-size:20px;margin-top:22px}.big small{font-size:14px;opacity:.75;margin-top:4px}
+.small-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.small{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.small b{display:block;font-size:15px}.small small{font-size:12px;color:var(--muted)}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:24px}
+.list.mine{background:var(--gold-soft);border-color:var(--gold-line)}
+.item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.list.mine .item{border-color:var(--gold-line)}
+.item:last-child{border-bottom:0}
+.item .num{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:grid;place-items:center;font-size:15px;color:var(--muted)}
+.list.mine .num{background:#3a3020;color:var(--gold)}
+:root[data-theme="light"] .list.mine .num{background:#efe2bf}
+.item .t{flex:1}.item .t b{display:block;font-size:17px;font-weight:500}.item .t small{color:var(--muted);font-size:14px}
+.item.add{color:var(--gold);font-weight:600;font-size:17px;justify-content:flex-start}
+
+/* Masari */
+.ring{position:relative;width:150px;height:150px;margin:0 auto}
+.ring svg.r{transform:rotate(-90deg) scaleX(-1)}
+.ring .in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .n{font-size:40px;font-weight:700;line-height:1}.ring .of{font-size:13px;color:var(--muted);margin-top:6px}
+.center{text-align:center}.muted{color:var(--muted)}
+.feature{text-align:center;margin:18px 0;padding:16px 14px;border-radius:24px;background:linear-gradient(160deg,var(--gold-soft),var(--surface) 85%);border:1px solid var(--gold-line)}
+.feature .hadith{font-size:20px;line-height:1.7;margin:6px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 16px}
+.msg{font-size:16px;line-height:1.7;margin-bottom:16px;display:grid;gap:12px}
+.week{display:grid;grid-template-columns:42px repeat(7,1fr);row-gap:10px;align-items:center}
+.week .d{font-size:12px;color:var(--muted);text-align:center}.week .d.t{color:var(--text);font-weight:700}
+.week .lbl{font-size:13px;color:var(--muted)}
+.dot{width:26px;height:26px;border-radius:50%;margin:0 auto;display:grid;place-items:center}
+.dot.done{background:var(--teal);color:var(--on-teal)}.dot.late{background:var(--gold);color:var(--on-teal)}
+.dot.miss{border:2px solid var(--empty)}.dot.tap{border-color:var(--teal)}.dot.tap::after{content:"+";color:var(--teal);font-weight:700}
+.dot.wait{border:2px dashed var(--empty)}.dot.none{visibility:hidden}
+.goal{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:grid;gap:10px}
+.goal h4{font-size:13px;font-weight:500;color:var(--muted)}
+.grow{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;font-size:14px}
+.segs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.segs i{height:8px;border-radius:4px;background:var(--surface2)}.segs i.f{background:var(--teal)}
+.grow b{font-size:13px}.grow b.met{color:var(--teal)}
+.tip{margin-top:14px;display:flex;gap:12px;background:var(--teal-soft);border-radius:20px;padding:16px;font-size:15px;line-height:1.7}
+.tip svg{flex:none;color:var(--teal);margin-top:3px}
+.links{display:flex;justify-content:center;gap:24px;margin-top:12px}
+
+
+/* Masari extras */
+.tchips{display:flex;gap:8px}
+.tchip{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px}
+.tchip .ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;border:2px dashed var(--empty)}
+.tchip small{display:block;font-size:12px;color:var(--muted)}
+.tchip.ok .ic{background:var(--teal);color:var(--on-teal);border:0}
+.tchip.late .ic{background:var(--gold);color:var(--on-teal);border:0}
+.tchip.now{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset}
+.card.dim .week{opacity:.4}
+.dot{border:0;padding:0;background:none}
+.dot.miss{border:2px solid var(--empty)}.dot.tap{border-color:var(--teal);cursor:pointer}
+.dot.wait{border:2px dashed var(--empty)}
+.dot.brk{width:18px;height:3px;border-radius:2px;background:var(--empty)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted);align-items:center}
+.legend .dot{width:16px;height:16px;display:inline-grid;margin:0 0 0 5px;vertical-align:-3px;font-size:11px}
+.legend .dot svg{width:10px;height:10px}
+.banner{background:var(--surface2);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.7;margin-bottom:14px}
+.banner b{display:block;font-size:15px}
+
+.readbtn{margin-top:10px;width:100%;display:flex;align-items:center;gap:12px;text-align:right;background:transparent;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;cursor:pointer}
+.readbtn .ri{width:34px;height:34px;border-radius:50%;border:2px solid var(--teal);color:var(--teal);display:grid;place-items:center;flex:none}
+.readbtn b{display:block;font-size:15px;font-weight:600}.readbtn small{font-size:13px;color:var(--muted)}
+.pick{width:100%;display:flex;align-items:center;gap:12px;background:var(--surface2);border:0;border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;text-align:right}
+.pick b{font-size:16px}.pick .when{color:var(--muted);font-size:14px}
+.pick .plus{margin-inline-start:auto;width:30px;height:30px;border-radius:50%;background:var(--teal);color:var(--on-teal);display:grid;place-items:center;font-weight:700;font-size:18px}
+.sheet .fine{font-size:12px;text-align:center;margin:6px 0 0}
+.wk-title{font-size:15px;font-weight:600;margin-bottom:14px}
+.week .d.f{opacity:.5}
+.dot.fut{border:2px dashed var(--empty);opacity:.45}
+.wsel{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--surface2);border-radius:14px;padding:4px}
+.wsel button{border:0;background:transparent;border-radius:10px;min-height:54px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-size:15px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .15s,color .15s}
+.wsel button.on{background:var(--teal);color:var(--on-teal);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.wsel button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.wsel small{font-size:10px;font-weight:500;opacity:.8}
+.wprev{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}
+.wprev span{text-align:center;font-size:11px;padding:7px 0;border-radius:8px;background:var(--surface2);color:var(--muted);transition:background .2s,color .2s}
+.wprev span.first{background:var(--teal-soft);color:var(--teal);font-weight:700}
+.wprev span.last{opacity:.7}
+.whint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.7}
+@media (prefers-reduced-motion:reduce){.wsel button,.wprev span{transition:none}}
+/* Settings */
+.sh{font-size:13px;font-weight:600;color:var(--muted);margin:22px 4px 8px}
+.sgroup{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.sgroup.pad{padding:12px}
+.srow{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.srow:last-child{border-bottom:0}
+.srow .t{flex:1}.srow .t b{display:block;font-size:15px;font-weight:500}.srow .t span{font-size:12px;color:var(--muted);line-height:1.6}
+.srow .time{font-size:14px;padding:6px 10px}
+.nudge{display:flex;gap:10px;background:var(--gold-soft);border:1px solid var(--gold-line);border-radius:14px;padding:12px;margin-top:12px;font-size:14px;line-height:1.7}
+.nudge svg{flex:none;color:var(--gold);margin-top:2px}
+.order-prev{margin-top:12px;background:var(--surface2);border-radius:14px;padding:12px}
+.order-prev small{color:var(--muted);font-size:12px;display:block;margin-bottom:6px}
+.oi{display:flex;gap:10px;align-items:center;padding:4px 0;font-family:"Amiri",serif;font-size:16px}
+.oi span{font-family:"IBM Plex Sans Arabic",sans-serif;width:22px;height:22px;border-radius:7px;background:var(--surface);display:grid;place-items:center;font-size:12px;color:var(--muted)}
+
+/* Sheet (fixed so it is visible wherever the page is scrolled) */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.sheet{position:fixed;left:50%;bottom:0;width:390px;max-width:100%;background:var(--surface);color:var(--text);border-radius:24px 24px 0 0;padding:12px 20px 28px;
+  transform:translate(-50%,100%);transition:.25s;z-index:31}
+.open-sheet .scrim{opacity:1;pointer-events:auto}
+.open-sheet .sheet{transform:translate(-50%,0)}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 16px}
+.sheet h2{font-size:18px;font-weight:600;margin-bottom:8px}
+.sheet p{color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:16px}
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:4px;margin-bottom:12px}
+.seg button{flex:1;height:40px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:500;font-size:15px;cursor:pointer}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.opt{display:block;width:100%;border:0;text-align:right;background:var(--surface2);border-radius:12px;padding:12px 14px;cursor:pointer;margin-bottom:10px}
+.opt b{display:block;font-size:15px}.opt span{font-size:13px;color:var(--muted)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;z-index:40;left:50%;transform:translate(-50%,90px);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:14px;font-size:14px;transition:.25s;width:max-content;max-width:330px;text-align:center;z-index:5}
+.toast.show{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<!-- ===== Preview navigation (not part of the app) ===== -->
+<div class="nav">
+  <div class="nav-row" id="nav"></div>
+  <div class="nav-row sub" id="sub"></div>
+</div>
+
+<div class="stage">
+  <div class="phone" id="phone"><div id="screen"></div></div>
+  <aside class="notes" id="notes"></aside>
+</div>
+<div class="scrim" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= Icons ================= */
+const I={
+ back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+ gear:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+ search:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+ sun:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+ moon:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+ check:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
+ clock:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
+ star:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/></svg>',
+ chev:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>',
+ bulb:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>',
+ orn:'<svg class="orn" width="44" height="12" viewBox="0 0 44 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 6h14M30 6h14"/><path d="M22 1l5 5-5 5-5-5z"/></svg>',
+ bell:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>'
+};
+const HADITH='أَحَبُّ الأعمالِ إلى اللهِ أدْومُها و إن قَلَّ';
+const ph=(key,text,tag='span')=>`<${tag} class="ph" data-key="${key}">${text}</${tag}>`;
+
+/* ================= State ================= */
+const st={screen:'ob1', startMode:'first', startStep:5, amRem:true, pmRem:true,
+  homeState:'evening', onceShown:true, masariState:'normal', showPh:true, order:'adw', weekStart:0};
+
+/* ================= Screens ================= */
+const SCREENS={
+ ob1:{label:'1 · عرض الميزة', render:()=>`
+  <div class="screen">
+   <div class="topbar"><span style="width:42px"></span><h1>أدومها</h1><span style="width:42px"></span></div>
+   <section class="ob-hadith">${I.orn}<p class="hadith">${HADITH}</p>${I.orn}</section>
+   <h2 class="ob-title">ابنِ وردك خطوةً خطوة</h2>
+   <div class="feat"><span class="n">١</span><div>ابدأ بذكرٍ واحد صباحًا ومساءً<small>أقل من دقيقة في اليوم</small></div></div>
+   <div class="feat"><span class="n">٢</span><div>كلما ثبتّ عليه، نضيف ذكرًا آخر<small>حتى تصل إلى أذكار الصباح والمساء كاملة بإذن الله</small></div></div>
+   <div class="feat"><span class="n">٣</span><div>يكفي ٤ أيام من ٧<small>وإن فاتك يوم فلا بأس، المهم أن تعود</small></div></div>
+   <div class="dots"><i class="on"></i><i></i><i></i></div>
+   <button class="btn" onclick="go('ob2')">فعّل أدومها</button>
+   <button class="btn ghost" onclick="go('homeOff')">لاحقًا</button>
+  </div>`,
+  notes:`<h2>١ · عرض الميزة (أول تشغيل فقط)</h2><ul>
+   <li><b>متى تظهر:</b> عند أول تشغيل للتطبيق، وبعد كل تحديث للتطبيق إذا كانت أدومها غير مفعّلة.</li>
+   <li>تُعرف التحديثات بمقارنة رقم نسخة التطبيق بآخر رقم نسخة ظهرت فيه هذه الشاشة (يُحفظ في قاعدة بيانات المستخدم).</li>
+   <li>إذا كانت أدومها مفعّلة، لا تظهر أبدًا.</li>
+   <li>الحديث هو العنصر الأبرز في الشاشة. بدون سطر مصدر، مثل شاشة مساري.</li>
+   <li>ثلاث نقاط قصيرة بدل الفقرات الطويلة في التصميم القديم.</li>
+   <li><b>لاحقًا</b> يفتح الرئيسية العادية، ولا تظهر الشاشة مرة أخرى حتى التحديث القادم. التفعيل يبقى متاحًا من الإعدادات في أي وقت.</li>
+   <li>النقاط في الأسفل تبيّن أن الإعداد كله ٣ شاشات.</li></ul>`},
+
+ ob2:{label:'2 · من أين تبدأ', render:()=>{
+  const n=st.startMode==='first'?1:st.startStep;
+  const pv=['الحمد لله وحده…','بسم الله الذي لا يضر…','رضيت بالله ربا…','اللهم أنت ربي…','قل هو الله أحد…','آية الكرسي'].slice(0,n+1);
+  return `<div class="screen">
+   <div class="topbar"><button class="ibtn" onclick="go('ob1')">${I.back}</button><h1>من أين تبدأ؟</h1><span style="width:42px"></span></div>
+   <p class="ob-sub">إن كنت تحافظ على بعض أذكار الصباح والمساء، فأكمل من حيث وصلت. وإن لم تكن، فابدأ من أول خطوة والتزم بالخطة؛ فالبداية الخفيفة تثبّت العادة.</p>
+   <button class="choice ${st.startMode==='first'?'on':''}" onclick="set({startMode:'first'})">
+     <b>أبدأ من أول خطوة<span class="radio"></span></b>
+     <span>لا أحافظ عليها بعد. ذكرٌ واحد صباحًا ومساءً.</span></button>
+   <button class="choice ${st.startMode==='custom'?'on':''}" onclick="set({startMode:'custom'})">
+     <b>أحافظ على بعضها<span class="radio"></span></b>
+     <span>أكمل من الخطوة التي وصلتَ إليها</span></button>
+   ${st.startMode==='custom'?`<div class="card" style="margin-bottom:12px">
+     <div class="stepper"><button onclick="set({startStep:Math.min(24,st.startStep+1)})">+</button><b>الخطوة ${st.startStep} من 24</b><button onclick="set({startStep:Math.max(2,st.startStep-1)})">−</button></div>
+     <div class="preview-list">${pv.map(t=>`<span class="pchip">${t}</span>`).join('')}${n>5?`<span class="pchip">…</span>`:''}</div>
+     <p class="warn">اختر آخر خطوة تحافظ على كل أذكارها. يُضاف الذكر التالي بعد أسبوعين من الثبات عليها.</p></div>`:''}
+   <div class="dots"><i></i><i class="on"></i><i></i></div>
+   <button class="btn" onclick="go('ob3')">التالي</button>
+  </div>`},
+  notes:`<h2>٢ · من أين تبدأ؟</h2><ul>
+   <li>خياران فقط: "أبدأ من أول خطوة" لمن لا يحافظ على الأذكار، و"أحافظ على بعضها" لمن يريد أن يكمل من حيث وصل. لا نرجع من يحافظ إلى الخلف.</li><li>"أبدأ من أول خطوة" مختار مسبقًا، بدون وسم "ننصح به".</li><li>الخطوة المختارة تبدأ بمدة أسبوعين (لا مدتها الكاملة)، لأن المستخدم ثابت عليها أصلًا.</li>
+   <li>العدّاد يظهر فقط عند اختيار "أحافظ على بعض الأذكار"، ومعه معاينة لأول كلمات أذكار الورد.</li>
+   <li>نصوص المعاينة تأتي من قاعدة البيانات (أول كلمات كل ذكر)، ولا تُكتب يدويًا.</li>
+   <li>نُقلت بطاقة النسخ الاحتياطي من هنا إلى الإعدادات، لأنها تثقّل أول تجربة.</li></ul>`},
+
+ ob3:{label:'3 · التذكير', render:()=>`
+  <div class="screen">
+   <div class="topbar"><button class="ibtn" onclick="go('ob2')">${I.back}</button><h1>متى نذكّرك؟</h1><span style="width:42px"></span></div>
+   <p class="ob-sub">التذكير في وقت ثابت هو أكبر ما يعين على الدوام. يمكنك تغييره لاحقًا.</p>
+   <div class="rem"><span class="ic" style="color:var(--gold)">${I.sun}</span><div class="t"><b>ورد الصباح</b><span>تذكير يومي</span></div>
+     <button class="time">7:00 ص</button><button class="sw ${st.amRem?'on':''}" onclick="set({amRem:!st.amRem})"></button></div>
+   <div class="rem"><span class="ic" style="color:var(--teal)">${I.moon}</span><div class="t"><b>ورد المساء</b><span>تذكير يومي</span></div>
+     <button class="time">5:00 م</button><button class="sw ${st.pmRem?'on':''}" onclick="set({pmRem:!st.pmRem})"></button></div>
+   <p class="hint">قد يصل التذكير متأخرًا قليلًا، حسب إعدادات هاتفك.</p>
+   <div class="dots"><i></i><i></i><i class="on"></i></div>
+   <button class="btn" onclick="set({onceShown:true,homeState:'first'});go('homeOn')">ابدأ مساري</button>
+  </div>`,
+  notes:`<h2>٣ · التذكير (جديدة)</h2><ul>
+   <li>نفس تذكيرَي الصباح والمساء الموجودين في التطبيق، منفصلين، بنفس القيم المحفوظة. لا تُنشأ تذكيرات جديدة.</li>
+   <li>في هذه الشاشة يكونان مفعّلين مسبقًا، لأن المستخدم اختار التفعيل بنفسه. يمكنه إطفاؤهما.</li>
+   <li>يُطلب إذن الإشعارات من Android عند الضغط على "ابدأ مساري"، فقط إذا كان أحدهما مفعّلًا.</li>
+   <li>بعدها تُفتح الرئيسية مباشرة، وفيها رسالة ترحيب لمرة واحدة (وليس شاشة مساري).</li></ul>`},
+
+ homeOn:{label:'٤ · الرئيسية مع أدومها', sub:[['first','أول دخول'],['morning','وقت الصباح'],['evening','وقت المساء'],['both','أتمّ الوردين']], subKey:'homeState', render:homeOn,
+  notes:`<h2>الرئيسية وأدومها مفعّلة</h2><ul>
+   <li><b>"وردك اليوم" هو الشيء الوحيد المميّز</b> في الرئيسية: إطار ملوّن وزر رئيسي واحد.</li>
+   <li>بطاقتا الصباح والمساء الكاملتان صارتا صغيرتين وهادئتين تحت عنوان "الأذكار كاملة"، بدون شارة "الآن"، حتى لا يكون هناك زرّان يفتحان الشيء نفسه.</li>
+   <li>الحديث سطر صغير ذهبي داخل البطاقة، ظاهر دائمًا.</li>
+   <li>الحالة بأيقونات مثل مساري: ✓ تم، ساعة = متأخر، إطار ملوّن = وقته الآن، إطار متقطع = لم يحن.</li>
+   <li>الزر الرئيسي يتغيّر: "افتح ورد الصباح/المساء". بعد إتمام الوردين يظهر دعاء فقط، <b>بدون أي زر</b>: الهدف أن يلتزم المستخدم بورد خطوته، لا أن يُدفع إلى الأذكار كاملة.</li>
+   <li>رسالة المرة الواحدة (ترحيب أو نصيحة مرحلة) داخل البطاقة، تختفي بـ"حسنًا"، وتظهر في الرئيسية فقط، لا في مساري.</li>
+   <li>"الخطوة ٥ من ٢٤ ›" هي الرابط إلى مساري.</li>
+   <li>كل نص بإطار متقطع متغيّر يأتي من قاعدة البيانات أو من رسائل المالك.</li></ul>`},
+
+ homeOff:{label:'٥ · الرئيسية بدون أدومها', render:homeOff,
+  notes:`<h2>الرئيسية وأدومها غير مفعّلة</h2><ul>
+   <li>بدون أي تغيير عن الرئيسية الحالية.</li>
+   <li>لا تظهر أي دعوة لتفعيل الميزة هنا؛ التفعيل من الإعدادات فقط.</li></ul>`},
+
+ masari:{label:'٦ · مساري', sub:[['normal','عادي'],['first','أول أسبوع'],['brk','استراحة'],['done','أتمّ المسار']], subKey:'masariState', render:masari,
+  notes:`<h2>مساري (التصميم المعتمد، مدمج هنا)</h2><ul>
+   <li>لا توجد بطاقتا الصباح والمساء في أعلى الشاشة؛ حالة اليوم ظاهرة في الرئيسية وفي الشبكة.</li>
+   <li>الدائرة: الخطوة من ٢٤، والمرحلة، والأيام الباقية على الأقل.</li>
+   <li>الحديث ظاهر دائمًا ومميّز، بدون سطر مصدر، وبخط أصغر ليأتي في سطر واحد بحجم الخط الافتراضي. مع الخطوط الكبيرة يلتفّ طبيعيًا إلى سطرين.</li>
+   <li><b>الشبكة هي الأسبوع الحالي</b>، تبدأ من اليوم المختار في الإعدادات (الافتراضي السبت)، وليست آخر ٧ أيام. الأيام القادمة باهتة بإطار متقطع.</li><li>هدف الأسبوع وشرط الانتقال يُحسبان على أسابيع تبدأ من نفس اليوم: الانتقال يحتاج آخر أسبوعين مكتملين، ٤ من ٧ للصباح و٤ للمساء. الأسبوع الأول غير المكتمل (بدء الميزة في منتصف الأسبوع) لا يُحسب في شرط الانتقال.</li><li>الأسبوع: عنوان ثابت "تتبّع الأسبوع" فقط، بدون جمل تشجيع فوقه. ثم الشبكة بعلامات ✓ والساعة، وأشرطة الهدف (٣ من ٤ أو ✓ تحقّق).</li>
+   <li><b>"قرأتُ وردي بدون التطبيق"</b> (بدل "قرأتُها من حفظي"): زر بسطر توضيحي. يفتح قائمة فيها فقط الأوراد غير المسجّلة لليوم وأمس، كل ورد سطر واحد، والضغط عليه يسجّله فورًا. إن لم يبقَ شيء تظهر رسالة لطيفة.</li><li>الضغط على نقطة <b>أمس</b> الفارغة (عليها +) يسجّلها أيضًا. الأيام الأقدم لا تُسجَّل.</li>
+   <li>الزر الرئيسي يفتح ورد الوقت الحالي. بعد إتمام الوردين لا يظهر زر للأذكار كاملة.</li>
+   <li>الحالات الخاصة: أول أسبوع (بدون أشرطة الهدف)، استراحة (شريط وشبكة باهتة، وزر "أنهِ الاستراحة")، أتمّ المسار (دائرة ذهبية ووضع المحافظة، ورابط "إيقاف أدومها").</li>
+   <li>نصيحة المرحلة بطاقة ثابتة هنا. رسالة "حسنًا" مكانها الرئيسية فقط.</li>
+   <li>الأرقام يجب أن تطابق النقاط في الشبكة.</li></ul>`},
+
+ settings:{label:'٧ · إعدادات أدومها', render:settings,
+  notes:`<h2>إعدادات أدومها</h2><ul>
+   <li>تُفتح من الترس في الرئيسية → قسم "أدومها".</li>
+   <li>كلمة "أدومها" في عنوان الشاشة فقط؛ لا تتكرر في عناصرها. مفتاح التشغيل اسمه "مفعّلة"، والترتيب الافتراضي اسمه "ترتيب الخطة".</li>
+   <li><b>ترتيب الورد (جديد):</b>
+     <br>• <b>ترتيب الخطة</b> (الافتراضي، وعليه وسم "ننصح به"): الافتتاحية أولًا، ثم الأذكار بترتيب خطواتها، والذكر الجديد دائمًا في آخر الورد.
+     <br>• <b>ترتيب الأبواب</b>: نفس أذكار الورد بالضبط، لكن بترتيبها في باب أذكار الصباح وباب أذكار المساء. لمن اعتاد قراءتها بترتيب الكتاب.
+     <br>• يتغيّر الترتيب فقط؛ أذكار الورد وعددها والتقدّم كما هي.
+     <br>• عند اختيار ترتيب الأبواب تظهر ملاحظة لطيفة تشرح لماذا ترتيب الخطة أسهل، مع رابط للعودة إليه. لا نمنع المستخدم.</li>
+   <li><b>التذكير:</b> تذكيران منفصلان كما هما الآن، وينتقلان إلى هنا عند تفعيل أدومها.</li>
+   <li><b>أوقات الورد:</b> بداية الصباح ٤:٠٠ ص، وينتهي "في وقته" ١٢:٠٠ م. بداية المساء ٤:٠٠ م، وينتهي "في وقته" ١٢:٠٠ ص.</li>
+   <li><b>بداية الأسبوع (جديد):</b> الجمعة، السبت، الأحد، الاثنين. الافتراضي <b>السبت</b> (يُختار تلقائيًا، بدون أي وسم ظاهر للمستخدم). يُحفظ في قاعدة بيانات المستخدم.
+     <br>• هذا الإعداد هو المصدر الوحيد لبداية الأسبوع: احذف أي قراءة لأول يوم في الأسبوع من الإعدادات الإقليمية للهاتف (locale).
+     <br>• شريط الأيام تحت الخيارات معاينة حيّة لترتيب الأسبوع، وأول يوم مميّز.
+     <br>• التغيير يطبَّق فورًا؛ الأرقام تُحسب من السجل المحفوظ، فلا يضيع شيء.</li>
+   <li><b>الخطة:</b> روابط "عدّل الخطة" و"طرأ عليّ ظرف".</li>
+   <li><b>احفظ مسارك:</b> بطاقة النسخ الاحتياطي انتقلت إلى هنا من شاشة التفعيل. التطبيق لا يفعّل النسخ بنفسه؛ الزر يفتح إعدادات النسخ الاحتياطي في Android فقط. تأكّد أن نسخ بيانات التطبيق مسموح في إعدادات Android للتطبيق (allowBackup)، وأن قاعدة بيانات المستخدم مشمولة فيه.</li></ul>`}
+};
+
+function settings(){
+  const ord=st.order;
+  const row=(t,s,right,click='')=>`<div class="srow" ${click}><div class="t"><b>${t}</b>${s?`<span>${s}</span>`:''}</div>${right}</div>`;
+  return `<div class="screen">
+   <div class="topbar"><button class="ibtn" onclick="go('homeOn')">${I.back}</button><h1>أدومها</h1><span style="width:42px"></span></div>
+   <div class="sgroup">${row('مفعّلة','ورد يبدأ صغيرًا ويكبر خطوةً خطوة',`<button class="sw on" onclick="say('عند الإطفاء تعود الرئيسية لوضعها العادي، ويبقى مسارك محفوظًا')"></button>`)}</div>
+
+   <h4 class="sh">ترتيب الورد</h4>
+   <div class="sgroup pad">
+    <button class="choice ${ord==='adw'?'on':''}" onclick="set({order:'adw'})">
+     <b>ترتيب الخطة <span class="tag">ننصح به</span><span class="radio"></span></b>
+     <span>تبدأ بما ثبتّ عليه أولًا، والذكر الجديد دائمًا في آخر الورد.</span></button>
+    <button class="choice ${ord==='cat'?'on':''}" style="margin-bottom:0" onclick="set({order:'cat'})">
+     <b>ترتيب الأبواب<span class="radio"></span></b>
+     <span>نفس أذكار وردك، بترتيبها في باب أذكار الصباح والمساء.</span></button>
+    ${ord==='cat'?`<div class="nudge">${I.bulb}<div>ترتيب الخطة أسهل للالتزام: وردك يبدأ دائمًا بما حفظته، والجديد في آخره، فلا تتوه بين الأذكار.
+      <button class="link" style="padding:4px 0;color:var(--teal)" onclick="set({order:'adw'})">العودة إلى ترتيب الخطة</button></div></div>`:''}
+    <div class="order-prev"><small>مثال لوردك الآن:</small>
+     ${(ord==='adw'?['الحمد لله وحده…','بسم الله الذي لا يضر…','رضيت بالله ربا…','اللهم أنت ربي… (سيد الاستغفار)','قل هو الله أحد…','آية الكرسي']
+       :['الحمد لله وحده…','آية الكرسي','قل هو الله أحد…','اللهم أنت ربي… (سيد الاستغفار)','بسم الله الذي لا يضر…','رضيت بالله ربا…'])
+       .map((t,i)=>`<div class="oi"><span>${i+1}</span>${t}</div>`).join('')}</div>
+   </div>
+
+   <h4 class="sh">التذكير</h4>
+   <div class="sgroup">
+    ${row('ورد الصباح','',`<button class="time">7:00 ص</button><button class="sw ${st.amRem?'on':''}" onclick="set({amRem:!st.amRem})"></button>`)}
+    ${row('ورد المساء','',`<button class="time">5:00 م</button><button class="sw ${st.pmRem?'on':''}" onclick="set({pmRem:!st.pmRem})"></button>`)}
+   </div>
+
+   <h4 class="sh">أوقات الورد</h4>
+   <div class="sgroup">
+    ${row('الصباح','يُحسب حتى بداية المساء، ويُعدّ متأخرًا بعد نهاية وقته',`<button class="time">4:00 ص</button><span class="muted">–</span><button class="time">12:00 م</button>`)}
+    ${row('المساء','يُحسب حتى بداية الصباح، ويُعدّ متأخرًا بعد نهاية وقته',`<button class="time">4:00 م</button><span class="muted">–</span><button class="time">12:00 ص</button>`)}
+   </div>
+
+   <h4 class="sh">بداية الأسبوع</h4>
+   <div class="sgroup pad">
+    <div class="wsel" role="radiogroup" aria-label="بداية الأسبوع">
+     ${[[6,'الجمعة'],[0,'السبت'],[1,'الأحد'],[2,'الاثنين']].map(([v,n])=>`<button role="radio" aria-checked="${st.weekStart===v}" class="${st.weekStart===v?'on':''}" onclick="set({weekStart:${v}})"><span>${n}</span></button>`).join('')}
+    </div>
+    <div class="wprev" aria-hidden="true">${[0,1,2,3,4,5,6].map(k=>{const d=WD[(st.weekStart+k)%7];return `<span class="${k===0?'first':k===6?'last':''}">${d}</span>`}).join('')}</div>
+    <p class="whint">من هذا اليوم يبدأ تتبّع الأسبوع في «مساري»، ويُعدّ هدفه: ٤ أيام من ٧ للصباح، و٤ للمساء.</p>
+   </div>
+
+   <h4 class="sh">الخطة</h4>
+   <div class="sgroup">
+    ${row('عدّل الخطة','الترتيب ومدة كل خطوة',`<span class="muted">${I.chev}</span>`)}
+    ${row('طرأ عليّ ظرف أو مستجد في حياتي','تراجع مؤقت أو استراحة',`<span class="muted">${I.chev}</span>`,`onclick="openLife()" style="cursor:pointer"`)}
+   </div>
+
+   <h4 class="sh">احفظ مسارك</h4>
+   <div class="sgroup pad"><p style="font-size:14px;line-height:1.8;color:var(--muted)">مسارك ومفضلتك وأذكارك محفوظة على هاتفك فقط. إن كان النسخ الاحتياطي مفعّلًا في إعدادات هاتفك، يحفظها Android في حسابك في Google، فتعود إليك عند نقل التطبيق إلى هاتف جديد.</p>
+    <button class="btn ghost" style="margin-top:12px;height:48px" onclick="say('يفتح إعدادات النسخ الاحتياطي في الهاتف')">افتح إعدادات النسخ الاحتياطي</button></div>
+  </div>`;
+}
+
+function sesBox(name,icon,state){
+  const map={done:['done',I.check,'تم'],late:['late',I.clock,'تم متأخرًا'],now:['now','','وقته الآن'],wait:['wait','','لم يحن بعد'],missed:['wait','','لم يُقرأ']};
+  const [c,ic,txt]=map[state];
+  return `<div class="ses ${state==='now'?'now':''}"><span class="st ${c}">${ic}</span><div><b>${name}</b><small>${txt}</small></div></div>`;
+}
+function homeTop(){return `<div class="topbar"><div class="logo">وِرْدُك</div><span></span><button class="ibtn" onclick="go('settings')">${I.gear}</button></div>
+  <div class="search">${I.search} ابحث في الأذكار</div>`}
+function homeBottom(){return `
+  <div class="sec-head"><h3>أذكاري</h3><a>إدارة</a></div>
+  <div class="list mine"><div class="item"><span class="num">1</span><div class="t"><b>أورادي</b><small>ذكران</small></div><span style="color:var(--muted)">${I.star}</span></div>
+   <div class="item add">+ إضافة باب</div></div>
+  <div class="sec-head"><h3>كل الأذكار</h3><a>تعديل الترتيب</a></div>
+  <div class="list">${[['3','أذكار النوم','13 ذكرًا'],['4','أذكار الاستيقاظ من النوم','4 أذكار'],['5','دعاء دخول الخلاء','ذكر واحد']].map(([n,t,s])=>
+   `<div class="item"><span class="num">${n}</span><div class="t"><b>${t}</b><small>${s}</small></div><span style="color:var(--muted)">${I.star}</span></div>`).join('')}</div>`}
+
+function homeOn(){
+  const s=st.homeState;
+  const sessions={first:['missed','now'],morning:['now','wait'],evening:['done','now'],both:['done','late']}[s];
+  const step=s==='first'?1:5;
+  const once = s==='first' && st.onceShown
+    ? `<div class="once">${ph('welcome_message','أهلًا بك في مسارك. بدأتَ بذكرٍ واحد، وهذا يكفي الآن. ابدأ بورد المساء.','div')}<div class="row"><button class="ok" onclick="set({onceShown:false})">حسنًا</button></div></div>`
+    : s==='evening' && st.onceShown
+    ? `<div class="once">${ph('stage_tip_message','صار لوردك موعدٌ في يومك، والإضافة الآن أسهل. لكن لا تستعجل؛ الثبات أهم من الكثرة.','div')}<div class="row"><button class="ok" onclick="set({onceShown:false})">حسنًا</button></div></div>`:'';
+  const btn = s==='both'
+    ? `<div class="once" style="text-align:center;margin-bottom:0">${ph('day_done_message','أتممتَ وردَي يومك، ثبّتك الله.','div')}</div>`
+    : `<button class="btn" onclick="openWard()">افتح ورد ${s==='morning'?'الصباح':'المساء'}</button><div class="ward-count">${ph('ward_count', (step+1)+' أذكار في وردك')}</div>`;
+  return `<div class="screen">${homeTop()}
+   <section class="today">
+    <div class="today-head"><h2>وردك اليوم</h2><button class="stepchip" onclick="go('masari')">الخطوة ${step} من 24 ${I.chev}</button></div>
+    <p class="mini-hadith">${HADITH}</p>
+    ${once}
+    <div class="sessions">${sesBox('الصباح',I.sun,sessions[0])}${sesBox('المساء',I.moon,sessions[1])}</div>
+    ${btn}
+   </section>
+   <div class="sec-head"><h3>الأذكار كاملة</h3></div>
+   <div class="small-pair">
+    <div class="small"><span style="color:var(--gold)">${I.sun}</span><div><b>أذكار الصباح</b><small>24 ذكرًا</small></div></div>
+    <div class="small"><span style="color:var(--teal)">${I.moon}</span><div><b>أذكار المساء</b><small>22 ذكرًا</small></div></div>
+   </div>
+   ${homeBottom()}</div>`;
+}
+function homeOff(){return `<div class="screen">${homeTop()}
+  <div class="pair">
+   <div class="big"><div class="top"><span style="color:var(--gold)">${I.sun}</span><span class="badge">الصباح</span></div><b>أذكار الصباح</b><small>24 ذكرًا</small></div>
+   <div class="big now"><div class="top">${I.moon}<span class="badge">الآن</span></div><b>أذكار المساء</b><small>22 ذكرًا</small></div>
+  </div>${homeBottom()}</div>`}
+
+const MDATA={
+ normal:{step:23,stage:'المرحلة الرابعة · الأذكار الطويلة',left:'باقٍ ٢٦ يومًا على الأقل قبل الخطوة التالية',
+  am:['done','miss','miss','done','late','miss','done'], pm:['done','miss','done','done','done','done','wait'],
+  msgs:[['evening_message','مساؤك ثابت، ما شاء الله.'],['morning_message','الصباح يحتاج يومًا واحدًا بعد ليصل إلى هدف الأسبوع.']],
+  tip:['stage_4_tip','الأذكار المئوية تحتاج وقتًا؛ خصّص لها وقتًا ثابتًا، ويمكنك ذكرها وأنت تمشي أو تنتظر.']},
+ first:{step:1,stage:'المرحلة الأولى · الأساس',left:'باقٍ ٢٦ يومًا على الأقل قبل الخطوة التالية',
+  am:['none','none','none','none','none','done','done'], pm:['none','none','none','none','none','done','wait'],
+  msgs:[['welcome_message','أهلًا بك في مسارك. بدأتَ بذكرٍ واحد، وهذا يكفي الآن.']],
+  tip:['stage_1_tip','ابدأ صغيرًا: ذكرٌ واحد يأخذ أقل من دقيقة. اربطه بشيء تفعله كل يوم، مثل ما بعد صلاة الفجر وما بعد صلاة العصر أو المغرب. وإن فاتك يوم، فلا تجعله يومين متتاليين.']},
+ brk:{step:23,stage:'المرحلة الرابعة · الأذكار الطويلة',left:'المسار متوقف مؤقتًا، ولن يتقدم العدّ أثناء الاستراحة',
+  am:['done','miss','miss','done','brk','brk','brk'], pm:['done','miss','done','done','brk','brk','brk'],
+  msgs:[['break_message','استرح، فالرجوع أهم من الاستمرار المتعب.']],
+  tip:['stage_4_tip','الأذكار المئوية تحتاج وقتًا؛ خصّص لها وقتًا ثابتًا، ويمكنك ذكرها وأنت تمشي أو تنتظر.']},
+ done:{step:24,stage:'أتممتَ المسار · وضع المحافظة',left:'وردك الآن كامل، والمهم أن يدوم',
+  am:['done','done','late','done','done','miss','done'], pm:['done','done','done','miss','done','done','wait'],
+  msgs:[['completion_message','الحمد لله، أتممتَ المسار كاملًا. أسأل الله أن يديم عليك ذكره.']],
+  tip:['maintenance_tip','بعد أن صار الورد عادة، احرص على وقته الثابت؛ فهو ما يحفظه في الأيام المزدحمة.']}
+};
+/* Week: weekday numbers with Saturday = 0. In this preview today is Wednesday (4).
+   History arrays hold the last 7 days, oldest first: index 6 = today, 5 = yesterday. */
+const WD=['سبت','أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة'], TODAY_WD=4;
+function weekCells(start){
+  const kToday=(TODAY_WD-start+7)%7;
+  return [0,1,2,3,4,5,6].map(k=>({name:WD[(start+k)%7], today:k===kToday, fut:k>kToday, i:6-(kToday-k)}));
+}
+let MD=null, MDkey=null;
+function masari(){
+  if(MDkey!==st.masariState){MDkey=st.masariState;MD=JSON.parse(JSON.stringify(MDATA[MDkey]))}
+  const S=MD, k=st.masariState, isBrk=k==='brk', isDone=k==='done', isFirst=k==='first';
+  const YEST=5, TOD=6, C=2*Math.PI*62;
+  const cells=weekCells(st.weekStart);
+  const cnt=a=>cells.filter(c=>!c.fut).map(c=>a[c.i]).filter(x=>x==='done'||x==='late').length;
+  const dot=(s,i,ses)=>{
+    if(s==='done')return `<div class="dot done">${I.check}</div>`;
+    if(s==='late')return `<div class="dot late">${I.clock}</div>`;
+    if(s==='miss')return i===YEST?`<button class="dot miss tap" onclick="markYest('${ses}')"></button>`
+      :`<button class="dot miss" onclick="say('يمكن التسجيل لليوم أو أمس فقط')"></button>`;
+    if(s==='wait')return `<div class="dot wait"></div>`;
+    if(s==='brk')return `<div class="dot brk"></div>`;
+    return `<div class="dot none"></div>`;};
+  const g=(n,l)=>`<div class="grow"><span>${l}</span><div class="segs">${[0,1,2,3].map(j=>`<i class="${j<n?'f':''}"></i>`).join('')}</div><b class="${n>=4?'met':''}">${n>=4?'✓ تحقّق':n+' من 4'}</b></div>`;
+  const amT=S.am[TOD], pmT=S.pm[TOD];
+  const chip=(name,s,isNow)=>{const ok=s==='done',late=s==='late';
+    return `<div class="tchip ${ok?'ok':late?'late':isNow?'now':''}"><span class="ic">${ok?I.check:late?I.clock:''}</span><div>${name}<small>${ok?'تم اليوم':late?'تم متأخرًا':isNow?'وقته الآن':'لم يُقرأ بعد'}</small></div></div>`};
+  const bothDone=(amT==='done'||amT==='late')&&(pmT==='done'||pmT==='late');
+  const primary = isBrk ? `<button class="btn" style="margin-top:20px" onclick="st.masariState='normal';MDkey=null;render();say('انتهت الاستراحة، أهلًا بعودتك')">أنهِ الاستراحة وعُد</button>`
+    : bothDone ? '' : `<button class="btn" style="margin-top:20px" onclick="MD.pm[6]='done';render();say('تقبّل الله منك، وجعله في ميزان حسناتك.')">افتح ورد المساء</button>`;
+  return `<div class="screen">
+   <div class="topbar"><button class="ibtn" onclick="go('homeOn')">${I.back}</button><h1>مساري</h1><span style="width:42px"></span></div>
+   <div style="padding:20px 0 6px">
+    <div class="ring"><svg class="r" width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="62" fill="none" stroke="var(--surface2)" stroke-width="12"/>
+     <circle cx="75" cy="75" r="62" fill="none" stroke="${isDone?'var(--gold)':'var(--teal)'}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-S.step/24)}"/></svg>
+     <div class="in">${isDone?`<div style="color:var(--gold)"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div><div class="of">٢٤ من ٢٤</div>`
+       :`<div class="n">${S.step}</div><div class="of">من 24 خطوة</div>`}</div></div>
+    <p class="center muted" style="margin-top:12px">${S.stage}</p>
+    <p class="center muted" style="font-size:14px;margin-top:4px">${S.left}</p>
+   </div>
+   <section class="feature">${I.orn}<p class="hadith">${HADITH}</p>${I.orn}</section>
+   <section class="card ${isBrk?'dim':''}">
+    ${isBrk?`<div class="banner"><b>استراحة حتى الخميس ٦ نوفمبر</b>هذه الأيام لا تُحسب عليك، والتذكيرات مستمرة.</div>`:''}
+    <h3 class="wk-title">تتبّع الأسبوع</h3>
+    <div class="week"><span></span>${cells.map(c=>`<span class="d ${c.today?'t':''} ${c.fut?'f':''}">${c.today?'اليوم':c.name}</span>`).join('')}
+     <span class="lbl">صباح</span>${cells.map(c=>c.fut?'<div class="dot fut"></div>':dot(S.am[c.i],c.i,'الصباح')).join('')}
+     <span class="lbl">مساء</span>${cells.map(c=>c.fut?'<div class="dot fut"></div>':dot(S.pm[c.i],c.i,'المساء')).join('')}</div>
+    ${isBrk?'':isFirst?`<div class="goal"><h4>هدفك: ٤ أيام من ٧ للصباح، و٤ للمساء. يجوز أن يفوتك يومان أو ثلاثة.</h4></div>`
+      :`<div class="goal"><h4>${isDone?'هدف هذا الأسبوع':'هدف هذا الأسبوع · شرط الانتقال'}</h4>${g(Math.min(4,cnt(S.am)),'الصباح')}${g(Math.min(4,cnt(S.pm)),'المساء')}</div>`}
+    <div class="legend"><span><span class="dot done">${I.check}</span>تم</span><span><span class="dot late">${I.clock}</span>متأخر</span>
+     <span><span class="dot miss"></span>لم يُقرأ</span><span><span class="dot miss tap"></span>سجّل أمس</span></div>
+   </section>
+   <div class="tip">${I.bulb}<div>${ph(S.tip[0],S.tip[1])}</div></div>
+   ${primary}
+   ${isBrk?'':`<button class="readbtn" onclick="openRead()"><span class="ri">${I.check}</span><span><b>قرأتُ وردي بدون التطبيق</b><small>من حفظك أو من كتاب؟ سجّله ليُحسب لك</small></span></button>`}
+   <div class="links">${isDone?`<button class="link" onclick="say('يوقف أدومها ويعيد التطبيق لوضعه العادي')">إيقاف أدومها</button>`
+     :`<button class="link" onclick="openLife()">طرأ عليّ ظرف</button>`}<button class="link" onclick="say('يفتح محرّر الخطة')">عدّل الخطة</button></div>
+  </div>`;
+}
+function markYest(ses){openSheet(`<h2>سجّل ${ses} أمس</h2><p>قرأتَ ورد ${ses} يوم الثلاثاء من حفظك؟</p>
+  <button class="btn" onclick="confirmYest('${ses}')">نعم، سجّله</button>`)}
+function confirmYest(ses){(ses==='الصباح'?MD.am:MD.pm)[5]='done';closeSheet();render();say('تقبّل الله منك، وجعله في ميزان حسناتك.')}
+function openRead(){
+  const S=MD, rows=[];
+  if(!['done','late'].includes(S.am[6]))rows.push(['am',6,'ورد الصباح','اليوم',I.sun,'var(--gold)']);
+  if(!['done','late'].includes(S.pm[6]))rows.push(['pm',6,'ورد المساء','اليوم',I.moon,'var(--teal)']);
+  if(S.am[5]==='miss')rows.push(['am',5,'ورد الصباح','أمس',I.sun,'var(--gold)']);
+  if(S.pm[5]==='miss')rows.push(['pm',5,'ورد المساء','أمس',I.moon,'var(--teal)']);
+  openSheet(`<h2>أيّ وردٍ قرأته؟</h2><p>اضغط على الورد الذي قرأته من حفظك أو من كتاب، ليُحسب لك كأنك قرأته في التطبيق.</p>
+  ${rows.length?rows.map(([k,i,n,d,ic,c])=>`<button class="pick" onclick="recordRead('${k}',${i})"><span style="color:${c}">${ic}</span><b>${n}</b><span class="when">${d}</span><span class="plus">+</span></button>`).join('')
+   :`<p style="text-align:center;margin:8px 0 16px">لا شيء لتسجيله؛ ورد اليوم وأمس مسجّلان. ثبّتك الله.</p>`}
+  <p class="fine">يمكن التسجيل لليوم وأمس فقط.</p>`)}
+function recordRead(k,i){MD[k][i]='done';closeSheet();render();say('تقبّل الله منك، وجعله في ميزان حسناتك.')}
+function openLife(){openSheet(`<h2>طرأ عليّ ظرف أو مستجد في حياتي</h2><p>لا بأس، التراجع المؤقت جزء من الطريق. المهم أن تبقى.</p>
+  <button class="opt" onclick="closeSheet();say('رجعتَ إلى الخطوة 11')"><b>أرجع إلى نصف الطريق</b><span>الخطوة 11، والصعود بعدها أسرع</span></button>
+  <button class="opt" onclick="closeSheet();say('رجعتَ إلى الخطوة 3')"><b>أرجع إلى البداية الخفيفة</b><span>أول 3 خطوات</span></button>
+  <button class="opt" onclick="closeSheet();st.screen='masari';st.masariState='brk';render()"><b>استراحة</b><span>أسبوع أو أسبوعان لا تُحسب عليك</span></button>`)}
+function openSheet(h){const s=document.getElementById('sheet');s.innerHTML='<div class="grab"></div>'+h;
+  s.querySelectorAll('.seg').forEach(g=>g.onclick=e=>{if(e.target.tagName!=='BUTTON')return;g.querySelectorAll('button').forEach(b=>b.classList.remove('on'));e.target.classList.add('on')});
+  document.body.classList.add('open-sheet')}
+function closeSheet(){document.body.classList.remove('open-sheet')}
+
+/* ================= Engine ================= */
+function openWard(){
+  const s=st.homeState;
+  const next={first:'first',morning:'evening',evening:'both',both:'both'}[s];
+  say('تقبّل الله منك، وجعله في ميزان حسناتك.');
+  if(s==='first'){set({homeState:'evening',onceShown:false})}else set({homeState:next,onceShown:false});
+}
+function set(p){Object.assign(st,p);render()}
+function go(s){st.screen=s;render();document.getElementById('phone').scrollIntoView({block:'start'});window.scrollTo(0,0)}
+function render(){
+  const S=SCREENS[st.screen];
+  document.getElementById('screen').innerHTML=S.render();
+  document.getElementById('notes').innerHTML=S.notes+
+   `<p style="margin-top:14px;font-size:12px;opacity:.7">الأزرار في الأعلى للمعاينة فقط وليست جزءًا من التطبيق. الألوان تقريبية: يُستخدم ثيم التطبيق وخطوطه.</p>`;
+  document.getElementById('nav').innerHTML=Object.entries(SCREENS).map(([k,v])=>`<button class="${k===st.screen?'on':''}" onclick="go('${k}')">${v.label}</button>`).join('')
+   +`<button onclick="toggleTheme()">☾ السمة</button><button class="${st.showPh?'on':''}" onclick="set({showPh:!st.showPh})">{{ }} المتغيّرات</button>`;
+  document.getElementById('sub').innerHTML=S.sub?S.sub.map(([k,l])=>`<button class="${st[S.subKey]===k?'on':''}" onclick="set({${S.subKey}:'${k}',onceShown:true})">${l}</button>`).join(''):'';
+  document.getElementById('sub').style.display=S.sub?'flex':'none';
+  document.body.classList.toggle('hide-ph',!st.showPh);
+}
+let tt;function say(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2300)}
+function toggleTheme(){const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light';render()}
+render();
+</script>
+</body>
+</html>

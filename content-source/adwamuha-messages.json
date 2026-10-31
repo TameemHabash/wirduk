@@ -1,0 +1,1246 @@
+{
+  "about": "The message library of Adwamuha. Verses: cut from the Tanzil Quran text (tanzil.net, CC BY 3.0, copied verbatim). Hadiths and athar: Dorar pages saved by scripts/dorar. Written only by scripts/adwamuha/messages.ts. Only \"approved\" entries ship; the owner approves each one.",
+  "tanzil": {
+    "version": "Tanzil Quran Text (Uthmani, Version 1.1)",
+    "sha256": "7f30c647331a61100ebf24a80507dc0fcdd9f2df97f1312b5b2dfcb982a7f326"
+  },
+  "messages": [
+    {
+      "id": "q2-152",
+      "kind": "verse",
+      "moments": [
+        "wardDone",
+        "bothDone"
+      ],
+      "status": "approved",
+      "note": "Remember Me, I will remember you.",
+      "verse": {
+        "sura": 2,
+        "suraName": "البقرة",
+        "from": 152,
+        "to": 152,
+        "texts": [
+          "فَٱذْكُرُونِىٓ أَذْكُرْكُمْ وَٱشْكُرُوا۟ لِى وَلَا تَكْفُرُونِ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q13-28",
+      "kind": "verse",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "Hearts find rest in the remembrance of Allah.",
+      "verse": {
+        "sura": 13,
+        "suraName": "الرعد",
+        "from": 28,
+        "to": 28,
+        "texts": [
+          "ٱلَّذِينَ ءَامَنُوا۟ وَتَطْمَئِنُّ قُلُوبُهُم بِذِكْرِ ٱللَّهِ ۗ أَلَا بِذِكْرِ ٱللَّهِ تَطْمَئِنُّ ٱلْقُلُوبُ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q33-41-42",
+      "kind": "verse",
+      "moments": [
+        "bothDone",
+        "newStep"
+      ],
+      "status": "approved",
+      "note": "Remember Allah much, and glorify Him morning and evening.",
+      "verse": {
+        "sura": 33,
+        "suraName": "الأحزاب",
+        "from": 41,
+        "to": 42,
+        "texts": [
+          "يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱذْكُرُوا۟ ٱللَّهَ ذِكْرًا كَثِيرًا",
+          "وَسَبِّحُوهُ بُكْرَةً وَأَصِيلًا"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q30-17-18",
+      "kind": "verse",
+      "moments": [
+        "bothDone"
+      ],
+      "status": "approved",
+      "note": "Glorify Allah in the evening and in the morning.",
+      "verse": {
+        "sura": 30,
+        "suraName": "الروم",
+        "from": 17,
+        "to": 18,
+        "texts": [
+          "فَسُبْحَـٰنَ ٱللَّهِ حِينَ تُمْسُونَ وَحِينَ تُصْبِحُونَ",
+          "وَلَهُ ٱلْحَمْدُ فِى ٱلسَّمَـٰوَٰتِ وَٱلْأَرْضِ وَعَشِيًّا وَحِينَ تُظْهِرُونَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q40-55",
+      "kind": "verse",
+      "moments": [
+        "bothDone",
+        "extended"
+      ],
+      "status": "approved",
+      "note": "Patience, and glorifying your Lord at evening and morning. Spoken to the Prophet.",
+      "verse": {
+        "sura": 40,
+        "suraName": "غافر",
+        "from": 55,
+        "to": 55,
+        "texts": [
+          "فَٱصْبِرْ إِنَّ وَعْدَ ٱللَّهِ حَقٌّ وَٱسْتَغْفِرْ لِذَنۢبِكَ وَسَبِّحْ بِحَمْدِ رَبِّكَ بِٱلْعَشِىِّ وَٱلْإِبْكَـٰرِ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q76-25",
+      "kind": "verse",
+      "moments": [
+        "wardDone",
+        "bothDone"
+      ],
+      "status": "approved",
+      "note": "Remember the name of your Lord morning and evening.",
+      "verse": {
+        "sura": 76,
+        "suraName": "الانسان",
+        "from": 25,
+        "to": 25,
+        "texts": [
+          "وَٱذْكُرِ ٱسْمَ رَبِّكَ بُكْرَةً وَأَصِيلًا"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q7-205",
+      "kind": "verse",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "Remember your Lord within yourself, mornings and evenings; do not be heedless.",
+      "verse": {
+        "sura": 7,
+        "suraName": "الأعراف",
+        "from": 205,
+        "to": 205,
+        "texts": [
+          "وَٱذْكُر رَّبَّكَ فِى نَفْسِكَ تَضَرُّعًا وَخِيفَةً وَدُونَ ٱلْجَهْرِ مِنَ ٱلْقَوْلِ بِٱلْغُدُوِّ وَٱلْـَٔاصَالِ وَلَا تَكُن مِّنَ ٱلْغَـٰفِلِينَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q20-130",
+      "kind": "verse",
+      "moments": [
+        "bothDone"
+      ],
+      "status": "approved",
+      "note": "Glorify before sunrise and before sunset, so",
+      "verse": {
+        "sura": 20,
+        "suraName": "طه",
+        "from": 130,
+        "to": 130,
+        "texts": [
+          "فَٱصْبِرْ عَلَىٰ مَا يَقُولُونَ وَسَبِّحْ بِحَمْدِ رَبِّكَ قَبْلَ طُلُوعِ ٱلشَّمْسِ وَقَبْلَ غُرُوبِهَا ۖ وَمِنْ ءَانَآئِ ٱلَّيْلِ فَسَبِّحْ وَأَطْرَافَ ٱلنَّهَارِ لَعَلَّكَ تَرْضَىٰ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q41-30",
+      "kind": "verse",
+      "moments": [
+        "weekReached",
+        "finished"
+      ],
+      "status": "approved",
+      "note": "Those who say Our",
+      "verse": {
+        "sura": 41,
+        "suraName": "فصلت",
+        "from": 30,
+        "to": 30,
+        "texts": [
+          "إِنَّ ٱلَّذِينَ قَالُوا۟ رَبُّنَا ٱللَّهُ ثُمَّ ٱسْتَقَـٰمُوا۟ تَتَنَزَّلُ عَلَيْهِمُ ٱلْمَلَـٰٓئِكَةُ أَلَّا تَخَافُوا۟ وَلَا تَحْزَنُوا۟ وَأَبْشِرُوا۟ بِٱلْجَنَّةِ ٱلَّتِى كُنتُمْ تُوعَدُونَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q46-13",
+      "kind": "verse",
+      "moments": [
+        "weekReached",
+        "finished"
+      ],
+      "status": "approved",
+      "note": "The same promise as 41:30, shorter.",
+      "verse": {
+        "sura": 46,
+        "suraName": "الأحقاف",
+        "from": 13,
+        "to": 13,
+        "texts": [
+          "إِنَّ ٱلَّذِينَ قَالُوا۟ رَبُّنَا ٱللَّهُ ثُمَّ ٱسْتَقَـٰمُوا۟ فَلَا خَوْفٌ عَلَيْهِمْ وَلَا هُمْ يَحْزَنُونَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q15-99",
+      "kind": "verse",
+      "moments": [
+        "finished"
+      ],
+      "status": "approved",
+      "note": "Worship your Lord until death comes: the path ends, the habit does not.",
+      "verse": {
+        "sura": 15,
+        "suraName": "الحجر",
+        "from": 99,
+        "to": 99,
+        "texts": [
+          "وَٱعْبُدْ رَبَّكَ حَتَّىٰ يَأْتِيَكَ ٱلْيَقِينُ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q29-69",
+      "kind": "verse",
+      "moments": [
+        "extended",
+        "weekBelow"
+      ],
+      "status": "approved",
+      "note": "Those who strive for Us, We guide them.",
+      "verse": {
+        "sura": 29,
+        "suraName": "العنكبوت",
+        "from": 69,
+        "to": 69,
+        "texts": [
+          "وَٱلَّذِينَ جَـٰهَدُوا۟ فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا ۚ وَإِنَّ ٱللَّهَ لَمَعَ ٱلْمُحْسِنِينَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q2-286",
+      "kind": "verse",
+      "moments": [
+        "weekBelow",
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "No soul is burdened beyond its capacity, and the prayer that follows.",
+      "verse": {
+        "sura": 2,
+        "suraName": "البقرة",
+        "from": 286,
+        "to": 286,
+        "texts": [
+          "لَا يُكَلِّفُ ٱللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا ٱكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَآ إِن نَّسِينَآ أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَآ إِصْرًا كَمَا حَمَلْتَهُۥ عَلَى ٱلَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِۦ ۖ وَٱعْفُ عَنَّا وَٱغْفِرْ لَنَا وَٱرْحَمْنَآ ۚ أَنتَ مَوْلَىٰنَا فَٱنصُرْنَا عَلَى ٱلْقَوْمِ ٱلْكَـٰفِرِينَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q94-5-6",
+      "kind": "verse",
+      "moments": [
+        "extended",
+        "weekBelow",
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "With hardship comes ease.",
+      "verse": {
+        "sura": 94,
+        "suraName": "الشرح",
+        "from": 5,
+        "to": 6,
+        "texts": [
+          "فَإِنَّ مَعَ ٱلْعُسْرِ يُسْرًا",
+          "إِنَّ مَعَ ٱلْعُسْرِ يُسْرًا"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q4-28",
+      "kind": "verse",
+      "moments": [
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "Allah wants to lighten things for you. Its context is the rules of marriage.",
+      "verse": {
+        "sura": 4,
+        "suraName": "النساء",
+        "from": 28,
+        "to": 28,
+        "texts": [
+          "يُرِيدُ ٱللَّهُ أَن يُخَفِّفَ عَنكُمْ ۚ وَخُلِقَ ٱلْإِنسَـٰنُ ضَعِيفًا"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q64-16",
+      "kind": "verse",
+      "moments": [
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "Fear Allah as much as you can. The verse also speaks of spending.",
+      "verse": {
+        "sura": 64,
+        "suraName": "التغابن",
+        "from": 16,
+        "to": 16,
+        "texts": [
+          "فَٱتَّقُوا۟ ٱللَّهَ مَا ٱسْتَطَعْتُمْ وَٱسْمَعُوا۟ وَأَطِيعُوا۟ وَأَنفِقُوا۟ خَيْرًا لِّأَنفُسِكُمْ ۗ وَمَن يُوقَ شُحَّ نَفْسِهِۦ فَأُو۟لَـٰٓئِكَ هُمُ ٱلْمُفْلِحُونَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q3-191",
+      "kind": "verse",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "Those who remember Allah standing, sitting and lying down.",
+      "verse": {
+        "sura": 3,
+        "suraName": "آل عمران",
+        "from": 191,
+        "to": 191,
+        "texts": [
+          "ٱلَّذِينَ يَذْكُرُونَ ٱللَّهَ قِيَـٰمًا وَقُعُودًا وَعَلَىٰ جُنُوبِهِمْ وَيَتَفَكَّرُونَ فِى خَلْقِ ٱلسَّمَـٰوَٰتِ وَٱلْأَرْضِ رَبَّنَا مَا خَلَقْتَ هَـٰذَا بَـٰطِلًا سُبْحَـٰنَكَ فَقِنَا عَذَابَ ٱلنَّارِ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q14-27",
+      "kind": "verse",
+      "moments": [
+        "weekReached",
+        "newStep"
+      ],
+      "status": "approved",
+      "note": "Allah keeps the believers firm with the firm word.",
+      "verse": {
+        "sura": 14,
+        "suraName": "ابراهيم",
+        "from": 27,
+        "to": 27,
+        "texts": [
+          "يُثَبِّتُ ٱللَّهُ ٱلَّذِينَ ءَامَنُوا۟ بِٱلْقَوْلِ ٱلثَّابِتِ فِى ٱلْحَيَوٰةِ ٱلدُّنْيَا وَفِى ٱلْـَٔاخِرَةِ ۖ وَيُضِلُّ ٱللَّهُ ٱلظَّـٰلِمِينَ ۚ وَيَفْعَلُ ٱللَّهُ مَا يَشَآءُ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q3-8",
+      "kind": "verse",
+      "moments": [
+        "newStep",
+        "finished"
+      ],
+      "status": "approved",
+      "note": "A prayer: do not let our hearts swerve after You guided us.",
+      "verse": {
+        "sura": 3,
+        "suraName": "آل عمران",
+        "from": 8,
+        "to": 8,
+        "texts": [
+          "رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِن لَّدُنكَ رَحْمَةً ۚ إِنَّكَ أَنتَ ٱلْوَهَّابُ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q18-46",
+      "kind": "verse",
+      "moments": [
+        "finished"
+      ],
+      "status": "approved",
+      "note": "The good deeds that last are better with your Lord.",
+      "verse": {
+        "sura": 18,
+        "suraName": "الكهف",
+        "from": 46,
+        "to": 46,
+        "texts": [
+          "ٱلْمَالُ وَٱلْبَنُونَ زِينَةُ ٱلْحَيَوٰةِ ٱلدُّنْيَا ۖ وَٱلْبَـٰقِيَـٰتُ ٱلصَّـٰلِحَـٰتُ خَيْرٌ عِندَ رَبِّكَ ثَوَابًا وَخَيْرٌ أَمَلًا"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q16-97",
+      "kind": "verse",
+      "moments": [
+        "weekReached"
+      ],
+      "status": "approved",
+      "note": "Whoever does good, We give a good life.",
+      "verse": {
+        "sura": 16,
+        "suraName": "النحل",
+        "from": 97,
+        "to": 97,
+        "texts": [
+          "مَنْ عَمِلَ صَـٰلِحًا مِّن ذَكَرٍ أَوْ أُنثَىٰ وَهُوَ مُؤْمِنٌ فَلَنُحْيِيَنَّهُۥ حَيَوٰةً طَيِّبَةً ۖ وَلَنَجْزِيَنَّهُمْ أَجْرَهُم بِأَحْسَنِ مَا كَانُوا۟ يَعْمَلُونَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q11-115",
+      "kind": "verse",
+      "moments": [
+        "extended"
+      ],
+      "status": "approved",
+      "note": "Be patient: Allah does not waste the reward of those who do good.",
+      "verse": {
+        "sura": 11,
+        "suraName": "هود",
+        "from": 115,
+        "to": 115,
+        "texts": [
+          "وَٱصْبِرْ فَإِنَّ ٱللَّهَ لَا يُضِيعُ أَجْرَ ٱلْمُحْسِنِينَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q18-30",
+      "kind": "verse",
+      "moments": [
+        "weekReached",
+        "finished"
+      ],
+      "status": "approved",
+      "note": "We do not waste the reward of one who does good work.",
+      "verse": {
+        "sura": 18,
+        "suraName": "الكهف",
+        "from": 30,
+        "to": 30,
+        "texts": [
+          "إِنَّ ٱلَّذِينَ ءَامَنُوا۟ وَعَمِلُوا۟ ٱلصَّـٰلِحَـٰتِ إِنَّا لَا نُضِيعُ أَجْرَ مَنْ أَحْسَنَ عَمَلًا"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q99-7",
+      "kind": "verse",
+      "moments": [
+        "wardDone",
+        "weekBelow"
+      ],
+      "status": "approved",
+      "note": "Even an atom of good will be seen.",
+      "verse": {
+        "sura": 99,
+        "suraName": "الزلزلة",
+        "from": 7,
+        "to": 7,
+        "texts": [
+          "فَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُۥ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q4-40",
+      "kind": "verse",
+      "moments": [
+        "weekBelow"
+      ],
+      "status": "approved",
+      "note": "Allah wrongs no one an atom; He multiplies a good deed.",
+      "verse": {
+        "sura": 4,
+        "suraName": "النساء",
+        "from": 40,
+        "to": 40,
+        "texts": [
+          "إِنَّ ٱللَّهَ لَا يَظْلِمُ مِثْقَالَ ذَرَّةٍ ۖ وَإِن تَكُ حَسَنَةً يُضَـٰعِفْهَا وَيُؤْتِ مِن لَّدُنْهُ أَجْرًا عَظِيمًا"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q2-186",
+      "kind": "verse",
+      "moments": [
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "I am near. About prayer (dua) in general.",
+      "verse": {
+        "sura": 2,
+        "suraName": "البقرة",
+        "from": 186,
+        "to": 186,
+        "texts": [
+          "وَإِذَا سَأَلَكَ عِبَادِى عَنِّى فَإِنِّى قَرِيبٌ ۖ أُجِيبُ دَعْوَةَ ٱلدَّاعِ إِذَا دَعَانِ ۖ فَلْيَسْتَجِيبُوا۟ لِى وَلْيُؤْمِنُوا۟ بِى لَعَلَّهُمْ يَرْشُدُونَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q87-14-15",
+      "kind": "verse",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "Successful is the one who remembers the name of his Lord.",
+      "verse": {
+        "sura": 87,
+        "suraName": "الأعلى",
+        "from": 14,
+        "to": 15,
+        "texts": [
+          "قَدْ أَفْلَحَ مَن تَزَكَّىٰ",
+          "وَذَكَرَ ٱسْمَ رَبِّهِۦ فَصَلَّىٰ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q73-8",
+      "kind": "verse",
+      "moments": [
+        "wardDone",
+        "newStep"
+      ],
+      "status": "approved",
+      "note": "Remember the name of your Lord and devote yourself to Him.",
+      "verse": {
+        "sura": 73,
+        "suraName": "المزمل",
+        "from": 8,
+        "to": 8,
+        "texts": [
+          "وَٱذْكُرِ ٱسْمَ رَبِّكَ وَتَبَتَّلْ إِلَيْهِ تَبْتِيلًا"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q2-153",
+      "kind": "verse",
+      "moments": [
+        "extended"
+      ],
+      "status": "approved",
+      "note": "Seek help through patience and prayer.",
+      "verse": {
+        "sura": 2,
+        "suraName": "البقرة",
+        "from": 153,
+        "to": 153,
+        "texts": [
+          "يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱسْتَعِينُوا۟ بِٱلصَّبْرِ وَٱلصَّلَوٰةِ ۚ إِنَّ ٱللَّهَ مَعَ ٱلصَّـٰبِرِينَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q24-37",
+      "kind": "verse",
+      "moments": [
+        "weekReached"
+      ],
+      "status": "approved",
+      "note": "People whom trade does not distract from the remembrance of Allah.",
+      "verse": {
+        "sura": 24,
+        "suraName": "النور",
+        "from": 37,
+        "to": 37,
+        "texts": [
+          "رِجَالٌ لَّا تُلْهِيهِمْ تِجَـٰرَةٌ وَلَا بَيْعٌ عَن ذِكْرِ ٱللَّهِ وَإِقَامِ ٱلصَّلَوٰةِ وَإِيتَآءِ ٱلزَّكَوٰةِ ۙ يَخَافُونَ يَوْمًا تَتَقَلَّبُ فِيهِ ٱلْقُلُوبُ وَٱلْأَبْصَـٰرُ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q29-45",
+      "kind": "verse",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "And",
+      "verse": {
+        "sura": 29,
+        "suraName": "العنكبوت",
+        "from": 45,
+        "to": 45,
+        "texts": [
+          "ٱتْلُ مَآ أُوحِىَ إِلَيْكَ مِنَ ٱلْكِتَـٰبِ وَأَقِمِ ٱلصَّلَوٰةَ ۖ إِنَّ ٱلصَّلَوٰةَ تَنْهَىٰ عَنِ ٱلْفَحْشَآءِ وَٱلْمُنكَرِ ۗ وَلَذِكْرُ ٱللَّهِ أَكْبَرُ ۗ وَٱللَّهُ يَعْلَمُ مَا تَصْنَعُونَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q3-200",
+      "kind": "verse",
+      "moments": [
+        "extended"
+      ],
+      "status": "approved",
+      "note": "Be patient, persevere, stay firm.",
+      "verse": {
+        "sura": 3,
+        "suraName": "آل عمران",
+        "from": 200,
+        "to": 200,
+        "texts": [
+          "يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱصْبِرُوا۟ وَصَابِرُوا۟ وَرَابِطُوا۟ وَٱتَّقُوا۟ ٱللَّهَ لَعَلَّكُمْ تُفْلِحُونَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "q16-128",
+      "kind": "verse",
+      "moments": [
+        "weekReached"
+      ],
+      "status": "approved",
+      "note": "Allah is with those who fear Him and do good.",
+      "verse": {
+        "sura": 16,
+        "suraName": "النحل",
+        "from": 128,
+        "to": 128,
+        "texts": [
+          "إِنَّ ٱللَّهَ مَعَ ٱلَّذِينَ ٱتَّقَوا۟ وَّٱلَّذِينَ هُم مُّحْسِنُونَ"
+        ]
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-FKL236hS",
+      "kind": "hadith",
+      "moments": [
+        "extended",
+        "weekBelow",
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "The heart of Adwamuha: steady even if little, and take on what you can.",
+      "hadith": {
+        "url": "https://dorar.net/h/FKL236hS",
+        "text": "سُئِلَ النَّبيُّ صلَّى اللهُ عليه وسلَّم: أيُّ الأعمالِ أحَبُّ إلى اللهِ؟ قال: أدومُها وإن قَلَّ، وقال: اكلَفوا مِنَ الأعمالِ ما تُطيقونَ.",
+        "rawi": "عائشة أم المؤمنين",
+        "muhaddith": "البخاري",
+        "book": "صحيح البخاري",
+        "number": "6465",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-Sbgu4t05",
+      "kind": "hadith",
+      "moments": [
+        "weekReached",
+        "extended"
+      ],
+      "status": "approved",
+      "note": "Aim right, come close, and keep going: steady even if little.",
+      "hadith": {
+        "url": "https://dorar.net/h/Sbgu4t05",
+        "text": "سَدِّدوا وقارِبوا، واعلَموا أن لَن يُدخِلَ أحَدَكُم عَمَلُه الجَنَّةَ، وأنَّ أحَبَّ الأعمالِ إلى اللهِ أدوَمُها وإن قَلَّ.",
+        "rawi": "عائشة أم المؤمنين",
+        "muhaddith": "البخاري",
+        "book": "صحيح البخاري",
+        "number": "6464",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-NpZLQ79z",
+      "kind": "hadith",
+      "moments": [
+        "weekReached",
+        "newStep"
+      ],
+      "status": "approved",
+      "note": "Ends with what Aisha did: once she started a deed, she kept to it.",
+      "hadith": {
+        "url": "https://dorar.net/h/NpZLQ79z",
+        "text": "أحَبُّ الأعمالِ إلى اللهِ تَعالى أدوَمُها وإن قَلَّ. قال: وكانَت عائِشةُ إذا عَمِلَتِ العَمَلَ لَزِمَتْه.",
+        "rawi": "عائشة أم المؤمنين",
+        "muhaddith": "مسلم",
+        "book": "صحيح مسلم",
+        "number": "783",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-lXt1iJzo",
+      "kind": "hadith",
+      "moments": [
+        "bothDone",
+        "extended"
+      ],
+      "status": "approved",
+      "note": "Religion is easy; get help from the start and the end of the day.",
+      "hadith": {
+        "url": "https://dorar.net/h/lXt1iJzo",
+        "text": "إنَّ الدِّينَ يُسرٌ، ولَن يُشادَّ الدِّينَ أحَدٌ إلَّا غَلَبَه، فسَدِّدوا وقارِبوا، وأبشِروا، واستَعينوا بالغَدوةِ والرَّوحةِ وشيءٍ مِنَ الدُّلجةِ.",
+        "rawi": "أبو هريرة",
+        "muhaddith": "البخاري",
+        "book": "صحيح البخاري",
+        "number": "39",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-EGb2ESZn",
+      "kind": "hadith",
+      "moments": [
+        "extended"
+      ],
+      "status": "approved",
+      "note": "Do not be like the one who stopped. It may feel like blame: maybe not for a hard moment.",
+      "hadith": {
+        "url": "https://dorar.net/h/EGb2ESZn",
+        "text": "يا عبدَ اللهِ ! لا تكُنْ مِثلَ فُلانٍ كان يقومُ من الليلِ، فترَكَ قِيامَ الليْلِ",
+        "rawi": "عبدالله بن عمرو",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "7945",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-r8o9JntL",
+      "kind": "hadith",
+      "moments": [
+        "afterStepBack",
+        "weekBelow"
+      ],
+      "status": "approved",
+      "note": "Every deed has a strong time and a slow time. Its last words (he",
+      "hadith": {
+        "url": "https://dorar.net/h/r8o9JntL",
+        "text": "لكلِّ عملٍ شِرَّةٌ، ولكلِّ شِرَّةٍ فَترةٌ، فمن كانت فترتُهُ إلى سنَّتي فقد أفلحَ، ومن كانَت إلى غيرِ ذلكَ فقد هلَك.",
+        "rawi": "عبدالله بن عمرو",
+        "muhaddith": "الوادعي",
+        "book": "الصحيح المسند",
+        "number": "802",
+        "grading": "صحيح على شرط الشيخين"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-EeGL2Yx2",
+      "kind": "hadith",
+      "moments": [
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "For a break because of illness or travel: the usual deed is still written.",
+      "hadith": {
+        "url": "https://dorar.net/h/EeGL2Yx2",
+        "text": "إذا مرض العبدُ أو سافر، كتب اللهُ تعالى له من الأجرِ مثلَ ما كان يعملُ صحيحًا مُقيمًا",
+        "rawi": "أبو موسى الأشعري",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "799",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-8aXAIyTx",
+      "kind": "hadith",
+      "moments": [
+        "weekReached",
+        "finished"
+      ],
+      "status": "approved",
+      "note": "Believe, then stay steady.",
+      "hadith": {
+        "url": "https://dorar.net/h/8aXAIyTx",
+        "text": "قُلْ آمنتُ باللهِ ثُمَّ استقِمْ",
+        "rawi": "سفيان بن عبدالله الثقفي",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "4395",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-ZMG5qhAf",
+      "kind": "hadith",
+      "moments": [
+        "wardDone",
+        "bothDone"
+      ],
+      "status": "approved",
+      "note": "The one who remembers his Lord is like the living.",
+      "hadith": {
+        "url": "https://dorar.net/h/ZMG5qhAf",
+        "text": "مَثَلُ الذي يَذكُرُ رَبَّه والذي لا يَذكُرُ رَبَّه مَثَلُ الحَيِّ والمَيِّتِ.",
+        "rawi": "أبو موسى الأشعري",
+        "muhaddith": "البخاري",
+        "book": "صحيح البخاري",
+        "number": "6407",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-6Nzy9FX6",
+      "kind": "hadith",
+      "moments": [
+        "wardDone",
+        "newStep"
+      ],
+      "status": "approved",
+      "note": "Keep your tongue moist with the remembrance of Allah. Shown alone, as on Dorar.",
+      "hadith": {
+        "url": "https://dorar.net/h/6Nzy9FX6",
+        "text": "لا يَزَالُ لسانُكَ رَطْبًا من ذِكْرِ اللهِ",
+        "rawi": "عبدالله بن بسر",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "7700",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-MObnkd78",
+      "kind": "hadith",
+      "moments": [
+        "weekReached",
+        "bothDone"
+      ],
+      "status": "approved",
+      "note": "Those who remember Allah much have gone ahead.",
+      "hadith": {
+        "url": "https://dorar.net/h/MObnkd78",
+        "text": "كان رَسولُ اللهِ صلَّى اللهُ عليه وسلَّم يَسيرُ في طَريقِ مَكَّةَ، فمَرَّ على جَبَلٍ يُقالُ له: جُمدانُ، فقال: سيروا، هذا جُمدانُ، سَبَقَ المُفَرِّدونَ، قالوا: وما المُفَرِّدونَ يا رَسولَ اللهِ؟ قال: الذَّاكِرونَ اللهَ كَثيرًا والذَّاكِراتُ.",
+        "rawi": "أبو هريرة",
+        "muhaddith": "مسلم",
+        "book": "صحيح مسلم",
+        "number": "2676",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-Nj8CsYQQ",
+      "kind": "hadith",
+      "moments": [
+        "newStep",
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "Come a hand-span closer, and Allah comes closer still.",
+      "hadith": {
+        "url": "https://dorar.net/h/Nj8CsYQQ",
+        "text": "إذا تَقَرَّبَ عَبدي مِنِّي شِبرًا تَقَرَّبتُ منه ذِراعًا، وإذا تَقَرَّبَ مِنِّي ذِراعًا تَقَرَّبتُ منه باعًا أو بوعًا، وإذا أتاني يَمشي أتَيتُه هَرولةً.",
+        "rawi": "أبو هريرة",
+        "muhaddith": "مسلم",
+        "book": "صحيح مسلم",
+        "number": "2675",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-Zd3Mo9hH",
+      "kind": "hadith",
+      "moments": [
+        "wardDone",
+        "bothDone"
+      ],
+      "status": "approved",
+      "note": "The best of your deeds: the remembrance of Allah.",
+      "hadith": {
+        "url": "https://dorar.net/h/Zd3Mo9hH",
+        "text": "ألا أُنبِّئكم بخيرِ أعمالِكم، و أزكاها عند مليكِكم، و أرفعِها في درجاتِكم ، و خيرٌ لكم من إنفاقِ الذهبِ و الوَرِقِ ، و خيرٌ لكم من أن تلْقَوا عدوَّكم، فتضرِبوا أعناقَهم، و يضربوا أعناقَكم ؟ ذكرُ اللهِ",
+        "rawi": "أبو الدرداء",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "2629",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-83W9LZ2X",
+      "kind": "hadith",
+      "moments": [
+        "weekReached",
+        "extended"
+      ],
+      "status": "approved",
+      "note": "His deeds were steady, like steady rain.",
+      "hadith": {
+        "url": "https://dorar.net/h/83W9LZ2X",
+        "text": "قُلتُ لعائِشةَ رَضيَ اللهُ عنها: هل كان رَسولُ اللهِ صلَّى اللهُ عليه وسلَّم يَختَصُّ مِنَ الأيَّامِ شيئًا؟ قالت: لا، كان عَمَلُه ديمةً، وأيُّكُم يُطيقُ ما كان رَسولُ اللهِ صلَّى اللهُ عليه وسلَّم يُطيقُ؟!",
+        "rawi": "عائشة أم المؤمنين",
+        "muhaddith": "البخاري",
+        "book": "صحيح البخاري",
+        "number": "1987",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-6SMWmThQ",
+      "kind": "hadith",
+      "moments": [
+        "afterStepBack",
+        "weekBelow"
+      ],
+      "status": "approved",
+      "note": "This religion is firm: go into it gently.",
+      "hadith": {
+        "url": "https://dorar.net/h/6SMWmThQ",
+        "text": "إِنَّ هذا الدينَ متينٌ، فأوْغِلُوا فيه بِرِفْقٍ",
+        "rawi": "أنس بن مالك",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "2246",
+        "grading": "حسن"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-9JuJS3N1",
+      "kind": "hadith",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "Four phrases, dearer than all the sun rises on.",
+      "hadith": {
+        "url": "https://dorar.net/h/9JuJS3N1",
+        "text": "لأن أقولَ: سُبحانَ اللهِ، والحَمدُ للَّهِ، ولا إلَهَ إلَّا اللهُ، واللهُ أكبَرُ؛ أحَبُّ إليَّ ممَّا طَلَعَت عليه الشَّمسُ.",
+        "rawi": "أبو هريرة",
+        "muhaddith": "مسلم",
+        "book": "صحيح مسلم",
+        "number": "2695",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-4DZspCuR",
+      "kind": "hadith",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "Two phrases, light on the tongue, heavy on the scale. They are already one of the morning adhkar.",
+      "hadith": {
+        "url": "https://dorar.net/h/4DZspCuR",
+        "text": "كلمتان خفيفتانِ على الِّلسانِ ، ثقيلتان في الميزانِ ، حبيبتانِ إلى الرحمنِ : سبحان اللهِ و بحمدِه، سبحان اللهِ العظيمِ",
+        "rawi": "أبو هريرة",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "4572",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-8DHStwPS",
+      "kind": "hadith",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "Nothing saves more from the punishment of Allah than His remembrance.",
+      "hadith": {
+        "url": "https://dorar.net/h/8DHStwPS",
+        "text": "ما عمِلَ آدمِيٌّ عمَلًا، أنْجَى له من عذابِ اللهِ من ذكرِ اللهِ",
+        "rawi": "معاذ بن جبل",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "5644",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-UBRtMw9L",
+      "kind": "hadith",
+      "moments": [
+        "bothDone"
+      ],
+      "status": "approved",
+      "note": "Sitting to remember Allah after Fajr and after Asr: the morning and the evening.",
+      "hadith": {
+        "url": "https://dorar.net/h/UBRtMw9L",
+        "text": "لأن أقعدَ معَ قومٍ يذكرونَ اللَّهَ تعالى من صلاةِ الغداةِ حتَّى تطلُعَ الشَّمسُ أحبُّ إليَّ من أن أعتقَ أربعةً من ولَدِ إسماعيلَ ولأن أقعدَ معَ قومٍ يذكرونَ اللَّهَ من صلاةِ العصرِ إلى أن تغربَ الشَّمسُ أحبُّ إليَّ من أن أعتقَ أربعةً",
+        "rawi": "أنس بن مالك",
+        "muhaddith": "الألباني",
+        "book": "صحيح أبي داود",
+        "number": "3667",
+        "grading": "حسن"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-y3jDiexQ",
+      "kind": "hadith",
+      "moments": [
+        "weekBelow",
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "A good deed only intended is still written. Fits the",
+      "hadith": {
+        "url": "https://dorar.net/h/y3jDiexQ",
+        "text": "مَن هَمَّ بحَسَنةٍ فلَم يَعمَلها كُتِبَت له حَسَنةً، ومَن هَمَّ بحَسَنةٍ فعَمِلَها كُتِبَت له عَشرًا إلى سَبعِ مِئةِ ضِعفٍ، ومَن هَمَّ بسَيِّئةٍ فلَم يَعمَلْها لَم تُكتَبْ، وإن عَمِلَها كُتِبَت.",
+        "rawi": "أبو هريرة",
+        "muhaddith": "مسلم",
+        "book": "صحيح مسلم",
+        "number": "130",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-N3oe6VCE",
+      "kind": "hadith",
+      "moments": [
+        "afterStepBack",
+        "extended"
+      ],
+      "status": "approved",
+      "note": "Allah is gentle and loves gentleness. Said about dealing with people.",
+      "hadith": {
+        "url": "https://dorar.net/h/N3oe6VCE",
+        "text": "يا عائِشةُ، إنَّ اللهَ رَفيقٌ يُحِبُّ الرِّفقَ، ويُعطي على الرِّفقِ ما لا يُعطي على العُنفِ، وما لا يُعطي على ما سِواه.",
+        "rawi": "عائشة أم المؤمنين",
+        "muhaddith": "مسلم",
+        "book": "صحيح مسلم",
+        "number": "2593",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-emFwKBKA",
+      "kind": "hadith",
+      "moments": [
+        "afterStepBack"
+      ],
+      "status": "approved",
+      "note": "He always chose the easier of two things.",
+      "hadith": {
+        "url": "https://dorar.net/h/emFwKBKA",
+        "text": "ما خُيِّرَ رسولُ اللهِ صلَّى اللهُ عليه وسلَّمَ بينَ أمرَيْنِ في الإسلامِ، إلَّا اخْتارَ أيْسَرَهما.",
+        "rawi": "عائشة أم المؤمنين",
+        "muhaddith": "شعيب الأرناؤوط",
+        "book": "تخريج المسند لشعيب",
+        "number": "24549",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-6s5PcfJi",
+      "kind": "hadith",
+      "moments": [
+        "newStep",
+        "extended"
+      ],
+      "status": "approved",
+      "note": "A prayer for help with dhikr. In the hadith it is said after every prayer.",
+      "hadith": {
+        "url": "https://dorar.net/h/6s5PcfJi",
+        "text": "يا معاذُ ! واللهِ إني لَأُحِبُّكَ، أُوصِيكَ يا معاذَ لا تَدَعَنَّ في دُبُرِ كلِّ صلاةٍ أن تقولَ : اللهم أَعِنِّي على ذِكْرِكَ، وشُكْرِكَ، وحُسْنِ عبادتِكَ",
+        "rawi": "معاذ بن جبل",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "7969",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-qE8NoW3J",
+      "kind": "hadith",
+      "moments": [
+        "extended",
+        "finished",
+        "weekReached"
+      ],
+      "status": "approved",
+      "note": "A prayer: keep my heart firm on Your religion.",
+      "hadith": {
+        "url": "https://dorar.net/h/qE8NoW3J",
+        "text": "يا مُقَلِّبَ القلوبِ ثَبِّتْ قلبي على دينِكَ",
+        "rawi": "أنس بن مالك وشهاب الجرمي وجابر بن عبدالله",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "7987",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-KNmk5ctb",
+      "kind": "hadith",
+      "moments": [
+        "finished"
+      ],
+      "status": "approved",
+      "note": "The best deed: to leave this world with your tongue moist with dhikr.",
+      "hadith": {
+        "url": "https://dorar.net/h/KNmk5ctb",
+        "text": "جاءَ أعرابيَّانِ إلى رسولِ اللهِ صلَّى اللهُ عليهِ وسلَّمَ فقال أحدُهما : يا رسولَ اللهِ ! أيُّ الناسِ خيرٌ ؟ قال : طُوبَى لمن طالَ عُمُرُه، وحَسُنَ عملُه. وقال الآخرُ : أيُّ العملِ خيرٌ ؟ قال : أن تُفارِقَ الدنيا ولِسانُكَ رَطْبٌ من ذِكْرِ اللهِ",
+        "rawi": "عبدالله بن بسر",
+        "muhaddith": "الألباني",
+        "book": "السلسلة الصحيحة",
+        "number": "4/452",
+        "grading": "إسناده صحيح، رجاله ثقات"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-HpUwBb25",
+      "kind": "hadith",
+      "moments": [
+        "afterStepBack",
+        "weekBelow"
+      ],
+      "status": "approved",
+      "note": "An hour for this and an hour for that: the heart is not always at its best.",
+      "hadith": {
+        "url": "https://dorar.net/h/HpUwBb25",
+        "text": "والذي نفسي بيدِه، لو كنتم تكونون في بيوتِكم على الحالةِ التي تكونون عليها عندي، لصافَحَتْكُمُ الملائكةُ، ولَأَظَلَّتْكم بأجنحتِها، ولكن يا حنظلةُ ساعةً و ساعةً",
+        "rawi": "حنظلة الأسيدي",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "7073",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-0ooWjN9r",
+      "kind": "hadith",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "The best dhikr and the best prayer.",
+      "hadith": {
+        "url": "https://dorar.net/h/0ooWjN9r",
+        "text": "أَفضلُ الذِّكرِ لا إله إلا اللهُ، وأفضلُ الدعاءِ الحمدُ لله.",
+        "rawi": "جابر بن عبدالله",
+        "muhaddith": "الألباني",
+        "book": "صحيح الترغيب",
+        "number": "1526",
+        "grading": "حسن"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-YbRDKjAY",
+      "kind": "hadith",
+      "moments": [
+        "wardDone",
+        "weekReached"
+      ],
+      "status": "approved",
+      "note": "He remembered Allah at all times.",
+      "hadith": {
+        "url": "https://dorar.net/h/YbRDKjAY",
+        "text": "كان يذكرُ اللهَ تعالى على كلِّ أحيانِه",
+        "rawi": "عائشة أم المؤمنين",
+        "muhaddith": "الألباني",
+        "book": "صحيح الجامع",
+        "number": "4943",
+        "grading": "صحيح"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-scFZxN1c",
+      "kind": "hadith",
+      "moments": [
+        "bothDone"
+      ],
+      "status": "approved",
+      "note": "Be in this world like a stranger; then what Ibn Umar said about the evening and the morning.",
+      "hadith": {
+        "url": "https://dorar.net/h/scFZxN1c",
+        "text": "أخَذَ رَسولُ اللهِ صلَّى اللهُ عليه وسلَّم بمَنكِبي، فقال: كُنْ في الدُّنيا كَأنَّكَ غَريبٌ أو عابِرُ سَبيلٍ. وكان ابنُ عُمَرَ يقولُ: إذا أمسَيتَ فلا تَنتَظِرِ الصَّباحَ، وإذا أصبَحتَ فلا تَنتَظِرِ المَساءَ، وخُذ مِن صِحَّتِكَ لمَرَضِكَ، ومِن حَياتِكَ لمَوتِكَ.",
+        "rawi": "عبدالله بن عمر",
+        "muhaddith": "البخاري",
+        "book": "صحيح البخاري",
+        "number": "6416",
+        "grading": "[صحيح]"
+      },
+      "addedOn": "2026-10-24"
+    },
+    {
+      "id": "d-VsgZSi6r",
+      "kind": "athar",
+      "moments": [
+        "wardDone"
+      ],
+      "status": "approved",
+      "note": "Dorar does not say whose words these are; the text does not name the Prophet. Its takhreej: Bukhari gives it without a chain, in a form that shows doubt; Albani: its chain is sahih. Your choice.",
+      "hadith": {
+        "url": "https://dorar.net/h/VsgZSi6r",
+        "text": "الشيطانُ جاثِمٌ على قلبِ ابنِ آدمَ؛ فإذا ذَكَر اللهَ خَنَسَ وإذا غَفَل وَسْوَسَ",
+        "rawi": "عبدالله بن عباس",
+        "muhaddith": "الألباني",
+        "book": "هداية الرواة",
+        "number": "2221",
+        "grading": "إسناده صحيح"
+      },
+      "addedOn": "2026-10-24"
+    }
+  ]
+}

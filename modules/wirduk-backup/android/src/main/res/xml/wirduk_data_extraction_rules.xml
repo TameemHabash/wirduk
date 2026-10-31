@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+. Cloud backup (the user's Google Drive): only the small data, as in
+  wirduk_backup_rules.xml (25 MB limit). Moving to a new phone by cable or Wi-Fi has no such
+  limit, so it also carries the user's own recordings (files/custom-audio).
+-->
+<data-extraction-rules>
+  <cloud-backup>
+    <include domain="file" path="SQLite/user.db" />
+    <include domain="file" path="SQLite/user.db-wal" />
+    <include domain="sharedpref" path="wirduk_backup.xml" />
+  </cloud-backup>
+  <device-transfer>
+    <include domain="file" path="SQLite/user.db" />
+    <include domain="file" path="SQLite/user.db-wal" />
+    <include domain="file" path="custom-audio/" />
+    <include domain="sharedpref" path="wirduk_backup.xml" />
+  </device-transfer>
+</data-extraction-rules>

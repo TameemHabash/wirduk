@@ -1,0 +1,52 @@
+{
+  "about": "The owner's later edits to texts of the description (docs/adwamuha/feature-prompt.md), given in chat. Each text is cut from the owner's message by script, never typed. scripts/adwamuha/owner-texts.ts applies them.",
+  "hadithCard": {
+    "date": "2026-10-29",
+    "note": "The light-plan hadith card: the owner's text (2026-10-25) with a shadda on the word Allah (2026-10-29), no source line and no Dorar link; the owner's source line and Dorar's data stay stored.",
+    "text": "أَحَبُّ الأعمالِ إلى اللّهِ أدْومُها و إن قَلَّ",
+    "source": "صحيح البخاري ومسلم",
+    "link": false,
+    "showSource": false
+  },
+  "setupIntent": {
+    "date": "2026-10-29",
+    "note": "The owner's words at the start of their 4-of-7 line (2026-10-24, the old start screen); kept in the setup's 4-of-7 line (owner, 2026-10-29). Cut from the app's strings by script.",
+    "text": "النية لكل يوم"
+  },
+  "designFixes": {
+    "date": "2026-10-30",
+    "note": "The owner's corrections to the design's interface texts (2026-10-30): the imperative in the first setup choice, and Home's title above the full morning and evening cards. Cut from their message by script; scripts/adwamuha/design-strings.ts applies them.",
+    "fixes": [
+      {
+        "key": "setup.fromFirst",
+        "from": "أبدأ",
+        "to": "ابدأ"
+      },
+      {
+        "key": "home.fullAdhkar",
+        "from": "الأذكار كاملة",
+        "to": "الصباح والمساء"
+      }
+    ]
+  },
+  "wardNames": {
+    "date": "2026-10-30",
+    "note": "Names shown instead of the first words of these two adhkar, in the setup preview and the ward order (owner, 2026-10-30). Cut from their message by script; each goes with its plan ids (morning, evening): step 5 and step 4.",
+    "names": [
+      {
+        "ids": [
+          1001,
+          133001
+        ],
+        "name": "آية الكرسي"
+      },
+      {
+        "ids": [
+          1002,
+          133002
+        ],
+        "name": "الإخلاص والمعوذتين"
+      }
+    ]
+  }
+}
