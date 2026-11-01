@@ -1,6 +1,6 @@
 import '@/i18n';
 
-import { useCallback, useEffect, useMemo, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -17,6 +17,7 @@ import { OWNER_TEXTS } from '@/features/adwamuha/owner-texts';
 import { AudioProvider } from '@/features/audio/AudioProvider';
 import { showRemindersInForeground } from '@/features/reminders/reminders';
 import { useReminderSync } from '@/features/reminders/useReminders';
+import { newAppStart } from '@/features/session/useSessionRestore';
 import { syncLayoutDirection } from '@/i18n/direction';
 import { UI_FONTS } from '@/theme/fonts';
 import type { ThemePreference } from '@/theme/resolve';
@@ -124,6 +125,9 @@ function ThemedApp() {
 
 export default function RootLayout() {
   const { i18n } = useTranslation();
+  // A new root is a new app start, even in a process Android kept. Before any screen
+  // renders, so Home's "continue where I stopped" and reminder taps see it.
+  useState(newAppStart);
 
   useEffect(() => {
     syncLayoutDirection(i18n.language);

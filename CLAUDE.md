@@ -199,6 +199,12 @@ README.md is long: read only the section you need.
   pager when the pager's **measured** width changes (`onPagerLayout`), and only accepts a page
   change during a real scroll. Keying it on the orientation alone was not enough (it was rebuilt
   before the new width was known).
+- **Once the audio has played, a swipe from the recent apps can leave the process alive** (the
+  media service; every time on the owner's Samsung phones). The app then starts again from Home
+  in the same JS runtime: module-level state survives. "Once per app start" state must be reset
+  in `newAppStart()` (`useSessionRestore.ts`, called by the root layout). To test on the emulator:
+  play the audio, swipe the app away while it plays, start it from its icon (same pid in `ps -A`).
+  `am start --activity-clear-task` is not the same: the old screen closes after the new one.
 - `npx expo run:android --device` wants the AVD name (`Wirdak_Pixel`), not `emulator-5554`.
 - Metro can run out of memory ("JavaScript heap out of memory") while a Gradle release build
   runs next to it (thousands of changed files under `android/`). Stop Metro before

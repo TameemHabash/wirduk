@@ -172,5 +172,5 @@ beforeEach(() => {
   resetAudioMocks();
   resetNotificationMocks();
   // Each test is a fresh app start for "continue where I stopped".
-  require('@/features/session/useSessionRestore').resetSessionRestoreForTests();
+  require('@/features/session/useSessionRestore').newAppStart();
 });

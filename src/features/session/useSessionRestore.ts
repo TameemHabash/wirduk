@@ -13,8 +13,12 @@ import { startupFromNotification } from '@/features/reminders/useReminders';
 /** Restored at most once per app start (Home can mount again later). */
 const state = { checked: false };
 
-/** Tests start each case as a fresh app start. */
-export function resetSessionRestoreForTests(): void {
+/**
+ * A new app start: the root layout calls it when it mounts (tests: before each case). Android
+ * can start the app again in a process it kept (after a swipe from the recent apps, once the
+ * audio has played): the screens start again from Home, but this module's state stays.
+ */
+export function newAppStart(): void {
   state.checked = false;
   startupFromNotification.opened = false;
 }

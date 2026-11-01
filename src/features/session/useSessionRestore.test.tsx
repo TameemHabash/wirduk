@@ -3,8 +3,11 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { SESSION_MAX_AGE_MS } from '@/data/session';
 import { counterStore } from '@/features/counter/counter-store';
 import { HomeScreen } from '@/features/home/HomeScreen';
-import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
+import { notificationState, responseFor } from '@/test-utils/notifications-mock';
+import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 import { mockRouter } from '@/test-utils/router-mock';
+
+import { newAppStart } from './useSessionRestore';
 
 const RESTORED = 'استُعيدت آخر حالة، ويمكنك إيقاف ذلك من الإعدادات';
 const SAVED = { categoryId: 1, dhikrId: 1017, counts: { '1017': 40, '1013': 3 } };
@@ -59,6 +62,45 @@ describe('Continue where I stopped — app start', () => {
       }),
     );
     expect(counterStore.get(1017)).toBe(40);
+  });
+
+  it('restores again when Android starts the app again in a process it kept', async () => {
+    // The first start was a tap on a reminder: the reminder wins, nothing is restored.
+    const repos = await createTestRepositories();
+    notificationState.lastResponse = responseFor(1);
+    const first = await renderWithApp(<HomeScreen />, repos);
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        pathname: '/category/[id]',
+        params: { id: '1' },
+      }),
+    );
+    await first.unmount();
+    // The ward went to the background (state saved); the user swiped the app away, but the
+    // audio kept the process: the screens start again from Home in the same process.
+    await repos.session.save({ ...SAVED, ward: 'morning' });
+    counterStore.resetMany([1013, 1017]);
+    mockRouter.push.mockClear();
+    newAppStart(); // what the root layout does when it mounts
+    await renderWithApp(<HomeScreen />, repos);
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        pathname: '/adwamuha/ward/[session]',
+        params: { session: 'morning', dhikr: '1017' },
+      }),
+    );
+    expect(counterStore.get(1017)).toBe(40);
+  });
+
+  it('restores only once per app start, though Home mounts again', async () => {
+    const repos = await startWith();
+    await waitFor(() => expect(mockRouter.push).toHaveBeenCalledTimes(1));
+    await screen.unmount();
+    await repos.session.save(SAVED);
+    await renderWithApp(<HomeScreen />, repos);
+    await settleLists();
+    expect(mockRouter.push).toHaveBeenCalledTimes(1);
+    expect(await repos.session.load()).not.toBeNull(); // not read: a restore clears it
   });
 
   it('starts fresh when the setting is off', async () => {
