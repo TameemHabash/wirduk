@@ -80,7 +80,12 @@ Check on the device with `run-as com.wirduk.app ls files/SQLite`.
 ## Phone (the owner's Galaxy S21+; its serial: `adb devices`, or `.local/devices.md`)
 
 The phone runs a standalone **release** build (JS inside, no Metro), signed with the debug key,
-so `install -r` keeps the owner's data:
+so `install -r` keeps the owner's data. **Build the phone APK with
+`.\scripts\dev\phone-apk.ps1`** (commit, push and stop Metro first): it builds arm64, keeps a
+copy in `.local/apk/`, and replaces the file behind the fixed public link the owner and testers
+install from (owner, 2026-11-01):
+https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk
+(pre-release `test-build`; its tag moves to the built commit). Over USB, or for the emulator:
 
 ```powershell
 cd android; .\gradlew.bat assembleRelease -PreactNativeArchitectures=arm64-v8a   # x86_64 for the emulator

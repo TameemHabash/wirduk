@@ -61,7 +61,9 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     with `-no-snapshot-load`.
   - Owner's phone: Galaxy S21+ (serial: `.local/devices.md`, Android 15, arm64): release build of commit
     68a8074 (content v13), installed by the owner from the file, tested 2026-11-01. Update it with
-    a release build (see CLAUDE.md, "Phone"); the APKs are in `.local/apk/`.
+    `scripts/dev/phone-apk.ps1` (CLAUDE.md, "Phone"): the APKs are in `.local/apk/`, and the
+    latest is always at https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk
+    (public pre-release `test-build`, owner's choice 2026-11-01).
   - A second phone: the same APK (574d1b2), installed by the owner from the file (no USB).
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
