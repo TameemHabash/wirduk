@@ -29,7 +29,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | — | After 11: the audio that does not count waits for the user's count; «العدّ مع الصوت» on by default | 🟢 Done | 0370843, one commit 2026-10-31 |
 | 12 | Backup: Android's automatic backup fixed + a backup file (save, restore) | 🟢 Done | 45ccb23, 4eb9e45, 050538f |
 | 13 | Quality and edge cases (every «أدومها» state tested, dev clock, cleanup, edge cases, the owner's phone) | 🟢 Done | 2d49084, 698aff6, 9373c31, 68a8074 |
-| — | Owner feedback 2026-11-01: «مساري»'s dot drawn square after «قرأتها من حفظي» (Galaxy only); "continue where I stopped" after the audio played (the process kept) | 🟢 Done | 63091f6, one commit 2026-11-01 |
+| — | Owner feedback 2026-11-01: «مساري»'s dot drawn square after «قرأتها من حفظي» (Galaxy only); "continue where I stopped" after the audio played (the process kept); the second ward's finish screen like the first (option ب) | 🟢 Done | 63091f6, ae60182, one commit 2026-11-01 |
 | 14 | Google Play | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -84,9 +84,6 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
    owner's Galaxy showed it, so it needs a check there with the next APK.
 5. **"Continue where I stopped" after the audio** (fixed 2026-11-01, `newAppStart()`): the owner
    checks it on both phones with the next APK (play the audio, swipe the app away, open it).
-6. **The finish screen of the day's second ward** shows only the owner's prayer (decision
-   2026-10-29). The owner asked (2026-11-01) why the evening has no encouraging message like the
-   morning: keep it, or change it? Waiting for the answer.
 
 ## Milestone 9 — notifications and "report an issue"
 

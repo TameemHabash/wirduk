@@ -153,7 +153,7 @@ over the 2026-10-23 decisions where they differ.
 | Backup card | Leaves the start (setup) screens; «احفظ مسارك» lives in the «أدومها» settings screen, with Claude's own text (the design's text was not logical). |
 | A later starting step | Gets 2 weeks (it is already practised), not its full time. |
 | «مساري» | No commitment percentages and no «لماذا خطة خفيفة؟» box; the hadith is featured; the stage tip is a fixed card; one-time messages only on Home. |
-| Both wards done | Home and the finish screen show only the owner's prayer, no verse or hadith and no button. |
+| Both wards done | Home ~~and the finish screen~~ show only the owner's prayer, no verse or hadith and no button. (2026-11-01: the finish screen shows the usual message again, see below.) |
 | Messages | Each {{placeholder}} of the design is stored in the database with the other encouraging messages and chosen by state. `ward_count` is counted, not stored. The design's `morning_message`, `evening_message`, `break_message` and `completion_message` are shown nowhere in it: left out. The welcome text fits a start at step 1; a later start and the morning get their own variants (Claude's drafts, for review). «النية لكل يوم» stays in the setup's "4 of 7" line. |
 | «ترتيب الورد» | Plan order (default, «ننصح به»): the opening, then the steps' adhkar, the new one last. Category order: the same adhkar of the ward, in their order in the morning / evening category. Only the order changes, never the content or the progress. Stored in user.db. |
 | Logo | The app's current logo, not the design's. |
@@ -186,8 +186,9 @@ How the messages work (Claude, step 3):
   last sentences around Claude's middle sentence («بدأتَ من حيث وصلت، وبعد أسبوعين من الثبات
   يُضاف ذكرٌ جديد.»), for the owner's review.
 - After the last step, the maintenance tip takes the place of the stage tip.
-- Both wards done: only the owner's prayer, also on the finish screen (no library message, no
-  «stay with your ward» line).
+- Both wards done: only the owner's prayer, ~~also on the finish screen (no library message, no
+  «stay with your ward» line)~~ on Home. Since 2026-11-01 the second ward's finish screen is the
+  same as the first's.
 
 How the setup works (Claude, step 4):
 
@@ -291,6 +292,12 @@ as before. With «العدّ مع الصوت» on, nothing changed.
 | Where it shows | Owner, 2026-10-25: Settings → «النسخ الاحتياطي» just before «الدعم»; and the «أدومها» start screen has «احفظ مسارك» (keep your path safe). When Android's backup looks off (never, or not for 30 days: an app cannot ask whether it is on), both offer «تفعيل النسخ الاحتياطي في الهاتف», which opens the phone's backup screen (stock Android's `com.android.settings.BACKUP_SETTINGS`, Google's opt-in on Google phones; the main Settings on a phone without it, with "search for «النسخ الاحتياطي»"). An app cannot turn backup on itself. |
 | The file | `wirduk-backup-YYYY-MM-DD.wirduk`, a SQLite database (a `VACUUM INTO` copy of `user.db` + `BackupMeta` + `BackupRecordings`). This phone's own tables (downloaded audio, the reader's last session) stay out of it and are kept on restore. A file from a newer app is refused ("update the app first"). The date counts when the share sheet was offered (Android cannot tell whether the user really saved it). |
 | Reminder | Settings shows the last backup dates. A gentle note on Home when Android never backed the app up or not for 30 days (Android does not tell an app whether backup is on; a small backup agent records each backup), unless a backup file was saved in the last 30 days. |
+
+## 2026-11-01 — Owner feedback
+
+| Topic | Decision |
+|---|---|
+| The day's second ward | Its finish screen is the same as the first ward's: an encouraging message (the owner's words, a verse or a hadith) and «اكتفِ اليوم / الليلة بوردك…» (owner's option ب, after screenshots of both screens). The owner's prayer for both wards («أتممتَ وردَي يومك، ثبّتك الله.») stays on Home only. |
 
 ## Technical choices (milestone 0–1)
 

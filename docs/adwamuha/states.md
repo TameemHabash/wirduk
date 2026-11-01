@@ -21,7 +21,7 @@ Each state below is reached in a test, and what the app decides and shows there 
 | Start at a later step | Setup, «أحافظ على بعضها» | 2 weeks on it, then the question | `scenarios` (later step), `progress.test.ts` |
 | Started in the evening | Setup after the evening began | That morning «—», its week cut | `setup.test.tsx`, `scenarios` (evening) |
 | A normal day | Morning or evening open | «وردك اليوم»: now, not yet, done, late, missed | `progress-screens.test.tsx` |
-| Both wards done | Morning and evening read | The owner's prayer only | `progress-screens.test.tsx`, `messages.test.tsx` |
+| Both wards done | Morning and evening read | Home: the owner's prayer only. The second ward's finish screen: the usual message and line, like the first (owner, 2026-11-01) | `progress-screens.test.tsx`, `messages.test.tsx`, `WardScreen.test.tsx` |
 | A late ward | Read after its on-time end | A clock; it still counts | `scenarios` (late), `sessions.test.ts` |
 | The first (cut) week | The step began inside the week | No bars: «هدفك: ٤ أيام من ٧…» | `progress-screens.test.tsx`, `scenarios` |
 | A full week | All 7 days in the step | Goal bars = the dots | `plan-walk`, `scenarios` |

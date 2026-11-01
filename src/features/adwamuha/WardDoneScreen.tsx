@@ -22,7 +22,8 @@ import type { Session } from './logic/sessions';
  * After a ward: the owner's short prayer or an approved verse / hadith,
  * «العودة للرئيسية», and a gentle word to stop at the ward today (owner: no
  * «read the rest»; a small ward kept every day makes the habit stronger).
- * After both wards of the day: only the owner's prayer (owner, 2026-10-29).
+ * The same after the day's second ward (owner, 2026-11-01; before: only the
+ * owner's prayer). The prayer for both wards stays on Home.
  */
 export function WardDoneScreen() {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export function WardDoneScreen() {
   const params = useLocalSearchParams<{ session: string; counted?: string }>();
   const session: Session = params.session === 'evening' ? 'evening' : 'morning';
   const counted = params.counted === '1';
-  const { records, slot, messageFor } = useAdwamuha();
+  const { slot, messageFor } = useAdwamuha();
   const buzzed = useRef(false);
 
   useEffect(() => {
@@ -42,17 +43,10 @@ export function WardDoneScreen() {
   }, [settings.completionVibration]);
 
   const today = slot().date;
-  const bothDone =
-    counted &&
-    (['morning', 'evening'] as const).every((s) =>
-      records.some((r) => r.date === today && r.session === s),
-    );
   // The same message for the same ward of the same day (owner's words or the library).
-  const message: MessageContent | null = !counted
-    ? { kind: 'owner', text: t('adwamuha.notCounted') }
-    : bothDone
-      ? messageFor('bothDone', `both:${today}`)
-      : messageFor('wardDone', `ward:${today}:${session}`);
+  const message: MessageContent | null = counted
+    ? messageFor('wardDone', `ward:${today}:${session}`)
+    : { kind: 'owner', text: t('adwamuha.notCounted') };
 
   return (
     <SafeAreaView style={[styles.fill, { backgroundColor: colors.background }]}>
@@ -71,7 +65,7 @@ export function WardDoneScreen() {
               <LibraryMessageView message={message.message} size={24} />
             </View>
           )}
-          {counted && !bothDone ? (
+          {counted ? (
             <AppText tone="muted" style={styles.centerText}>
               {t(`adwamuha.stayWithWard.${session}`)}
             </AppText>

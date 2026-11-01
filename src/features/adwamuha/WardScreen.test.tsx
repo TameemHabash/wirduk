@@ -2,7 +2,6 @@ import { Text } from 'react-native';
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { counterStore } from '@/features/counter/counter-store';
-import { momentSnippets } from '@/test-utils/adwamuha-messages';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
 import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
 
@@ -182,7 +181,7 @@ describe('after a ward', () => {
     expect(mockRouter.dismissTo).toHaveBeenCalledWith('/');
   });
 
-  it("both wards of the day done: only the owner's prayer (no verse or hadith, no other line)", async () => {
+  it("the day's second ward: the same as the first, not the owner's prayer (owner, 2026-11-01)", async () => {
     const repos = await withPlan(1);
     for (const session of ['morning', 'evening'] as const) {
       await repos.adwamuha.addRecord({
@@ -196,12 +195,15 @@ describe('after a ward', () => {
     }
     setRouteParams({ session: 'evening', counted: '1' });
     await renderWithApp(<WardDoneScreen />, repos, { now: at(18) });
-    const prayer = (await repos.content.listAdwamuhaTexts('ar')).find(
-      (t) => t.id === 'owner:bothDone',
-    )!.text;
-    expect(await screen.findByText(prayer)).toBeOnTheScreen();
-    expect(await momentSnippets(repos, 'bothDone')).toEqual([prayer]);
-    expect(screen.queryByText(/^اكتفِ اليوم بوردك/)).toBeNull();
+    const texts = await repos.content.listAdwamuhaTexts('ar');
+    const library = await repos.content.listAdwamuhaMessages('ar');
+    const picked = pickMessage(messagePool('wardDone', texts, library), `ward:${DAY}:evening`)!;
+    const snippet = picked.kind === 'owner' ? picked.text : picked.message.texts[0]!;
+    expect(await screen.findByText(snippet, { exact: false })).toBeOnTheScreen();
+    expect(screen.getByText(/^اكتفِ الليلة بوردك/)).toBeOnTheScreen();
+    // The prayer for both wards is Home's only.
+    const prayer = texts.find((t) => t.id === 'owner:bothDone')!.text;
+    expect(screen.queryByText(prayer)).toBeNull();
     expect(screen.getByText('العودة إلى الرئيسية')).toBeOnTheScreen();
   });
 
