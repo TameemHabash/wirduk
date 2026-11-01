@@ -60,11 +60,11 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     ("Not Responding", no CPU): stop it, delete the `*.lock` files in its `.avd` folder, start it
     with `-no-snapshot-load`.
   - Owner's phone: Galaxy S21+ (serial: `.local/devices.md`, Android 15, arm64): release build of commit
-    68a8074 (content v13), installed by the owner from the file, tested 2026-11-01. Update it with
+    eecb345 (content v13), installed by the owner from the link, tested 2026-11-01. Update it with
     `scripts/dev/phone-apk.ps1` (CLAUDE.md, "Phone"): the APKs are in `.local/apk/`, and the
     latest is always at https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk
     (public pre-release `test-build`, owner's choice 2026-11-01).
-  - A second phone: the same APK (574d1b2), installed by the owner from the file (no USB).
+  - A second phone (Samsung): the same APK (eecb345), installed by the owner from the link (no USB).
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
     test build first (their own adhkar and settings are lost, unless a backup feature exists).
@@ -82,10 +82,10 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
    names any that should play once.
 3. The manual checklist (`docs/manual-test-checklist.md`) has items without a date: not yet
    checked on a device (TalkBack, some own-adhkar steps, a few settings).
-4. **«مساري»'s square dot** (fixed 2026-11-01, `WeekGrid.tsx`: a new view per status): only the
-   owner's Galaxy showed it, so it needs a check there with the next APK.
-5. **"Continue where I stopped" after the audio** (fixed 2026-11-01, `newAppStart()`): the owner
-   checks it on both phones with the next APK (play the audio, swipe the app away, open it).
+
+The owner feedback of 2026-11-01 («مساري»'s square dot, "continue where I stopped" after the
+audio, the second ward's finish screen) was checked by the owner on both phones with the APK of
+eecb345 (2026-11-01): all good.
 
 ## Milestone 9 — notifications and "report an issue"
 

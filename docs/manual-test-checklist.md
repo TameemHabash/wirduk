@@ -40,7 +40,7 @@ rotation, «المتابعة من حيث توقفت», «إتمام».
 - [ ] The screen stays on in the reader ("إبقاء الشاشة مضاءة"); off: it sleeps as usual.
 - [ ] Rotating the phone (auto-rotate on): the reader shows text and counter side by side and keeps the counts and the page; Home, Settings and the completion screen scroll.
 - [ ] Rotating to landscape and back to portrait, twice: the dhikr stays centered (not shifted to a side, no part of the next page showing), and swiping still works. [2026-10-23, emulator]
-- [ ] "المتابعة من حيث توقفت": in the reader, go Home (phone button), close the app from recent apps, open it: the same dhikr with the same counts, and the toast. After 5 hours, or with the setting off: a fresh app. The same after playing the audio (the process stays alive), also in a «أدومها» ward and after a start from a reminder (fixed 2026-11-01; checked on the emulator).
+- [ ] "المتابعة من حيث توقفت": in the reader, go Home (phone button), close the app from recent apps, open it: the same dhikr with the same counts, and the toast. After 5 hours, or with the setting off: a fresh app. The same after playing the audio (the process stays alive), also in a «أدومها» ward and after a start from a reminder (fixed 2026-11-01). [2026-11-01, emulator and the owner's two Samsung phones]
 - [ ] Morning and evening start with "الْحَمْدُ للهِ وَحْدَهُ، وَالصَّلَاةُ وَالسَّلامُ عَلَى مَنْ لاَ نَبِيَّ بَعْدَهُ" (with the owner's recording since 2026-10-31); no (( )) in any dhikr.
 - [ ] Each surah of المعوذات (1002, 2001, 27005) starts its own line; in 1001 آية الكرسي starts on the line after الاستعاذة; the steps of 31001 are one per line.
 - [ ] A dhikr with a Dorar source shows "المصدر: …", "الحكم: …" and "عرض في الدرر السنية" in small faded text. [2026-10-17, 1005]
