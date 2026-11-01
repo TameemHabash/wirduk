@@ -3,7 +3,7 @@
 #   https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk
 #
 #   .\scripts\dev\phone-apk.ps1              # build, then update the link
-#   .\scripts\dev\phone-apk.ps1 -SkipBuild   # update the link with the build just made
+#   .\scripts\dev\phone-apk.ps1 -SkipBuild   # update the link with the last phone build
 #
 # Commit and push first: the APK must match a commit on the public main (the release's tag
 # points at it). Stop Metro first (a release build next to it can run it out of memory).
@@ -45,9 +45,14 @@ if (-not $SkipBuild) {
 }
 if (-not (Test-Path $apk)) { Fail "No APK at $apk" }
 
-# An emulator build (x86_64) writes the same file, and an old file may be from an older commit.
-$commitTime = [DateTimeOffset]::FromUnixTimeSeconds([long](git log -1 --format=%ct)).LocalDateTime
-if ((Get-Item $apk).LastWriteTime -lt $commitTime) { Fail 'The APK is older than the commit: build again.' }
+# Without a build, the file may be older than the last app change (docs and scripts do not count;
+# after a build Gradle keeps the file when nothing in the app changed). An emulator build
+# (x86_64) writes the same file.
+if ($SkipBuild) {
+  $changed = git log -1 --format=%ct -- . ':(exclude)docs' ':(exclude)*.md' ':(exclude)scripts' ':(exclude)workers'
+  $changedAt = [DateTimeOffset]::FromUnixTimeSeconds([long]$changed).LocalDateTime
+  if ((Get-Item $apk).LastWriteTime -lt $changedAt) { Fail 'The APK is older than the last app change: build again.' }
+}
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $zip = [IO.Compression.ZipFile]::OpenRead($apk)
 $abis = $zip.Entries | Where-Object { $_.FullName -like 'lib/*/*' } |
