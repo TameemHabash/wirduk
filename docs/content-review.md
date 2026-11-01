@@ -51,11 +51,14 @@ evening note (e.g. `[وإذا أمسى قال: اللَّهم إني أمسيت.
 - The bracket notes are removed from the evening text. The morning text is unchanged.
   Every change is in [content-changes.md](content-changes.md).
 
-## E. Evening audio — to check
+## E. Evening audio — ✅ closed (milestone 11, 2026-10-31, content v13)
 
-Since content v4 these evening adhkar show the evening words, but they still play the
-same recording as the morning dhikr (the book has one recording per dhikr). Listen and
-decide per dhikr: keep it, or turn its audio off in the evening.
+Since milestone 11 each of these evening adhkar plays the owner's own evening recording
+(`133003.m4a`, `133004.m4a`, `133006.m4a`, `133007.m4a`, `133015.m4a`, `133016.m4a`; see
+`audioRecordings` in `content-source/overrides.json`). The book recordings below are no longer used.
+
+Before (content v4 to v12): these evening adhkar showed the evening words, but they still played
+the same recording as the morning dhikr (the book has one recording per dhikr).
 
 ### 133003 (morning: 1003)
 

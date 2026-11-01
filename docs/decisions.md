@@ -87,7 +87,7 @@ build from `content-source/dorar-sources.json` and `content-source/overrides.jso
 
 | Topic | Decision |
 |---|---|
-| Opening dhikr | "الْحَمْدُ للهِ وَحْدَهُ، وَالصَّلَاةُ وَالسَّلامُ عَلَى مَنْ لاَ نَبِيَّ بَعْدَهُ" (the owner's own words, not in the book; corrected by the owner the same day, content v7; "نَبِيَّ" with its shadda from 2026-10-23, content v8) comes first in the morning (1901) and the evening (133901). Count 1, no source, no audio yet (the owner will send audio). Added adhkar use positions 900+ (`overrides.json` → `addedAdhkar`). |
+| Opening dhikr | "الْحَمْدُ للهِ وَحْدَهُ، وَالصَّلَاةُ وَالسَّلامُ عَلَى مَنْ لاَ نَبِيَّ بَعْدَهُ" (the owner's own words, not in the book; corrected by the owner the same day, content v7; "نَبِيَّ" with its shadda from 2026-10-23, content v8) comes first in the morning (1901) and the evening (133901). Count 1, no source. Audio: the owner's recording `1901.m4a` since milestone 11 (2026-10-31, content v13). Added adhkar use positions 900+ (`overrides.json` → `addedAdhkar`). |
 | Quote marks | The book's (( )) are removed from every dhikr at build time (`scripts/content/lib/quote-marks.ts`, 241 adhkar). Single parentheses (notes such as "(ثلاث مرات)") stay; a "))" that closes two notes stays. |
 | Next-dhikr vibration | Setting, on by default: 200 ms (Android; a heavy tap on iOS) when the reader moves on. Between a count (light tick) and a finished category (600 ms). |
 | Keep the screen on | Setting, on by default, while the reader is open (`expo-keep-awake`). |

@@ -10,7 +10,8 @@ feature was built (date in brackets).
 recordings, «العدّ مع الصوت» on and off, the morning and evening download offline, TalkBack (the
 counter, icon names, «مساري», the setup), the largest system font, audio with the screen off,
 reminders (on time, app closed, after a restart, the tap), a report (with a picture, and offline),
-rotation, «المتابعة من حيث توقفت», «إتمام».
+rotation, «المتابعة من حيث توقفت», «إتمام». The owner's full check covers the whole list, also the
+lines below without a date (owner, 2026-11-01).
 
 ## Home
 - [ ] Morning or evening card shows "الآن" by time of day (morning 03:00–14:59). [2026-10-16]

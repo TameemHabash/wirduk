@@ -72,16 +72,16 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
 
 ## Waiting for the owner
 
-0. **Audio** for the new opening dhikr (1901/133901): the owner will send it, with the number of
-   times each recording says its dhikr (`audioRepeats` in `overrides.json`, default 1).
+Nothing (2026-11-01). The old items, all closed:
 
-1. **Evening audio** (`docs/content-review.md` §E): six evening adhkar show the evening words but
-   play the morning recording. Per dhikr: keep it, or no audio in the evening.
-2. **Recordings that already repeat**: some files may say the dhikr more than once (e.g. 2001,
-   three surahs, count 3), so repeating them by the count may be too much. The owner listens and
-   names any that should play once.
-3. The manual checklist (`docs/manual-test-checklist.md`) has items without a date: not yet
-   checked on a device (TalkBack, some own-adhkar steps, a few settings).
+- **Audio for the opening dhikr** (1901/133901): the owner's recording `1901.m4a` (milestone 11,
+  content v13).
+- **Evening audio** (`docs/content-review.md` §E): the six evening adhkar with evening words play
+  the owner's own evening recordings (`133003.m4a`, …; milestone 11).
+- **Recordings that already repeat**: the owner gave the numbers with the new audio
+  (`audioRepeats`: `1017.m4a` and `1022.m4a` say it 5 times; every other recording once).
+- **The manual checklist**: the owner checked it on the Galaxy S21+ (2026-11-01, APK 68a8074, the
+  note at the top of `docs/manual-test-checklist.md`).
 
 The owner feedback of 2026-11-01 («مساري»'s square dot, "continue where I stopped" after the
 audio, the second ward's finish screen) was checked by the owner on both phones with the APK of
@@ -424,8 +424,8 @@ Done (2026-10-25):
   backup with `bmgr` (local transport): it copied only `user.db`, its WAL and the date file
   (≈4.2 MB), the agent saved the date; after clearing the app and `bmgr restore`, «أدومها» and
   its days came back and Settings showed both dates.
-- [ ] 4. Privacy page update: drafted in `wirduk-audio` (backup section, «أدومها» in the stored
-  data, "removed on uninstall, except a backup"); waits for the owner's OK to push (public).
+- [x] 4. Privacy page update in `wirduk-audio` (backup section, «أدومها» in the stored data,
+  "removed on uninstall, except a backup"): pushed with the owner's OK (wirduk-audio 4308dda).
 - [x] 5. Release APK.
 - [x] 6. The owner's notes (2026-10-25): the section moved just before «الدعم»; the «أدومها»
   start screen has «احفظ مسارك»; when Android's backup looks off, «تفعيل النسخ الاحتياطي في
