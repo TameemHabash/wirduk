@@ -96,7 +96,13 @@ export function WeekGrid({
                   onPress={onPress}
                   hitSlop={6}
                 >
-                  <Dot status={status} plus={isYesterday} />
+                  {/* A new view when the status changes: on the owner's Galaxy, today's dot
+                      changed in place from dashed to done was drawn square (2026-11-01). */}
+                  <Dot
+                    key={`${status}${isYesterday ? '+' : ''}`}
+                    status={status}
+                    plus={isYesterday}
+                  />
                 </Pressable>
               </View>
             );

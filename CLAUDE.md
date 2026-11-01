@@ -216,6 +216,8 @@ README.md is long: read only the section you need.
   Never leave a multi-word label exactly as wide as measured: let it take the full width
   (`alignSelf: 'stretch'` + `textAlign`, as `Button`), or give it extra room (`flexGrow`, as
   `LinkRow`'s value; `minWidth`). In RTL, `textAlign: 'right'` puts text at the visual left.
+  Also Galaxy only: a round view changed in place from a dashed border to a filled one was drawn
+  square (2026-11-01, «مساري»'s dots). Give such a view a `key` per state, so it is a new view.
 - Android `TextInput` with a fixed height cuts the tall UI font: `paddingVertical: 0`,
   `includeFontPadding: false`, `textAlignVertical: 'center'`, `minHeight` instead of `height`.
 - Pull binary files from the device with `run-as … cat … > /data/local/tmp/x` then `adb pull`

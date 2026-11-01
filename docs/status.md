@@ -29,6 +29,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | — | After 11: the audio that does not count waits for the user's count; «العدّ مع الصوت» on by default | 🟢 Done | 0370843, one commit 2026-10-31 |
 | 12 | Backup: Android's automatic backup fixed + a backup file (save, restore) | 🟢 Done | 45ccb23, 4eb9e45, 050538f |
 | 13 | Quality and edge cases (every «أدومها» state tested, dev clock, cleanup, edge cases, the owner's phone) | 🟢 Done | 2d49084, 698aff6, 9373c31, 68a8074 |
+| — | Owner feedback 2026-11-01: «مساري»'s dot drawn square after «قرأتها من حفظي» (Galaxy only) | 🟢 Done | one commit, 2026-11-01 |
 | 14 | Google Play | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -53,8 +54,9 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
   branch `archive-main`) and `TameemHabash/wirduk-audio` (public, GitHub Pages: 397 mp3 +
   privacy policy at `/privacy/`), checked out at `D:\SelfProjects\wirduk-audio`.
 - **Devices:**
-  - Emulator `Wirdak_Pixel` (Android 16, x86_64): dev build of 10c (2026-10-30), content v12,
-    signed in to the owner's Google account (for the backup screen). If it hangs on start
+  - Emulator `Wirdak_Pixel` (Android 16, x86_64): dev build of 2026-10-31, content v13, signed
+    in to the owner's Google account (for the backup screen). Its app data was empty on
+    2026-11-01; «أدومها» set up again then, with test days from the dev clock. If it hangs on start
     ("Not Responding", no CPU): stop it, delete the `*.lock` files in its `.avd` folder, start it
     with `-no-snapshot-load`.
   - Owner's phone: Galaxy S21+ (serial: `.local/devices.md`, Android 15, arm64): release build of commit
@@ -78,6 +80,13 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
    names any that should play once.
 3. The manual checklist (`docs/manual-test-checklist.md`) has items without a date: not yet
    checked on a device (TalkBack, some own-adhkar steps, a few settings).
+4. **The ward did not come back** after leaving the app in it and closing the app from the recent
+   apps (owner, 2026-11-01; the normal morning and evening do come back). Not reproduced on the
+   emulator: force-stop, a swipe from the recent apps, and a swipe while the audio plays all
+   reopen the ward at the same dhikr with the same counts. Waiting for details: how the ward was
+   opened (Home, «مساري», a reminder), what showed after reopening, how long after, the audio.
+5. **«مساري»'s square dot** (fixed 2026-11-01, `WeekGrid.tsx`: a new view per status): only the
+   owner's Galaxy showed it, so it needs a check there with the next APK.
 
 ## Milestone 9 — notifications and "report an issue"
 
