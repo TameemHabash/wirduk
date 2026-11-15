@@ -19,10 +19,11 @@ const BACKUP_APP = 'wirduk';
 
 /**
  * Tables that belong to this phone, not to the user's data: downloaded audio
- * (the files are not in the backup) and the reader's last session. They are
- * left empty in a backup and kept as they are on restore.
+ * (the files are not in the backup), the reader's last session and the day's
+ * ward read in parts. They are left empty in a backup and kept as they are on
+ * restore.
  */
-export const DEVICE_TABLES: readonly string[] = ['DownloadedAudio', 'SavedSession'];
+export const DEVICE_TABLES: readonly string[] = ['DownloadedAudio', 'SavedSession', 'WardProgress'];
 
 const OWN_TABLES = ['BackupMeta', 'BackupRecordings'];
 
@@ -121,7 +122,15 @@ export async function prepareBackup(
     appVersion: info.appVersion,
   };
   await copy.transaction(async (tx) => {
-    for (const table of DEVICE_TABLES) await tx.exec(`DELETE FROM ${table}`);
+    // An older schema may not have all of them yet (the restore adds them by migration).
+    const present = new Set(
+      (
+        await tx.getAll<{ name: string }>("SELECT name FROM sqlite_master WHERE type = 'table'")
+      ).map((r) => r.name),
+    );
+    for (const table of DEVICE_TABLES) {
+      if (present.has(table)) await tx.exec(`DELETE FROM ${table}`);
+    }
     await tx.exec(`
       CREATE TABLE BackupMeta (Key TEXT PRIMARY KEY, Value TEXT NOT NULL);
       CREATE TABLE BackupRecordings (Name TEXT PRIMARY KEY, Data BLOB NOT NULL);

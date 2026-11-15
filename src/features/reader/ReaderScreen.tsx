@@ -148,9 +148,21 @@ interface ReaderProps {
   onFinished?: () => void;
   /** Adwamuha: this list is the morning / evening ward ("continue where I stopped" reopens it). */
   ward?: 'morning' | 'evening';
+  /**
+   * Each change of this list's counts (only those above 0, by dhikr id), while
+   * the reader is open: the Adwamuha ward keeps them for the day.
+   */
+  onCountsChange?: (counts: Record<string, number>) => void;
 }
 
-export function Reader({ category, adhkar, startDhikrId, onFinished, ward }: ReaderProps) {
+export function Reader({
+  category,
+  adhkar,
+  startDhikrId,
+  onFinished,
+  ward,
+  onCountsChange,
+}: ReaderProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const { isRtl } = useDirection();
@@ -177,11 +189,33 @@ export function Reader({ category, adhkar, startDhikrId, onFinished, ward }: Rea
   };
   useEffect(() => cancelAdvance, []);
 
-  // Leaving the reader (back, home, or the completion screen) starts this
-  // category from zero next time (owner decision 2026-10-17). The ids are fixed
-  // for this instance: a reload on focus gives a new array with the same ids,
-  // and a changed list mounts a new Reader (see its key).
+  // The ids are fixed for this instance: a reload on focus gives a new array
+  // with the same ids, and a changed list mounts a new Reader (see its key).
   const [ids] = useState(() => adhkar.map((d) => d.id));
+
+  // Every change of the counts goes to `onCountsChange` (the ward keeps them for
+  // the day). Declared before the reset below, so on leaving it stops first and
+  // the reset is never passed on.
+  const countsListener = useRef(onCountsChange);
+  useEffect(() => {
+    countsListener.current = onCountsChange;
+  });
+  const passCounts = onCountsChange !== undefined;
+  useEffect(() => {
+    if (!passCounts) return;
+    return counterStore.subscribe(() => {
+      const counts: Record<string, number> = {};
+      for (const id of ids) {
+        const n = counterStore.get(id);
+        if (n > 0) counts[String(id)] = n;
+      }
+      countsListener.current?.(counts);
+    });
+  }, [ids, passCounts]);
+
+  // Leaving the reader (back, home, or the completion screen) starts this
+  // category from zero next time (owner decision 2026-10-17); the ward's counts
+  // come back from where they are kept.
   useEffect(() => () => counterStore.resetMany(ids), [ids]);
 
   const hapticsOn = settings.hapticsEnabled;

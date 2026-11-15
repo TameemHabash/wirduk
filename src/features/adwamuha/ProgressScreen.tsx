@@ -104,11 +104,15 @@ export function ProgressScreen() {
         ordinal: ordinals[progress.stage - 1] ?? String(progress.stage),
         title: progress.stageTitle,
       });
+  // The step's good weeks so far (owner, 2026-11-14: a week counts once it has 4 and 4).
   const leftLine = onBreak
     ? t('adwamuha.masari.breakLeft')
     : finished
       ? t('adwamuha.masari.finishedLeft')
-      : t('adwamuha.daysLeft', { count: progress.status.daysLeft });
+      : t('adwamuha.weeksDone', {
+          done: Math.min(progress.status.goodWeeks, progress.status.weeksNeeded),
+          total: progress.status.weeksNeeded,
+        });
   const tip = textFor('tip', finished ? 'maintenance' : `stage:${progress.stage}`);
   const nowDone = records.some((r) => r.date === today && r.session === now.session);
   const dayNames = t('adwamuha.masariHelp.dayNames', { returnObjects: true }) as string[];
@@ -187,28 +191,29 @@ export function ProgressScreen() {
               onOlderDay={() => toast.show({ message: t('adwamuha.masari.olderDay') })}
             />
           </View>
-          {onBreak ? null : (
-            // A line before the goal (owner, 2026-10-30; design `.goal`'s top border).
-            <View
-              testID="goal-divider"
-              style={[styles.divider, { backgroundColor: colors.border }]}
-            />
-          )}
-          {onBreak ? null : progress.thisWeek.full ? (
-            <View style={{ gap: spacing.sm }}>
-              <AppText variant="label" tone="muted">
-                {t(finished ? 'adwamuha.masari.goalTitle' : 'adwamuha.masari.goalMoveOn')}
-              </AppText>
-              {SESSIONS.map((s) => (
-                <GoalBar key={s} session={s} count={progress.thisWeek[s]} />
-              ))}
-            </View>
-          ) : (
-            // The step began inside this week (or a break cut it): it does not count yet.
-            <AppText variant="caption" tone="muted">
-              {t('adwamuha.masari.firstWeekGoal')}
+          {/* A line before the goal (owner, 2026-10-30; design `.goal`'s top border). */}
+          <View
+            testID="goal-divider"
+            style={[styles.divider, { backgroundColor: colors.border }]}
+          />
+          {/*
+            The goal bars, always (owner, 2026-11-14): a week counts for the step only once it
+            has 4 mornings and 4 evenings, also the week the step began in or a break cut.
+          */}
+          <View style={[{ gap: spacing.sm }, onBreak && styles.dim]}>
+            <AppText variant="label" tone="muted">
+              {t(finished ? 'adwamuha.masari.goalTitle' : 'adwamuha.masari.goalMoveOn')}
             </AppText>
-          )}
+            {SESSIONS.map((s) => (
+              <GoalBar key={s} session={s} count={progress.thisWeek[s]} />
+            ))}
+            {!finished && progress.thisWeek.stepBeganInside ? (
+              // Its days before the step count for nothing: say why the bars show less than the dots.
+              <AppText variant="caption" tone="muted">
+                {t('adwamuha.masariHelp.stepWeekNote')}
+              </AppText>
+            ) : null}
+          </View>
         </View>
 
         {tip ? (

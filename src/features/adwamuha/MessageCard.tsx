@@ -11,7 +11,7 @@ import { LibraryMessageView } from './LibraryMessageView';
 /**
  * The message due now, once (prompt §9, §11): the end of the path (with the
  * offer to keep «أدومها» on or turn it off), a new step, a step back or break,
- * an extension, the end of a week, a new stage's tip. The owner's own words or
+ * the end of a week, a new stage's tip. The owner's own words or
  * an approved verse / hadith. Shown on Home and on «مساري»; gone once dismissed.
  */
 export function MessageCard() {

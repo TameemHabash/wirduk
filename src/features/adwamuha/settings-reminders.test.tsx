@@ -5,7 +5,12 @@ import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { useReminderSync } from '@/features/reminders/useReminders';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
-import { notificationState, pickTime, responseFor } from '@/test-utils/notifications-mock';
+import {
+  notificationState,
+  pickTime,
+  responseFor,
+  tapNotification,
+} from '@/test-utils/notifications-mock';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 import { mockRouter } from '@/test-utils/router-mock';
 
@@ -239,6 +244,31 @@ describe('reminders with «أدومها» on', () => {
         params: { session: 'morning' },
       }),
     );
+  });
+
+  it('a tap on a ward already read today: Home stays, with a toast (owner, 2026-11-14)', async () => {
+    notificationState.lastResponse = responseFor(1);
+    const repos = await withPlan(true);
+    await repos.adwamuha.addRecord({
+      date: DAY,
+      session: 'morning',
+      completedAt: 1,
+      late: false,
+      source: 'reader',
+      step: 2,
+    });
+    await renderWithApp(<HomeScreen />, repos, { now: at(9) });
+    expect(await screen.findByText('قرأتَ ورد الصباح اليوم، تقبّل الله منك.')).toBeOnTheScreen();
+    expect(notificationState.lastResponse).toBeNull(); // handled once
+    expect(mockRouter.push).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/adwamuha/ward/[session]' }),
+    );
+    // A tap while the app runs, on the evening reminder (not read yet): its ward opens.
+    await act(async () => tapNotification(133));
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      pathname: '/adwamuha/ward/[session]',
+      params: { session: 'evening' },
+    });
   });
 
   it('with it off, a tap opens the category as before', async () => {

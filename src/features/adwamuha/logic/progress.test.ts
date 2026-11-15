@@ -7,7 +7,6 @@ import {
   endBreak,
   evaluate,
   lastFinishedWeek,
-  minimumDays,
   moveOnStatus,
   offPause,
   planSkipped,
@@ -17,6 +16,7 @@ import {
   stepBack,
   stepBackTarget,
   stepSkipped,
+  weeksNeeded,
 } from './progress';
 import { type Weekday, weekdayOf } from './weeks';
 
@@ -28,26 +28,26 @@ const W = weekdayOf(day(0));
 const W3 = ((W + 3) % 7) as Weekday;
 
 describe('starting', () => {
-  it('at step 1: its full time', () => {
+  it('at step 1: its full weeks', () => {
     const s = startPlan(1, day(0));
     expect(s).toMatchObject({ step: 1, stepStartedOn: day(0), highestStep: 1, reclimb: false });
     expect(s.startWeeks).toBeUndefined();
-    expect(minimumDays(s, plan)).toBe(28);
+    expect(weeksNeeded(s, plan)).toBe(4);
   });
 
   it('at a later step: 2 weeks (the user keeps it already); earlier steps count as reached', () => {
     const s = startPlan(2, day(0)); // step 2 is 3 weeks in the plan
     expect(s).toMatchObject({ step: 2, highestStep: 2, startWeeks: LATER_START_WEEKS });
-    expect(minimumDays(s, plan)).toBe(14);
+    expect(weeksNeeded(s, plan)).toBe(2);
     // Never more than the step's own weeks (step 3: 1 week).
-    expect(minimumDays(startPlan(3, day(0)), plan)).toBe(7);
+    expect(weeksNeeded(startPlan(3, day(0)), plan)).toBe(1);
   });
 
-  it('the next step, or a step back, has its usual time again', () => {
+  it('the next step, or a step back, has its usual weeks again', () => {
     const s = startPlan(2, day(0));
     const next = advance(s, plan, day(14));
     expect(next.startWeeks).toBeUndefined();
-    expect(minimumDays(next, plan)).toBe(7); // step 3: 1 week
+    expect(weeksNeeded(next, plan)).toBe(1); // step 3: 1 week
     expect(stepBack(s, 'half', day(5)).startWeeks).toBeUndefined();
   });
 });
@@ -78,60 +78,62 @@ describe('begun in the evening: that first morning counts for nothing', () => {
     expect(stepSkipped(stepBack(next, 'half', day(30)))).toBeNull();
   });
 
-  it('its week is cut: neither met nor missed; the next full week decides', () => {
-    // Step 3 (one week) begun on day 0 in the evening: days 0–6 do not count.
+  it('its week can still count with 4 and 4 on the days left; otherwise the next week decides', () => {
+    // Step 3 (one week) begun on day 0 (Thursday) in the evening, weeks from Thursday. Day 0's
+    // morning (read on the step before) counts for nothing.
     const s = startPlan(3, day(0), 'evening');
-    const records = daily(0, 13);
-    const first = moveOnStatus(s, plan, records, [], day(6), W);
-    expect(first.weeks[0]).toMatchObject({ full: false, morning: 7 });
-    expect(first.conditionMet).toBe(false);
-    expect(evaluate(s, plan, daily(0, 6), [], day(7), W).event).toBeNull(); // waits, no extension
-    // Days 7–10 have 4 and 4: the next week is met before it ends.
-    expect(evaluate(s, plan, daily(0, 10), [], day(10), W).event).toEqual({ kind: 'ready' });
+    const first = moveOnStatus(s, plan, daily(0, 5), [], day(5), W);
+    expect(first.weeks[0]).toMatchObject({ full: false, morning: 5, evening: 6, met: true });
+    expect(first.conditionMet).toBe(true);
+    // Only 2 mornings and 3 evenings in it: it does not count; days 7–10 make the next one good.
+    const thin = daily(0, 2);
+    expect(evaluate(s, plan, thin, [], day(7), W).event).toBeNull();
+    expect(evaluate(s, plan, [...thin, ...daily(7, 10)], [], day(10), W).event).toEqual({
+      kind: 'ready',
+    });
   });
 });
 
-describe('the move-on condition (calendar weeks)', () => {
-  it('waits for the minimum time (4 weeks = 28 days that count)', () => {
+describe('the move-on condition (good weeks, owner 2026-11-14)', () => {
+  it('a step of 4 weeks needs 4 good weeks; a week counts once it has 4 and 4', () => {
     const s = stateAt(1, day(0));
-    expect(minimumDays(s, plan)).toBe(28);
-    // Day 27, both wards of today not done yet: 27 days judged (days 0–26).
-    expect(moveOnStatus(s, plan, daily(0, 26), [], day(27), W)).toMatchObject({
-      daysOnStep: 27,
-      minimumPassed: false,
-      daysLeft: 1,
+    // Days 0–23: weeks 0–6, 7–13, 14–20 full, and days 21–23 (3 and 3) so far.
+    expect(moveOnStatus(s, plan, daily(0, 23), [], day(23), W)).toMatchObject({
+      weeksNeeded: 4,
+      goodWeeks: 3,
+      weeksLeft: 1,
+      conditionMet: false,
     });
-    expect(evaluate(s, plan, daily(0, 26), [], day(27), W).event).toBeNull();
-    // Day 27 with today done: 28 days, ready.
-    expect(evaluate(s, plan, daily(0, 27), [], day(27), W).event).toEqual({ kind: 'ready' });
+    expect(evaluate(s, plan, daily(0, 23), [], day(24), W).event).toBeNull();
+    // Day 24 with both wards: the fourth week has 4 and 4 before it ends.
+    expect(evaluate(s, plan, daily(0, 24), [], day(24), W).event).toEqual({ kind: 'ready' });
   });
 
-  it('needs 4 mornings AND 4 evenings in each of the last two full weeks', () => {
-    const s = stateAt(1, day(0));
-    const fourOfSeven = daily(0, 27, ['morning', 'evening'], (n) => n % 7 >= 4);
-    const status = moveOnStatus(s, plan, fourOfSeven, [], day(28), W);
-    expect(status.weeksNeeded).toBe(2);
-    expect(status.conditionMet).toBe(true);
-    // Evenings only 3 in the newest full week (days 21–27).
-    const lowEvening = fourOfSeven.filter((r) => !(r.session === 'evening' && r.date === day(24)));
-    expect(moveOnStatus(s, plan, lowEvening, [], day(28), W).conditionMet).toBe(false);
-    // The older week too (days 14–20).
-    const lowOlder = fourOfSeven.filter((r) => !(r.session === 'morning' && r.date === day(14)));
-    expect(moveOnStatus(s, plan, lowOlder, [], day(28), W).conditionMet).toBe(false);
-  });
-
-  it('checks only one week for a step shorter than two weeks', () => {
+  it('needs 4 mornings AND 4 evenings in the week', () => {
     const s = stateAt(3, day(0)); // 1 week
-    const status = moveOnStatus(
-      s,
-      plan,
-      daily(0, 6, ['morning', 'evening'], (n) => n >= 4),
-      [],
-      day(7),
-      W,
+    const mornings = daily(0, 6, ['morning']);
+    const threeEvenings = daily(0, 2, ['evening']);
+    expect(moveOnStatus(s, plan, [...mornings, ...threeEvenings], [], day(7), W).conditionMet).toBe(
+      false,
     );
-    expect(status.weeksNeeded).toBe(1);
-    expect(status.conditionMet).toBe(true);
+    expect(
+      moveOnStatus(s, plan, [...mornings, ...daily(0, 3, ['evening'])], [], day(7), W).conditionMet,
+    ).toBe(true);
+  });
+
+  it('a week short of 4 and 4 just does not count: the good weeks need not follow each other', () => {
+    const s = stateAt(4, day(0)); // 2 weeks
+    // Week 0–6 good, week 7–13 only 3 and 3, week 14–20 good.
+    const records = [...daily(0, 6), ...daily(7, 9), ...daily(14, 17)];
+    expect(moveOnStatus(s, plan, records.slice(0, -6), [], day(14), W)).toMatchObject({
+      goodWeeks: 1,
+      weeksLeft: 1,
+    });
+    expect(evaluate(s, plan, records.slice(0, -2), [], day(16), W).event).toBeNull();
+    // Two good weeks: done (step 4 is the plan's last, so the path is finished).
+    expect(evaluate(s, plan, records, [], day(17), W).event).toEqual({ kind: 'finished' });
+    // Nothing is ever added to the step (no automatic extension any more).
+    expect(evaluate(s, plan, daily(0, 2), [], day(60), W)).toEqual({ state: s, event: null });
   });
 
   it('the numbers are those of the calendar weeks, newest first (this week first)', () => {
@@ -144,47 +146,14 @@ describe('the move-on condition (calendar weeks)', () => {
     ]);
   });
 
-  it('a week that began before the step does not count (weeks start on the phone’s first day)', () => {
-    // Weeks start on day 3: days 0–2 are a cut week; full weeks are 3–9, 10–16, …
+  it('a week the step began in counts only its days in the step', () => {
+    // Weeks start on day 3: days 0–2 are the step's first week, too short for 4 and 4.
     const s = stateAt(4, day(0)); // 2 weeks
-    const at14 = moveOnStatus(s, plan, daily(0, 13), [], day(14), W3);
-    expect(at14.weeks.at(-1)).toMatchObject({ start: day(-4), full: false });
-    // Days 0–13 judged: 14 days, the minimum. Full weeks 3–9 (over) and 10–16 (4 and 4 already).
-    expect(at14).toMatchObject({ minimumPassed: true, conditionMet: true });
-  });
-
-  it('after the minimum, waits for a full week instead of extending', () => {
-    // Step 3 (1 week) begun on day 0, weeks start on day 3: the first full week is days 3–9.
-    const s = stateAt(3, day(0));
-    const thin = daily(0, 6, ['morning', 'evening'], (n) => n >= 3 && n <= 5); // days 3–5 skipped
-    // Day 7: the minimum passed; days 3–9 have only 1 and 1 so far, and are not over.
-    expect(moveOnStatus(s, plan, thin, [], day(7), W3)).toMatchObject({
-      minimumPassed: true,
-      decided: false,
-    });
-    expect(evaluate(s, plan, thin, [], day(7), W3).event).toBeNull();
-    // Day 10: days 3–9 are over with 1 and 1: one more week.
-    expect(evaluate(s, plan, thin, [], day(10), W3).event).toEqual({ kind: 'extended', weeks: 1 });
-  });
-});
-
-describe('automatic extension', () => {
-  it('adds a week, without blame, when the time is up and the condition is not met', () => {
-    const s = stateAt(1, day(0));
-    const few = daily(0, 27, ['morning', 'evening'], (n) => n % 7 >= 2); // 2 of 7
-    const { state, event } = evaluate(s, plan, few, [], day(28), W);
-    expect(event).toEqual({ kind: 'extended', weeks: 1 });
-    expect(state.extraWeeks).toBe(1);
-    expect(minimumDays(state, plan)).toBe(35);
-    // Next day: nothing new (the new minimum is a week away).
-    expect(evaluate(state, plan, few, [], day(29), W).event).toBeNull();
-  });
-
-  it('adds enough weeks after a long time without opening the app', () => {
-    const s = stateAt(1, day(0));
-    const { state, event } = evaluate(s, plan, daily(0, 9), [], day(60), W); // 60 days judged
-    expect(event).toEqual({ kind: 'extended', weeks: 5 }); // 28 + 5 weeks = 63 > 60
-    expect(state.extraWeeks).toBe(5);
+    const at9 = moveOnStatus(s, plan, daily(0, 9), [], day(9), W3);
+    expect(at9.weeks.at(-1)).toMatchObject({ start: day(-4), full: false, morning: 3, met: false });
+    expect(at9).toMatchObject({ goodWeeks: 1, conditionMet: false });
+    // Days 10–13: the week 10–16 has 4 and 4 already.
+    expect(moveOnStatus(s, plan, daily(0, 13), [], day(13), W3).conditionMet).toBe(true);
   });
 });
 
@@ -202,7 +171,9 @@ describe('«أضِف الذكر التالي»', () => {
     const s = advance(stateAt(1, day(0)), plan, day(28));
     expect(s).toMatchObject({ step: 2, stepStartedOn: day(28), extraWeeks: 0, reclimb: false });
     expect(s.highestStep).toBe(2);
-    expect(minimumDays(s, plan)).toBe(21);
+    expect(weeksNeeded(s, plan)).toBe(3);
+    // An old extension in the stored data is not read any more.
+    expect(weeksNeeded({ ...s, extraWeeks: 2 }, plan)).toBe(3);
   });
 });
 
@@ -228,31 +199,33 @@ describe('step back («طرأ عليّ ظرف»)', () => {
       reclimb: true,
       highestStep: 3,
     });
-    expect(minimumDays(backed, plan)).toBe(7);
+    expect(weeksNeeded(backed, plan)).toBe(1);
     const two = advance(backed, plan, day(57));
     const three = advance(two, plan, day(64));
-    expect([two, three].map((s) => [s.step, s.reclimb, minimumDays(s, plan)])).toEqual([
-      [2, true, 7],
-      [3, true, 7],
+    expect([two, three].map((s) => [s.step, s.reclimb, weeksNeeded(s, plan)])).toEqual([
+      [2, true, 1],
+      [3, true, 1],
     ]);
-    // A step never reached before keeps its normal time (step 4: 2 weeks).
+    // A step never reached before keeps its normal weeks (step 4: 2 weeks).
     const four = advance(three, plan, day(71));
-    expect([four.step, four.reclimb, minimumDays(four, plan)]).toEqual([4, false, 14]);
+    expect([four.step, four.reclimb, weeksNeeded(four, plan)]).toEqual([4, false, 2]);
   });
 
-  it('a break pauses the step: its days count for nothing, nor do the weeks it cuts', () => {
+  it('a break pauses the step: no good week while away; a week it cut still counts with 4 and 4', () => {
     const s = stateAt(1, day(0));
     const pause = breakFrom(day(10), 1); // days 10–16
     expect(pause).toEqual({ from: day(10), to: day(16), kind: 'break' });
     const records = daily(0, 40, ['morning', 'evening'], (n) => n >= 10 && n <= 16);
-    // Day 28 (done): days 0–28 are 29 days, 7 of them paused → 22 count.
-    expect(moveOnStatus(s, plan, records, [pause], day(28), W).daysOnStep).toBe(22);
-    expect(evaluate(s, plan, records, [pause], day(28), W).event).toBeNull();
-    // Day 34 (done): 35 days − 7 paused = 28: the 4 weeks are over.
-    const status = moveOnStatus(s, plan, records, [pause], day(34), W);
-    expect(status).toMatchObject({ daysOnStep: 28, minimumPassed: true, conditionMet: true });
+    const upTo = (n: number) => records.filter((r) => r.date <= day(n));
+    // Day 28 (done): weeks 0–6 good, 7–13 only 3 and 3 (days 7–9), 14–20 good with days
+    // 17–20, 21–27 good, 28– just begun: 3 good weeks of 4.
+    const at28 = moveOnStatus(s, plan, upTo(28), [pause], day(28), W);
+    expect(at28).toMatchObject({ goodWeeks: 3, conditionMet: false });
+    expect(evaluate(s, plan, upTo(28), [pause], day(28), W).event).toBeNull();
     // The weeks of days 7–13 and 14–20 had break days: not full.
-    expect(status.weeks.filter((w) => !w.full).map((w) => w.start)).toEqual([day(14), day(7)]);
+    expect(at28.weeks.filter((w) => !w.full).map((w) => w.start)).toEqual([day(14), day(7)]);
+    // Day 31 (done): the week 28–34 has 4 and 4.
+    expect(evaluate(s, plan, upTo(31), [pause], day(31), W).event).toEqual({ kind: 'ready' });
   });
 
   it('a break can end early; one that has not begun goes away', () => {
@@ -336,7 +309,14 @@ describe('end of a week (for the encouragement messages)', () => {
     });
   });
 
-  it('none for a week the step began inside', () => {
+  it('none for a week the step began inside, unless it still had 4 and 4 (it counted)', () => {
+    // Weeks from day 3: the step's first week is days 0–2 only.
     expect(lastFinishedWeek(stateAt(1, day(0)), daily(0, 5), [], day(6), W3)).toBeNull();
+    // Weeks from day -1: the step's first week is days 0–5, all read.
+    const Wm1 = ((W + 6) % 7) as Weekday;
+    expect(lastFinishedWeek(stateAt(1, day(0)), daily(0, 5), [], day(6), Wm1)).toEqual({
+      weekStart: day(-1),
+      reachedTarget: true,
+    });
   });
 });

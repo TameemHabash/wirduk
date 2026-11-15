@@ -8,6 +8,7 @@ import { parsePlanState, parseUserPlan } from '@/features/adwamuha/logic/stored'
 import type { Pause, PlanState, UserPlan, WardRecord } from '@/features/adwamuha/logic/types';
 
 import type { SqlDatabase } from '../db/sql';
+import { parseCounts } from '../session';
 
 import type { Clock } from './user-repositories';
 
@@ -164,6 +165,40 @@ export class AdwamuhaRepository {
       'SELECT Id AS id, At AS at, Day AS day, Kind AS kind, Step AS step, Json AS json FROM AdwamuhaEvents ORDER BY Id',
     );
     return rows.map(({ json, ...e }) => ({ ...e, data: json === null ? null : JSON.parse(json) }));
+  }
+
+  /**
+   * The ward of `date` read in parts (owner, 2026-11-14): its counts by dhikr id.
+   * Empty when none was kept, it was another day's, or it is damaged.
+   */
+  async loadWardProgress(session: Session, date: DayKey): Promise<Record<string, number>> {
+    const row = await this.db.getFirst<{ date: string; json: string }>(
+      'SELECT Date AS date, Json AS json FROM WardProgress WHERE Session = ?',
+      [session],
+    );
+    if (!row || row.date !== date) return {};
+    try {
+      return parseCounts(JSON.parse(row.json)) ?? {};
+    } catch {
+      return {};
+    }
+  }
+
+  /** Keeps the counts of the ward of `date` (replaces an earlier day's). */
+  async saveWardProgress(
+    session: Session,
+    date: DayKey,
+    counts: Readonly<Record<string, number>>,
+  ): Promise<void> {
+    await this.db.run(
+      'INSERT OR REPLACE INTO WardProgress (Session, Date, Json, SavedAt) VALUES (?, ?, ?, ?)',
+      [session, date, JSON.stringify(counts), this.now()],
+    );
+  }
+
+  /** The ward was finished: nothing more to keep. */
+  async clearWardProgress(session: Session): Promise<void> {
+    await this.db.run('DELETE FROM WardProgress WHERE Session = ?', [session]);
   }
 
   /** Every message already shown. */

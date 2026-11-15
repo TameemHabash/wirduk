@@ -49,7 +49,11 @@ export interface PlanState {
   /** Current step, 1-based. */
   step: number;
   stepStartedOn: DayKey;
-  /** Weeks added because the move-on condition was not met. */
+  /**
+   * Weeks the old rule added when the move-on condition was not met. Kept in
+   * stored data, always 0 for new steps, and no longer read: since 2026-11-14
+   * a week short of the target just does not count (`moveOnStatus`).
+   */
   extraWeeks: number;
   /** After «أبقِني أسبوعًا آخر»: do not ask again before this day. */
   askAgainOn: DayKey | null;

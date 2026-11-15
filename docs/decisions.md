@@ -145,7 +145,7 @@ over the 2026-10-23 decisions where they differ.
 
 | Topic | Decision |
 |---|---|
-| Weeks | Calendar weeks that start on the phone's own first day of the week (its region settings; since 2026-10-30 the «بداية الأسبوع» setting, Saturday by default), for everything: the week grid, the goal bars and the move-on rule. Rule: the last 2 full weeks of the step each have 4 mornings and 4 evenings; a week cut by the step's start or by a break does not count. The numbers always match the dots. (Before: the last 7 days, rolling.) |
+| Weeks | Calendar weeks that start on the phone's own first day of the week (its region settings; since 2026-10-30 the «بداية الأسبوع» setting, Saturday by default), for everything: the week grid, the goal bars and the move-on rule. Rule: the last 2 full weeks of the step each have 4 mornings and 4 evenings; a week cut by the step's start or by a break does not count. The numbers always match the dots. (Before: the last 7 days, rolling.) **Since 2026-11-14: N good weeks, see below.** |
 | Setup screens | Three screens (the feature, where to start, reminders) on the first launch, and once after each app update while Adwamuha is off; «لاحقًا» hides them until the next update. Never while it is on. (Before: first launch of a new install only.) |
 | Move-on question and suggestion | «جاهز لإضافة الذكر التالي؟» and «هل تريد أن تخفّف وردك؟» show in «وردك اليوم» on Home, in the one-time message place, with their buttons; the move-on question also on «مساري» above «تتبّع الأسبوع» until answered. |
 | Recording outside the app | «قرأتُ وردي بدون التطبيق» lists only today's and yesterday's wards not recorded; a tap records. Undo stays: tap a ✓ you recorded yourself (today or yesterday), after a short confirmation. |
@@ -298,6 +298,34 @@ as before. With «العدّ مع الصوت» on, nothing changed.
 | Topic | Decision |
 |---|---|
 | The day's second ward | Its finish screen is the same as the first ward's: an encouraging message (the owner's words, a verse or a hadith) and «اكتفِ اليوم / الليلة بوردك…» (owner's option ب, after screenshots of both screens). The owner's prayer for both wards («أتممتَ وردَي يومك، ثبّتك الله.») stays on Home only. |
+
+## 2026-11-14 — Owner feedback («أدومها»)
+
+The owner's four points (2026-11-14) and their answers. These win over the 2026-10-23 and
+2026-10-29 decisions where they differ.
+
+| Topic | Decision |
+|---|---|
+| Reminder tap, ward already read | With «أدومها» on, a tap on the morning / evening reminder first checks that ward for today. Already read: Home stays (its «وردك اليوم» shows both wards) with a toast «قرأتَ ورد الصباح / المساء اليوم، تقبّل الله منك.» (owner's choice of the two options). Not read: the ward opens, as before. |
+| The ward read in parts | The ward is new each day, so its counts are kept while its window is open (morning: from «يبدأ الصباح» to «يبدأ المساء»; evening: until the next morning starts). Leaving the ward and coming back later in the same window goes on at the first dhikr not read. The next window starts fresh; finishing the ward clears it. Only the ward: the full categories still start from zero (2026-10-17). Outside its window the ward is not kept (it would not count either). |
+| «أدومها» badge | While «أدومها» is off (setup skipped on install or after an update, or turned off), Home shows a small «أدومها» badge next to the settings button; a tap opens setup 1. Gone while it is on. |
+| The week rule | The owner: a week is not complete until the user reads the ward 4 times in it; a week below 4 does not count toward the step's weeks. Asked which rule, the owner asked for Claude's advice (what helps a person keep it, and is easier): **any N good weeks, not in a row**. A step of N weeks needs N weeks with 4 mornings **and** 4 evenings each. A week short of that just does not count: no blame, no automatic extension (replaces "the last 2 full weeks" and the extension of 2026-10-29). Not in a row because a reset to zero after one hard week makes people give up; 4 and 4 because the habit is both wards. |
+| Goal bars | Always shown on «مساري» (also in the week the step began in, and faded during a break). Under the ring: «الأسابيع المكتملة في هذه الخطوة: N من M» instead of the days left. |
+
+How the good weeks work (Claude, following the rule above):
+
+- A week counts as soon as it has 4 and 4, even before it ends (as before for full weeks).
+- The week the step began in counts only its days in the step, and counts when it still reaches
+  4 and 4 (a step begun early in the week usually can). Its earlier days count for nothing, so
+  the bars can show less than the dots: a line under the bars says «يُحسب هذا الأسبوع من بدء
+  خطوتك.». The first morning of a step begun in the evening counts for nothing (even if it was
+  read on the step before).
+- A week cut by a break also counts with 4 and 4 on its other days. A ward read on a break day
+  counts (the numbers match the dots).
+- The gentle step-back suggestion still looks at the last 2 full weeks that are over. The
+  end-of-week message comes for a full week, or for a cut week that was good.
+- Later start: 2 good weeks; climbing back after a step back: 1 good week per step.
+- The old `extraWeeks` stays in stored data and is no longer read. No word for an extension.
 
 ## Technical choices (milestone 0–1)
 

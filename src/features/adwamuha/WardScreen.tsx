@@ -9,12 +9,14 @@ import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
 import type { Category, Dhikr } from '@/data/models';
 import { useSettings } from '@/data/settings/SettingsProvider';
+import { counterStore } from '@/features/counter/counter-store';
 import { Reader } from '@/features/reader/ReaderScreen';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { useAdwamuha } from './AdwamuhaProvider';
-import type { Session } from './logic/sessions';
+import { type Session, recordSlot } from './logic/sessions';
 import { orderWard } from './logic/ward';
+import { latestWriter } from './ward-progress';
 
 export const categoryOfSession = (session: Session) =>
   session === 'morning'
@@ -27,6 +29,7 @@ export const categoryOfSession = (session: Session) =>
  * the whole reading for today. The ward is read in the order the user chose
  * («ترتيب الورد»: the plan's, or the category's).
  */
+// It can be read in parts: its counts are kept while its window is open (`ward-progress.ts`).
 export function WardScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -34,9 +37,24 @@ export function WardScreen() {
   const params = useLocalSearchParams<{ session: string; dhikr?: string }>();
   const session: Session = params.session === 'evening' ? 'evening' : 'morning';
   const adwamuha = useAdwamuha();
-  const { content } = useRepositories();
+  const { content, adwamuha: repo } = useRepositories();
   const categoryId = categoryOfSession(session);
-  const order = useSettings().settings.wardOrder;
+  const { wardOrder: order, wardTimes } = useSettings().settings;
+
+  // The ward's window open now (null outside it: then it neither counts nor is kept). Its
+  // counts are kept for that window (owner, 2026-11-14: read in parts, a new ward each day).
+  const [windowDate] = useState(() => recordSlot(session, adwamuha.now(), wardTimes)?.date ?? null);
+  const keep = useMemo(
+    () =>
+      windowDate === null
+        ? null
+        : latestWriter((counts) =>
+            counts === null
+              ? repo.clearWardProgress(session)
+              : repo.saveWardProgress(session, windowDate, counts),
+          ),
+    [repo, session, windowDate],
+  );
 
   // The ward's ids as a key: a new array with the same ids changes nothing.
   const idsKey = adwamuha.wardIds(session).join(',');
@@ -45,9 +63,11 @@ export function WardScreen() {
     if (!adwamuha.ready || !idsKey) return;
     let cancelled = false;
     const ids = idsKey.split(',').map(Number);
-    content
-      .listAdhkar(categoryId, i18n.language)
-      .then((all) => {
+    Promise.all([
+      content.listAdhkar(categoryId, i18n.language),
+      windowDate === null ? {} : repo.loadWardProgress(session, windowDate).catch(() => ({})),
+    ])
+      .then(([all, kept]) => {
         if (cancelled) return;
         const byId = new Map(all.map((d) => [d.id, d]));
         const ordered = orderWard(
@@ -55,13 +75,26 @@ export function WardScreen() {
           order,
           all.map((d) => d.id),
         );
-        setAdhkar(ordered.map((id) => byId.get(id)).filter((d): d is Dhikr => d !== undefined));
+        const list = ordered.map((id) => byId.get(id)).filter((d): d is Dhikr => d !== undefined);
+        // Where the user stopped earlier in this window: the reader opens at the first open dhikr.
+        counterStore.restore(list, kept);
+        setAdhkar(list);
       })
       .catch(() => !cancelled && setAdhkar([]));
     return () => {
       cancelled = true;
     };
-  }, [adwamuha.ready, categoryId, content, i18n.language, idsKey, order]);
+  }, [
+    adwamuha.ready,
+    categoryId,
+    content,
+    i18n.language,
+    idsKey,
+    order,
+    repo,
+    session,
+    windowDate,
+  ]);
 
   const title = t(`adwamuha.wardTitle.${session}`);
   const category = useMemo<Category>(
@@ -77,6 +110,8 @@ export function WardScreen() {
 
   const { completeWard } = adwamuha;
   const onFinished = useCallback(() => {
+    // Read to the end: nothing more to keep (opening it again starts from the beginning).
+    keep?.(null);
     void completeWard(session)
       .catch(() => null)
       .then((record) =>
@@ -85,7 +120,7 @@ export function WardScreen() {
           params: { session, counted: record ? '1' : '0' },
         }),
       );
-  }, [completeWard, router, session]);
+  }, [completeWard, keep, router, session]);
 
   if (adwamuha.ready && !idsKey) {
     return (
@@ -105,6 +140,7 @@ export function WardScreen() {
       startDhikrId={params.dhikr ? Number(params.dhikr) : undefined}
       onFinished={onFinished}
       ward={session}
+      onCountsChange={keep ?? undefined}
     />
   );
 }

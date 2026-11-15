@@ -1,7 +1,7 @@
 import { daily, day, rec } from '@/test-utils/adwamuha';
 
 import type { Pause } from './types';
-import { finishedWeeks, settledWeeks, stepWeeks, weekGrid, weekStartOf, weekdayOf } from './weeks';
+import { finishedWeeks, goodWeeks, stepWeeks, weekGrid, weekStartOf, weekdayOf } from './weeks';
 
 const SUNDAY = 0;
 const MONDAY = 1;
@@ -63,12 +63,17 @@ describe("a step's weeks", () => {
     expect(cut.map((w) => w.full)).toEqual([true, false]);
   });
 
-  it('settled weeks: full and over, or full and met already; finished weeks: full and over', () => {
+  it('good weeks: 4 and 4, full or not, before they end too; finished weeks: full and over', () => {
     const list = weeks();
-    expect(settledWeeks(list).map((w) => w.start)).toEqual([day(9), day(2)]);
+    // The first week (days 0–1 in the step) has only 2 and 2: not good.
+    expect(goodWeeks(list).map((w) => w.start)).toEqual([day(9), day(2)]);
     expect(finishedWeeks(list).map((w) => w.start)).toEqual([day(2)]);
     const thin = weeks([...daily(0, 8), rec(day(9), 'morning')]);
-    expect(settledWeeks(thin).map((w) => w.start)).toEqual([day(2)]);
+    expect(goodWeeks(thin).map((w) => w.start)).toEqual([day(2)]);
+    // A step begun on a Sunday (day 3): its first week has 6 days, and 4 and 4 make it good.
+    const cut = stepWeeks(daily(3, 6), [], day(3), day(6), SATURDAY);
+    expect(cut[0]).toMatchObject({ full: false, morning: 4, evening: 4, met: true });
+    expect(goodWeeks(cut)).toHaveLength(1);
   });
 });
 

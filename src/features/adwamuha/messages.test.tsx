@@ -118,10 +118,20 @@ describe("the owner's messages, each once (on Home only)", () => {
     expect(screen.queryByText('حسنًا')).toBeNull();
   });
 
-  it('after an automatic extension', async () => {
+  it('no extension word any more (2026-11-14): weeks short of the target just do not count', async () => {
+    // Four weeks without a ward, and an extension left from the old rule.
     const repos = await withPlan(1, 28, ['tip:1']);
-    await renderWithApp(<HomeScreen />, repos, { now: at(9) });
-    await expectMomentMessage(repos, 'extended');
+    await repos.adwamuha.logEvent(addDays(DAY, -1), 'extend', 1, { weeks: 1 });
+    for (const week of [7, 14, 21, 28]) {
+      await repos.adwamuha.markShown(`week:1:${addDays(DAY, -28)}:${addDays(DAY, -week)}`);
+    }
+    await renderWithApp(<HomeScreen />, repos, {
+      now: at(9),
+      weekStartsOn: weekdayOf(addDays(DAY, -28)),
+    });
+    expect(await screen.findByText(OWNER_TEXTS.labels.todayWard)).toBeOnTheScreen();
+    expect(screen.queryByText('حسنًا')).toBeNull();
+    expect((await repos.adwamuha.listEvents()).map((e) => e.kind)).toEqual(['extend']);
   });
 
   it('the end of the path: a message, then keep it on or turn it off (once)', async () => {

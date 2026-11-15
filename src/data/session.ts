@@ -31,17 +31,29 @@ export function isFresh(session: SavedSession, now: number): boolean {
   return age >= -60_000 && age <= SESSION_MAX_AGE_MS;
 }
 
+/**
+ * Stored counts by dhikr id: only whole ids and counts above 0 are kept; null
+ * when it is not an object at all.
+ */
+export function parseCounts(value: unknown): Record<string, number> | null {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
+  const counts: Record<string, number> = {};
+  for (const [id, n] of Object.entries(value)) {
+    if (Number.isInteger(Number(id)) && Number.isInteger(n) && (n as number) > 0) {
+      counts[id] = n as number;
+    }
+  }
+  return counts;
+}
+
 /** Parses stored JSON; anything malformed is ignored (null). */
 export function parseSession(json: string, savedAt: number): SavedSession | null {
   try {
     const v = JSON.parse(json) as Partial<ReaderSession>;
     if (!Number.isInteger(v.categoryId) || v.categoryId === 0) return null;
     if (!Number.isInteger(v.dhikrId) || v.dhikrId === 0) return null;
-    if (typeof v.counts !== 'object' || v.counts === null) return null;
-    const counts: Record<string, number> = {};
-    for (const [id, n] of Object.entries(v.counts)) {
-      if (Number.isInteger(Number(id)) && Number.isInteger(n) && n > 0) counts[id] = n;
-    }
+    const counts = parseCounts(v.counts);
+    if (counts === null) return null;
     const ward = v.ward === 'morning' || v.ward === 'evening' ? v.ward : undefined;
     return {
       categoryId: v.categoryId!,

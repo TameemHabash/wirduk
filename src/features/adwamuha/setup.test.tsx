@@ -75,6 +75,28 @@ describe('when the setup shows', () => {
   });
 });
 
+describe('the «أدومها» badge next to the settings button (owner, 2026-11-14)', () => {
+  it('while it is off (setup skipped, never turned on): opens setup 1', async () => {
+    const repos = await createTestRepositories();
+    await repos.adwamuha.markShown(setupShownKey()); // «لاحقًا» on the first launch
+    await renderWithApp(<HomeScreen />, repos, { now: at(9) });
+    await fireEvent.press(await screen.findByLabelText('تعرّف على «أدومها»'));
+    expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/intro');
+    expect(screen.getByLabelText('الإعدادات')).toBeOnTheScreen();
+  });
+
+  it('also when it was turned off', async () => {
+    await renderWithApp(<HomeScreen />, await withPlan(false), { now: at(9) });
+    expect(await screen.findByLabelText('تعرّف على «أدومها»')).toBeOnTheScreen();
+  });
+
+  it('gone while it is on', async () => {
+    await renderWithApp(<HomeScreen />, await withPlan(true), { now: at(9) });
+    await screen.findByText(OWNER_TEXTS.labels.todayWard);
+    expect(screen.queryByLabelText('تعرّف على «أدومها»')).toBeNull();
+  });
+});
+
 describe('setup 1: what «أدومها» is', () => {
   it('the hadith, three points (the owner’s «النية لكل يوم» kept), «فعّل أدومها» and «لاحقًا»', async () => {
     await renderWithApp(<SetupIntroScreen />, undefined, { now: at(9) });

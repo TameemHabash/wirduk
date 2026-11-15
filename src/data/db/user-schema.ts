@@ -162,6 +162,20 @@ export const USER_MIGRATIONS: readonly string[] = [
        + (SELECT COUNT(*) FROM CategoryOrder) + (SELECT COUNT(*) FROM CustomCategories)
        + (SELECT COUNT(*) FROM DownloadedAudio) > 0;
   `,
+
+  // 6 — Adwamuha: the day's ward read in parts (owner, 2026-11-14). Its counts are
+  // kept while its window is open; a row of an earlier window is ignored, then
+  // replaced. One row per session. This phone's own (not in a backup).
+  `
+  CREATE TABLE WardProgress (
+    Session TEXT    PRIMARY KEY CHECK (Session IN ('morning', 'evening')),
+    -- The date the ward counts for (an evening after midnight: the day before).
+    Date    TEXT    NOT NULL,
+    -- JSON: { "<dhikrId>": count } (only counts above 0).
+    Json    TEXT    NOT NULL,
+    SavedAt INTEGER NOT NULL
+  );
+  `,
 ];
 
 export const USER_SCHEMA_VERSION = USER_MIGRATIONS.length;

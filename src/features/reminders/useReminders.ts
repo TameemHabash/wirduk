@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
+import { useToast } from '@/components/Toast';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { useAdwamuhaOptional } from '@/features/adwamuha/AdwamuhaProvider';
 import { OWNER_TEXTS } from '@/features/adwamuha/owner-texts';
@@ -53,14 +54,22 @@ const SESSION_OF_CATEGORY: Record<number, 'morning' | 'evening'> = {
 
 /**
  * A tap on a reminder opens its adhkar — or, with «أدومها» on, that session's
- * ward: at app start (the tap that opened the app) and while the app runs.
- * Used by the Home screen, the first screen.
+ * ward, unless that ward is already read today: then Home stays, with a toast
+ * (owner, 2026-11-14). At app start (the tap that opened the app) and while
+ * the app runs. Used by the Home screen, the first screen.
  */
 export function useNotificationTaps(): void {
   const router = useRouter();
+  const toast = useToast();
+  const { t } = useTranslation();
   const adwamuha = useAdwamuhaOptional();
   const adwamuhaReady = adwamuha?.ready ?? true;
   const adwamuhaOn = adwamuha?.enabled ?? false;
+  // Read at the tap, not effect dependencies: the day's records, the clock, the toast.
+  const latest = useRef({ adwamuha, toast, t });
+  useEffect(() => {
+    latest.current = { adwamuha, toast, t };
+  });
 
   // The tap that opened the app: noted at once (it wins over "continue where I
   // stopped"), opened once «أدومها»'s state is known.
@@ -82,6 +91,13 @@ export function useNotificationTaps(): void {
       void Notifications.clearLastNotificationResponseAsync().catch(() => undefined);
       const session = SESSION_OF_CATEGORY[categoryId];
       if (adwamuhaOn && session) {
+        const { adwamuha: now, toast: notice, t: tr } = latest.current;
+        const today = now?.slot().date;
+        if (now?.records.some((r) => r.date === today && r.session === session)) {
+          // Already read today: Home's «وردك اليوم» shows it; no need to open the ward again.
+          notice.show({ message: tr(`adwamuha.alreadyRead.${session}`) });
+          return;
+        }
         router.push({ pathname: '/adwamuha/ward/[session]', params: { session } });
       } else {
         router.push({ pathname: '/category/[id]', params: { id: String(categoryId) } });

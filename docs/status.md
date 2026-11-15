@@ -1,6 +1,6 @@
 # Project status and next steps
 
-Last updated: 2026-11-01. Read this first when you come back to the project.
+Last updated: 2026-11-15. Read this first when you come back to the project.
 Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 
 ## Milestones
@@ -30,6 +30,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | 12 | Backup: Android's automatic backup fixed + a backup file (save, restore) | 🟢 Done | 45ccb23, 4eb9e45, 050538f |
 | 13 | Quality and edge cases (every «أدومها» state tested, dev clock, cleanup, edge cases, the owner's phone) | 🟢 Done | 2d49084, 698aff6, 9373c31, 68a8074 |
 | — | Owner feedback 2026-11-01: «مساري»'s dot drawn square after «قرأتها من حفظي» (Galaxy only); "continue where I stopped" after the audio played (the process kept); the second ward's finish screen like the first (option ب) | 🟢 Done | 63091f6, ae60182, one commit 2026-11-01 |
+| — | Owner feedback 2026-11-14: a reminder tap checks the ward first; the ward read in parts (kept for its window); the «أدومها» badge on Home while off; the good-weeks rule, the goal bars always shown | 🟢 Done | one commit 2026-11-15 |
 | 14 | Google Play | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -68,11 +69,16 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
     test build first (their own adhkar and settings are lost, unless a backup feature exists).
-- **Tests:** 730 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
+- **Tests:** 740 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
+- **user.db:** schema 6 (6: `WardProgress`, the day's ward read in parts, 2026-11-14).
 
 ## Waiting for the owner
 
-Nothing (2026-11-01). The old items, all closed:
+- **The owner feedback of 2026-11-14** (below): to check on the phone with the next APK (built
+  only when the owner asks). The week rule is Claude's advice, asked for by the owner: confirm or
+  change it.
+
+Before that, nothing (2026-11-01). The old items, all closed:
 
 - **Audio for the opening dhikr** (1901/133901): the owner's recording `1901.m4a` (milestone 11,
   content v13).
@@ -86,6 +92,28 @@ Nothing (2026-11-01). The old items, all closed:
 The owner feedback of 2026-11-01 («مساري»'s square dot, "continue where I stopped" after the
 audio, the second ward's finish screen) was checked by the owner on both phones with the APK of
 eecb345 (2026-11-01): all good.
+
+## Owner feedback 2026-11-14 («أدومها»)
+
+The owner's four points; decisions and details in `docs/decisions.md` (2026-11-14). Done
+(2026-11-15), checked on the emulator (dev build) and in tests:
+
+1. **A reminder tap checks the ward first** (`useNotificationTaps`): already read today, Home
+   stays with a toast «قرأتَ ورد الصباح / المساء اليوم، تقبّل الله منك.»; otherwise the ward opens.
+2. **The ward read in parts** (`ward-progress.ts`, user.db migration 6 `WardProgress`, a phone
+   table that stays out of backups): the counts are kept while the ward's window is open, the
+   ward opens again at the first dhikr not read (also after the app is closed); the next window
+   starts fresh; finishing clears it. The full categories still start from zero.
+3. **The «أدومها» badge** on Home, next to the settings button, while «أدومها» is off: opens
+   setup 1. Gone while on.
+4. **The good-weeks rule**: a step of N weeks needs N weeks with 4 mornings and 4 evenings each,
+   not in a row; a week short of that does not count (no extension any more). «مساري» always shows
+   the goal bars (faded during a break; in the step's first week with «يُحسب هذا الأسبوع من بدء
+   خطوتك.»), and under the ring «الأسابيع المكتملة في هذه الخطوة: N من M». The owner asked for
+   Claude's advice on the rule (any good weeks, not in a row): to confirm.
+
+A steady user now moves on a little sooner: a week counts on its 4th good day, so the last week
+of a step can end the step mid-week (before: the step's full days had to pass first).
 
 ## Milestone 9 — notifications and "report an issue"
 

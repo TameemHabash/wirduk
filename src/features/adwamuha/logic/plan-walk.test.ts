@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { WEEK_TARGET } from './commitment';
-import { type DayKey, addDays } from './days';
+import { type DayKey, addDays, daysBetween } from './days';
 import {
   advance,
   evaluate,
@@ -65,8 +65,8 @@ type Reads = (day: DayKey, index: number) => { morning: boolean; evening: boolea
 interface Walk {
   state: PlanState;
   records: WardRecord[];
-  asked: { step: number; days: number; minimum: number }[];
-  extended: { step: number; weeks: number }[];
+  /** Each «جاهز لإضافة الذكر التالي؟»: the day (index), days on the step, good weeks, needed. */
+  asked: { day: number; step: number; days: number; good: number; needed: number }[];
   suggested: number;
   days: number;
 }
@@ -83,7 +83,7 @@ function walk(
 ): Walk {
   let state = startPlan(1, START, 'morning');
   const records: WardRecord[] = [];
-  const w: Walk = { state, records, asked: [], extended: [], suggested: 0, days: 0 };
+  const w: Walk = { state, records, asked: [], suggested: 0, days: 0 };
   let today = START;
   for (let i = 0; i < maxDays; i++, today = addDays(today, 1)) {
     const r = reads(today, i);
@@ -112,22 +112,31 @@ function walk(
     }
     const out = evaluate(state, PLAN, records, [], today, SATURDAY);
     const status = moveOnStatus(state, PLAN, records, [], today, SATURDAY);
-    if (out.event?.kind === 'extended') {
-      // Only once the time is up and the full weeks are settled, never when the target was met.
-      expect(status.minimumPassed && status.decided && !status.conditionMet).toBe(true);
-      w.extended.push({ step: state.step, weeks: out.event.weeks });
-      state = out.state;
-    } else if (out.event?.kind === 'finished') {
+    // The good weeks are exactly the weeks with 4 and 4, and never more than the weeks so far.
+    expect(status.goodWeeks).toBe(
+      status.weeks.filter((x) => x.morning >= WEEK_TARGET && x.evening >= WEEK_TARGET).length,
+    );
+    if (out.event?.kind === 'finished') {
+      expect(status.conditionMet).toBe(true);
       state = out.state;
       w.days = i + 1;
       break;
     } else if (out.event?.kind === 'ready') {
-      expect(status.minimumPassed && status.conditionMet).toBe(true);
-      w.asked.push({ step: state.step, days: status.daysOnStep, minimum: status.minimumDays });
+      expect(status.conditionMet).toBe(true);
+      w.asked.push({
+        day: i,
+        step: state.step,
+        days: daysBetween(state.stepStartedOn, today) + 1,
+        good: status.goodWeeks,
+        needed: status.weeksNeeded,
+      });
       state =
         answer(state.step) === 'add'
           ? advance(state, PLAN, today, 'evening')
           : postpone(state, today);
+    } else {
+      // Nothing to do: the step is short of good weeks, or the user asked for one more week.
+      expect(out.state).toBe(state);
     }
     w.days = i + 1;
   }
@@ -142,41 +151,52 @@ const fourOfSeven: Reads = (_d, i) => ({ morning: i % 7 < 4, evening: i % 7 < 4 
 const threeOfSeven: Reads = (_d, i) => ({ morning: i % 7 < 3, evening: i % 7 < 3 });
 
 describe('whole plans, day by day with the app’s rules', () => {
-  it('a steady user: asked at each step within a week after its minimum, then maintenance', () => {
+  it('a steady user: asked on the day the last good week has 4 and 4, then maintenance', () => {
     const w = walk(every, 900);
     expect(w.asked.map((a) => a.step)).toEqual(PLAN.steps.slice(0, -1).map((_, i) => i + 1));
     for (const a of w.asked) {
-      expect(a.days).toBeGreaterThanOrEqual(a.minimum);
-      expect(a.days - a.minimum).toBeLessThanOrEqual(7);
+      expect(a.good).toBe(a.needed);
+      // The last good week is met on its 4th day; the step's first week counts when it can
+      // still have 4 and 4 (each step begins in the evening of the question).
+      expect(a.days).toBeGreaterThan((a.needed - 1) * 7);
+      expect(a.days).toBeLessThanOrEqual(a.needed * 7 + 1);
     }
-    expect(w.extended).toEqual([]);
     expect(w.suggested).toBe(0);
     expect(w.state).toMatchObject({ step: PLAN.steps.length, maintenance: true });
-    // About as long as the plan's weeks: the day of «أضِف الذكر التالي» is the old step's last
-    // day and the new step's first (so up to a day less per step), and a step is asked at most
-    // a week after its minimum.
+    // Never longer than the plan's weeks.
     const planDays = PLAN.steps.reduce((n, s) => n + s.weeks * 7, 0);
-    expect(w.days).toBeGreaterThanOrEqual(planDays - (PLAN.steps.length - 1));
-    expect(w.days).toBeLessThanOrEqual(planDays + 7 * PLAN.steps.length);
+    expect(w.days).toBeLessThanOrEqual(planDays + PLAN.steps.length);
+    expect(w.days).toBeGreaterThan(planDays - 7 * PLAN.steps.length);
   });
 
-  it('exactly 4 of 7 days (the target): never extended, the whole plan done', () => {
+  it('exactly 4 of 7 days (the target): every full week is good, the whole plan done', () => {
     const w = walk(fourOfSeven, 1200);
-    expect(w.extended).toEqual([]);
     expect(w.suggested).toBe(0);
     expect(w.state.maintenance).toBe(true);
+    for (const a of w.asked) expect(a.good).toBe(a.needed);
   });
 
-  it('3 of 7 days: never asked, extended a week at a time, the step-back suggestion every 14 days', () => {
+  it('3 of 7 days: never asked, the step waits, the step-back suggestion every 14 days', () => {
     const w = walk(threeOfSeven, 120);
     expect(w.asked).toEqual([]);
-    expect(w.state.step).toBe(1);
-    expect(w.extended.length).toBeGreaterThan(0);
-    expect(w.extended.every((e) => e.step === 1 && e.weeks === 1)).toBe(true);
+    expect(w.state).toMatchObject({ step: 1, extraWeeks: 0 });
     // 120 days: the suggestion is shown, then waits 14 days each time.
     expect(w.suggested).toBeGreaterThanOrEqual(2);
     expect(w.suggested).toBeLessThanOrEqual(Math.ceil(120 / 14));
     expect(WEEK_TARGET).toBe(4);
+  });
+
+  it('good weeks with bad weeks between them: they add up, and the step moves on', () => {
+    // Every other week read on 4 days, the weeks between on 2 days only.
+    const w = walk((_d, i) => {
+      const read = Math.floor(i / 7) % 2 === 0 ? i % 7 < 4 : i % 7 < 2;
+      return { morning: read, evening: read };
+    }, 200);
+    expect(w.asked.length).toBeGreaterThan(0);
+    // Step 1 (4 weeks) needed 4 good weeks, so about 7 calendar weeks.
+    expect(w.asked[0]).toMatchObject({ step: 1, good: 4, needed: 4 });
+    expect(w.asked[0]!.days).toBeGreaterThan(6 * 7);
+    expect(w.asked[0]!.days).toBeLessThanOrEqual(7 * 7);
   });
 
   it('«أبقِني أسبوعًا آخر» at every question: asked again a week later each time, never moved on', () => {
@@ -184,8 +204,7 @@ describe('whole plans, day by day with the app’s rules', () => {
     expect(w.state.step).toBe(1);
     expect(w.asked.length).toBeGreaterThan(1);
     for (let i = 1; i < w.asked.length; i++) {
-      // Each time 7 counted days later.
-      expect(w.asked[i]!.days - w.asked[i - 1]!.days).toBe(7);
+      expect(w.asked[i]!.day - w.asked[i - 1]!.day).toBe(7);
     }
   });
 
@@ -195,5 +214,6 @@ describe('whole plans, day by day with the app’s rules', () => {
     const w = walk(() => ({ morning: random() < 0.65, evening: random() < 0.6 }), 730);
     // Checked inside walk() each day; and the step only moves forward by the user's answer.
     expect(w.asked.length).toBe(w.state.step - 1);
+    for (const a of w.asked) expect(a.good).toBeGreaterThanOrEqual(a.needed);
   });
 });

@@ -25,6 +25,7 @@
     "addFavorite": "إضافة «{{title}}» إلى المفضلة",
     "removeFavorite": "إزالة «{{title}}» من المفضلة",
     "openSettings": "الإعدادات",
+    "adwamuhaBadge": "تعرّف على «أدومها»",
     "categoryLabel": "{{title}}، {{countText}}",
     "categoryLabelNow": "{{title}}، {{countText}}، الآن",
     "loadError": "تعذّر عرض الأذكار.",
@@ -223,12 +224,11 @@
     },
     "startsAt": "يبدأ {{ward}} الساعة {{time}}",
     "wardCount": "{{countText}} في وردك",
-    "daysLeft_zero": "انتهت المدة الدنيا لهذه الخطوة.",
-    "daysLeft_one": "باقي يوم واحد على الأقل في هذه الخطوة.",
-    "daysLeft_two": "باقي يومان على الأقل في هذه الخطوة.",
-    "daysLeft_few": "باقي {{count}} أيام على الأقل في هذه الخطوة.",
-    "daysLeft_many": "باقي {{count}} يومًا على الأقل في هذه الخطوة.",
-    "daysLeft_other": "باقي {{count}} يوم على الأقل في هذه الخطوة.",
+    "weeksDone": "الأسابيع المكتملة في هذه الخطوة: {{done}} من {{total}}",
+    "alreadyRead": {
+      "morning": "قرأتَ ورد الصباح اليوم، تقبّل الله منك.",
+      "evening": "قرأتَ ورد المساء اليوم، تقبّل الله منك."
+    },
     "weekdays": ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
     "later": "لاحقًا",
     "start": {
@@ -253,7 +253,8 @@
       "undoTitle": "إلغاء التسجيل؟",
       "undoText": "سجّلتَ ورد {{ward}} {{when}} بنفسك. هل تلغي هذا التسجيل؟",
       "undo": "ألغِ التسجيل",
-      "selfRecorded": "سجّلتَه بنفسك، اضغط للإلغاء"
+      "selfRecorded": "سجّلتَه بنفسك، اضغط للإلغاء",
+      "stepWeekNote": "يُحسب هذا الأسبوع من بدء خطوتك."
     },
     "setupHelp": {
       "page": "الشاشة {{page}} من {{total}}",

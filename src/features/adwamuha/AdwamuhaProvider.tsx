@@ -104,7 +104,7 @@ export interface AdwamuhaValue {
   dismissSuggestion: () => Promise<void>;
   /**
    * The messages due now, the most important first (the end of the path, the
-   * welcome, a new step, a step back or break, an extension, the end of a
+   * welcome, a new step, a step back or break, the end of a
    * week, a new stage's tip). Show one.
    */
   messages: DueMessage[];
@@ -155,9 +155,9 @@ const EMPTY: Loaded = { stored: null, records: [], pauses: [], events: [], shown
 
 /** A message due now (each is shown once). */
 export interface DueMessage {
-  /** Marked as shown when dismissed (all of them: e.g. several extensions while away). */
+  /** Marked as shown when dismissed (all of them: e.g. several new steps the same day). */
   keys: string[];
-  kind: 'finished' | 'welcome' | 'newStep' | 'afterStepBack' | 'extended' | 'week' | 'tip';
+  kind: 'finished' | 'welcome' | 'newStep' | 'afterStepBack' | 'week' | 'tip';
   content: MessageContent;
 }
 
@@ -261,7 +261,8 @@ export function AdwamuhaProvider({
   // change applies at once: everything is worked out again from the stored days.
   const weekStart = settings.weekStart;
 
-  // What the plan says now: an extension or the end is saved; "ready" is only shown.
+  // What the plan says now: the end of the path is saved; "ready" is only shown. (No automatic
+  // extension since 2026-11-14: a week short of the target just does not count.)
   const outcome = useMemo(
     () =>
       stored && enabled
@@ -271,20 +272,11 @@ export function AdwamuhaProvider({
   );
   const saving = useRef(false);
   useEffect(() => {
-    if (!stored || !outcome?.event || outcome.event.kind === 'ready' || saving.current) return;
+    if (!stored || outcome?.event?.kind !== 'finished' || saving.current) return;
     saving.current = true;
-    const event = outcome.event;
-    const data = event.kind === 'extended' ? { weeks: event.weeks } : undefined;
     repo
       .save({ ...stored, state: outcome.state })
-      .then(() =>
-        repo.logEvent(
-          today,
-          event.kind === 'extended' ? 'extend' : 'finish',
-          stored.state.step,
-          data,
-        ),
-      )
+      .then(() => repo.logEvent(today, 'finish', stored.state.step))
       .then(reload)
       .catch(() => undefined)
       .finally(() => {
@@ -488,8 +480,8 @@ export function AdwamuhaProvider({
       const keys = unshown(kinds, true);
       add(keys, moment, messageFor(moment, keys[0] ?? ''));
     }
-    const extended = unshown(['extend']);
-    add(extended, 'extended', messageFor('extended', extended[0] ?? ''));
+    // No word for an extension any more (2026-11-14: the step is never extended; an old
+    // 'extend' event stays in the history only).
     const week = lastFinishedWeek(stored.state, records, pauses, today, weekStart);
     const weekKey = week ? weekMessageKey(stored.state, week.weekStart) : '';
     if (week && !shown.has(weekKey)) {

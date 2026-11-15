@@ -42,6 +42,33 @@ describe('AdwamuhaRepository — the plan and state', () => {
   });
 });
 
+describe('AdwamuhaRepository — the day’s ward read in parts', () => {
+  it('keeps the counts of the ward of a date, per session; another date has none', async () => {
+    const { repo: r } = await repo();
+    expect(await r.loadWardProgress('morning', day(0))).toEqual({});
+    await r.saveWardProgress('morning', day(0), { 1901: 1, 1001: 2 });
+    await r.saveWardProgress('evening', day(0), { 133901: 1 });
+    expect(await r.loadWardProgress('morning', day(0))).toEqual({ 1901: 1, 1001: 2 });
+    expect(await r.loadWardProgress('evening', day(0))).toEqual({ 133901: 1 });
+    // The next day's ward starts fresh, and its first save replaces the old row.
+    expect(await r.loadWardProgress('morning', day(1))).toEqual({});
+    await r.saveWardProgress('morning', day(1), { 1901: 1 });
+    expect(await r.loadWardProgress('morning', day(0))).toEqual({});
+    await r.clearWardProgress('morning');
+    expect(await r.loadWardProgress('morning', day(1))).toEqual({});
+    expect(await r.loadWardProgress('evening', day(0))).toEqual({ 133901: 1 });
+  });
+
+  it('ignores damaged counts (no crash)', async () => {
+    const { db, repo: r } = await repo();
+    await r.saveWardProgress('morning', day(0), { 1901: 1 });
+    await db.run("UPDATE WardProgress SET Json = 'not json'");
+    expect(await r.loadWardProgress('morning', day(0))).toEqual({});
+    await db.run('UPDATE WardProgress SET Json = \'{"1901": -2, "x": 3, "1001": 2}\'');
+    expect(await r.loadWardProgress('morning', day(0))).toEqual({ 1001: 2 });
+  });
+});
+
 describe('AdwamuhaRepository — day records', () => {
   it('keeps one record per date and session: the first one', async () => {
     const { repo: r } = await repo();

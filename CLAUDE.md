@@ -125,11 +125,16 @@ README.md is long: read only the section you need.
 - `src/features/custom/` the user's own adhkar (negative ids). `src/features/settings/`, `home/`.
 - `src/features/reminders/` morning/evening reminders: `reminders.ts` (permission, channel,
   daily schedule), `useReminders.ts` (`useReminderSync` in the root layout, `useNotificationTaps`
-  in Home, before `useSessionRestore`). Settings rows: `settings/ReminderSettings.tsx`.
+  in Home, before `useSessionRestore`; with «أدومها» on, a tap opens the ward unless it is read
+  today: then a toast). Settings rows: `settings/ReminderSettings.tsx`.
 - `src/features/report/` "report an issue": `ReportScreen.tsx`, `report.ts` (details, send),
   `shrink-image.ts`, and `report-protocol.ts` (format + limits, **shared with the relay**).
 - Adwamuha (أدومها, milestone 10): `docs/adwamuha/` (the owner's description, the build plan, the
-  matching). The default plan: `content-source/adwamuha-plan.json`, written by
+  matching). The move-on rule (owner, 2026-11-14): a step of N weeks needs N good weeks (4
+  mornings and 4 evenings each, not in a row; `goodWeeks` in `logic/weeks.ts`, `moveOnStatus`);
+  never extended. The ward read in parts: `ward-progress.ts` + user.db `WardProgress` (migration
+  6, a phone table, not in backups), kept while its window is open. Home's «أدومها» badge while
+  off: `HomeHeader.tsx`. The default plan: `content-source/adwamuha-plan.json`, written by
   `scripts/adwamuha/match-plan.ts --write` (keys and stage names cut from the owner's file),
   checked on every content build by `scripts/content/lib/plan.ts` (tables `Plan*`; read with
   `ContentRepository.getDefaultPlan`). The user's own copy of the plan lives in user.db

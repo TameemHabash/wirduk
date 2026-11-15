@@ -151,20 +151,19 @@ describe('moving on', () => {
     expect(screen.queryByText(OWNER_TEXTS.labels.readyQuestion)).toBeNull();
   });
 
-  it('adds a week by itself when the time is up but the days were too few', async () => {
+  it('weeks short of 4 and 4 do not count: nothing is added, the step waits (owner, 2026-11-14)', async () => {
     const repos = await withPlan(28);
     await read(repos, addDays(DAY, -1), 'morning');
     await renderWithApp(<ProgressScreen />, repos, { now: at(7) });
-    await waitFor(async () => expect((await repos.adwamuha.load())?.state.extraWeeks).toBe(1));
-    expect((await repos.adwamuha.listEvents()).map((e) => [e.kind, e.data])).toEqual([
-      ['extend', { weeks: 1 }],
-    ]);
-    expect(await screen.findByText('باقي 7 أيام على الأقل في هذه الخطوة.')).toBeOnTheScreen();
+    expect(await screen.findByText('الأسابيع المكتملة في هذه الخطوة: 0 من 4')).toBeOnTheScreen();
+    expect(screen.queryByText(OWNER_TEXTS.labels.readyQuestion)).toBeNull();
+    expect((await repos.adwamuha.load())?.state.extraWeeks).toBe(0);
+    expect(await repos.adwamuha.listEvents()).toEqual([]);
   });
 });
 
 describe('«مساري»', () => {
-  it('the ring, the stage, the days left, the hadith, the week and its goal bars (no percentages)', async () => {
+  it('the ring, the stage, the good weeks, the hadith, the week and its goal bars (no percentages)', async () => {
     const repos = await withPlan(10);
     for (let i = 1; i <= 7; i++) await read(repos, addDays(DAY, -i), 'morning');
     for (let i = 1; i <= 3; i++) await read(repos, addDays(DAY, -i), 'evening');
@@ -172,8 +171,9 @@ describe('«مساري»', () => {
     await renderWithApp(<ProgressScreen />, repos, { now: at(7) });
     expect(await screen.findByLabelText(stepText(1))).toBeOnTheScreen();
     expect(await screen.findByText(`المرحلة الأولى · ${stage1}`)).toBeOnTheScreen();
-    // 28 days: days 0–9 of the step are over (today is not judged yet).
-    expect(screen.getByText('باقي 18 يومًا على الأقل في هذه الخطوة.')).toBeOnTheScreen();
+    // The first week (31 January – 6 February) had 4 mornings but no evening: not good yet.
+    expect(screen.getByText('الأسابيع المكتملة في هذه الخطوة: 0 من 4')).toBeOnTheScreen();
+    expect(screen.queryByText('يُحسب هذا الأسبوع من بدء خطوتك.')).toBeNull();
     expect(screen.getByText(OWNER_TEXTS.hadith.text)).toBeOnTheScreen();
     expect(screen.getByText('تتبّع الأسبوع')).toBeOnTheScreen();
     // This calendar week (from Saturday, the setting's default): Saturday to Monday so far,
@@ -189,10 +189,25 @@ describe('«مساري»', () => {
     expect(screen.queryByText('لماذا خطة خفيفة؟')).toBeNull();
   });
 
-  it('a week the step began in: the goal in words instead of the bars', async () => {
-    await renderWithApp(<ProgressScreen />, await withPlan(1), { now: at(7) });
-    expect(await screen.findByText(/^هدفك: ٤ أيام من ٧/)).toBeOnTheScreen();
-    expect(screen.queryByText('هدف هذا الأسبوع · شرط الانتقال')).toBeNull();
+  it('a week the step began in: the bars too (owner, 2026-11-14), counted from the step’s start', async () => {
+    // Begun on Monday 9 February; the week started on Saturday 7 February.
+    const repos = await withPlan(1);
+    await read(repos, addDays(DAY, -1), 'morning');
+    await renderWithApp(<ProgressScreen />, repos, { now: at(7) });
+    expect(await screen.findByText('هدف هذا الأسبوع · شرط الانتقال')).toBeOnTheScreen();
+    expect(screen.getByLabelText('الصباح: 1 من 4')).toBeOnTheScreen();
+    expect(screen.getByLabelText('المساء: 0 من 4')).toBeOnTheScreen();
+    expect(screen.getByText('يُحسب هذا الأسبوع من بدء خطوتك.')).toBeOnTheScreen();
+    expect(screen.queryByText(/^هدفك: ٤ أيام من ٧/)).toBeNull();
+  });
+
+  it('during a break: the bars stay, faded with the grid', async () => {
+    const repos = await withPlan(10);
+    await repos.adwamuha.addPause({ from: addDays(DAY, -1), to: addDays(DAY, 5), kind: 'break' });
+    await renderWithApp(<ProgressScreen />, repos, { now: at(7) });
+    expect(await screen.findByText(/^استراحة حتى/)).toBeOnTheScreen();
+    expect(screen.getByLabelText('الصباح: 0 من 4')).toBeOnTheScreen();
+    expect(screen.getByTestId('goal-divider')).toBeOnTheScreen();
   });
 
   it('«قرأتُ وردي بدون التطبيق»: only the wards not recorded; a tap records, a ✓ tapped undoes', async () => {

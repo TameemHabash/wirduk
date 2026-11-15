@@ -74,6 +74,9 @@ describe('the backup file', () => {
   it("holds the user's data and recordings, not this phone's downloads or session", async () => {
     const phone = await userDb('user.db');
     await fill(phone);
+    await phone.exec(
+      `INSERT INTO WardProgress (Session, Date, Json, SavedAt) VALUES ('morning', '2026-10-02', '{"1901":1}', 1)`,
+    );
     const { path, summary } = await backupOf(phone);
     expect(summary).toEqual({
       format: 1,
@@ -90,6 +93,7 @@ describe('the backup file', () => {
     const copy = open(path);
     expect(await copy.getAll('SELECT * FROM DownloadedAudio')).toEqual([]);
     expect(await copy.getAll('SELECT * FROM SavedSession')).toEqual([]);
+    expect(await copy.getAll('SELECT * FROM WardProgress')).toEqual([]); // the day's ward in parts
     expect(await backupRecordings(copy)).toEqual([recording]);
     // The live database is untouched.
     expect(await phone.getAll('SELECT FileName FROM DownloadedAudio')).toEqual([{ FileName: 'x' }]);

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useRepositories } from '@/data/DataProvider';
 
 import { useAdwamuha } from './AdwamuhaProvider';
-import type { DayKey } from './logic/days';
+import { type DayKey, daysBetween } from './logic/days';
 import { type MoveOnStatus, moveOnStatus, planSkipped } from './logic/progress';
 import type { Session } from './logic/sessions';
 import { type DayStatus, type GridDay, weekGrid } from './logic/weeks';
@@ -18,11 +18,12 @@ export interface ProgressView {
   maintenance: boolean;
   status: MoveOnStatus;
   /**
-   * This calendar week on the step: wards done so far, and whether it is full
-   * (it counts for the move-on rule; not when the step began inside it or a
-   * break cut it). The same days as the grid, so the numbers match the dots.
+   * This calendar week on the step: wards done so far (on the days in the
+   * step), whether it is full (not cut by the step's start or a break), and
+   * whether the step began inside it (its earlier days count for nothing).
+   * A full week counts the same days as the grid, so the numbers match the dots.
    */
-  thisWeek: { morning: number; evening: number; full: boolean };
+  thisWeek: { morning: number; evening: number; full: boolean; stepBeganInside: boolean };
   grid: GridDay[];
   todayStatus: Record<Session, DayStatus>;
 }
@@ -77,7 +78,12 @@ export function useProgress(): ProgressView | null {
       stageTitle: titles.get(stage) ?? '',
       maintenance: state.maintenance,
       status,
-      thisWeek: { morning: week.morning, evening: week.evening, full: week.full },
+      thisWeek: {
+        morning: week.morning,
+        evening: week.evening,
+        full: week.full,
+        stepBeganInside: daysBetween(week.start, state.stepStartedOn) > 0,
+      },
       grid,
       todayStatus: { morning: now.morning, evening: now.evening },
     };

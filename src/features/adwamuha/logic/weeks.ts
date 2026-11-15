@@ -5,11 +5,13 @@
  * the grid of «مساري», the goal bars, the move-on rule, the end-of-week
  * messages and the step-back suggestion, so the numbers always match the dots.
  *
- * A week counts for the step only when it is "full": all 7 days in the step,
- * none of them paused (a break, the feature off), and not cut by a first
- * morning that was already over when the step began. A cut week is neither
- * met nor missed; its wards are never counted as done that were not (the
- * dots and the numbers always match).
+ * A week is "full" when all 7 days are in the step, none of them paused (a
+ * break, the feature off), and it is not cut by a first morning that was
+ * already over when the step began. Since 2026-11-14 (owner) any week with 4
+ * mornings and 4 evenings counts for the step, full or not (`goodWeeks`); a
+ * cut week short of that is neither met nor missed (no step-back suggestion,
+ * no end-of-week message). In a week the step began in, only the days since
+ * it began count.
  */
 import {
   type SkippedWard,
@@ -84,8 +86,13 @@ export function stepWeeks(
     const days = weekDays(start);
     const end = days[WEEK_DAYS - 1]!;
     const inStep = days.filter((d) => daysBetween(since, d) >= 0);
-    const morning = inStep.filter((d) => done.morning.has(d)).length;
-    const evening = inStep.filter((d) => done.evening.has(d)).length;
+    // The skipped first morning counts for nothing, even if it was read (on the step before).
+    const count = (session: Session) =>
+      inStep.filter(
+        (d) => done[session].has(d) && !(skipped?.day === d && skipped.session === session),
+      ).length;
+    const morning = count('morning');
+    const evening = count('evening');
     out.push({
       start,
       end,
@@ -103,11 +110,11 @@ export function stepWeeks(
 }
 
 /**
- * Weeks that settle the move-on rule, newest first: full weeks that are over,
- * or already met (4 and 4 before the week ends cannot be lost).
+ * The good weeks of a step, newest first (owner, 2026-11-14): 4 mornings and 4
+ * evenings, counted on the days in the step. Any week can be one, even cut (the
+ * step began in it, or a break), and it counts as soon as it has them.
  */
-export const settledWeeks = (weeks: readonly StepWeek[]) =>
-  weeks.filter((w) => w.full && (w.complete || w.met));
+export const goodWeeks = (weeks: readonly StepWeek[]) => weeks.filter((w) => w.met);
 
 /** Full weeks that are over, newest first (a week can only fall short once it is over). */
 export const finishedWeeks = (weeks: readonly StepWeek[]) =>

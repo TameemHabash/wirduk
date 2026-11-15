@@ -1,18 +1,18 @@
 /**
  * Moving through the plan (prompt §6, §7, §11; owner's answers 2026-10-23,
- * calendar weeks 2026-10-29). Pure functions: they take the stored state and
- * return a new one, and are worked out lazily whenever the app opens (it need
- * not open every day).
+ * calendar weeks 2026-10-29, good weeks 2026-11-14). Pure functions: they take
+ * the stored state and return a new one, and are worked out lazily whenever
+ * the app opens (it need not open every day).
  *
  * "today" is always the date of the ward window that is open now
  * (`slotAt(now).date`), so 01:30 still belongs to the day before.
- * `firstDay` is the phone's first day of the week (see `weeks.ts`).
+ * `firstDay` is the first day of the week («بداية الأسبوع», see `weeks.ts`).
  */
-import { type SkippedWard, WEEK_DAYS, WEEK_TARGET, countedDays, judgedUntil } from './commitment';
+import { type SkippedWard, WEEK_DAYS, WEEK_TARGET } from './commitment';
 import { type DayKey, addDays, daysBetween } from './days';
 import type { Session } from './sessions';
 import type { Pause, PlanState, UserPlan, WardRecord } from './types';
-import { type StepWeek, type Weekday, finishedWeeks, settledWeeks, stepWeeks } from './weeks';
+import { type StepWeek, type Weekday, finishedWeeks, goodWeeks, stepWeeks } from './weeks';
 
 /**
  * Weeks on the step the user starts at when it is not the first: they already
@@ -55,16 +55,15 @@ export const stepSkipped = (state: PlanState): SkippedWard =>
 export const planSkipped = (state: PlanState, startedOn: DayKey): SkippedWard =>
   state.planStartedIn === 'evening' ? { day: startedOn, session: 'morning' } : null;
 
-/** The current step's weeks: 1 when climbing back, 2 for a later start, else the plan's. */
-function stepWeeksOf(state: PlanState, plan: UserPlan): number {
+/**
+ * The good weeks the current step needs: 1 when climbing back, 2 for a later
+ * start, else the plan's weeks. (`extraWeeks`, the old automatic extension, is
+ * no longer used: a week short of the target simply does not count.)
+ */
+export function weeksNeeded(state: PlanState, plan: UserPlan): number {
   if (state.reclimb) return 1;
   const weeks = plan.steps[state.step - 1]?.weeks ?? 1;
   return state.startWeeks ? Math.min(state.startWeeks, weeks) : weeks;
-}
-
-/** Minimum counted days on the current step: its weeks, plus extensions. */
-export function minimumDays(state: PlanState, plan: UserPlan): number {
-  return (stepWeeksOf(state, plan) + state.extraWeeks) * WEEK_DAYS;
 }
 
 /** The step's calendar weeks, newest first (this week first). */
@@ -78,27 +77,25 @@ export const weeksOfStep = (
   stepWeeks(records, pauses, state.stepStartedOn, today, firstDay, stepSkipped(state));
 
 export interface MoveOnStatus {
-  /** Counted days on this step that can be judged so far. */
-  daysOnStep: number;
-  minimumDays: number;
-  minimumPassed: boolean;
-  /** Counted days left before the minimum passes (0 once passed). */
-  daysLeft: number;
-  /** Full weeks the rule checks: 2, or 1 for a step shorter than two weeks. */
+  /** Good weeks the step needs (see `weeksNeeded`). */
   weeksNeeded: number;
+  /** The step's good weeks so far: 4 mornings and 4 evenings each (owner, 2026-11-14). */
+  goodWeeks: number;
+  /** Good weeks still to go (0 once there are enough). */
+  weeksLeft: number;
   /** The step's calendar weeks, newest first (the first is this week). */
   weeks: StepWeek[];
-  /** The last `weeksNeeded` settled full weeks each have 4 mornings and 4 evenings. */
+  /** The step has all the good weeks it needs. */
   conditionMet: boolean;
-  /** Enough full weeks are settled for a verdict (otherwise the rule waits for them). */
-  decided: boolean;
 }
 
 /**
- * The move-on condition: the minimum has passed, and in each of the last two
- * full calendar weeks (only one when the step is shorter than two weeks) the
- * morning and the evening were each done on 4 days or more. A week that
- * already has 4 and 4 counts before it ends.
+ * The move-on condition (owner, 2026-11-14): a step of N weeks needs N good
+ * weeks, each with 4 mornings and 4 evenings. They need not follow each other:
+ * a week short of 4 and 4 just does not count (it is not held against the
+ * user, and nothing is extended). A week counts as soon as it has 4 and 4,
+ * even before it ends, and the step's first week counts too when it gets there
+ * (only the days since the step began are counted in it).
  */
 export function moveOnStatus(
   state: PlanState,
@@ -108,33 +105,25 @@ export function moveOnStatus(
   today: DayKey,
   firstDay: Weekday,
 ): MoveOnStatus {
-  const until = judgedUntil(records, today);
-  const daysOnStep = countedDays(state.stepStartedOn, until, pauses).length;
-  const min = minimumDays(state, plan);
-  const needed = min >= 2 * WEEK_DAYS ? 2 : 1;
+  const needed = weeksNeeded(state, plan);
   const weeks = weeksOfStep(state, records, pauses, today, firstDay);
-  const last = settledWeeks(weeks).slice(0, needed);
+  const good = goodWeeks(weeks).length;
   return {
-    daysOnStep,
-    minimumDays: min,
-    minimumPassed: daysOnStep >= min,
-    daysLeft: Math.max(0, min - daysOnStep),
     weeksNeeded: needed,
+    goodWeeks: good,
+    weeksLeft: Math.max(0, needed - good),
     weeks,
-    conditionMet: last.length === needed && last.every((w) => w.met),
-    decided: last.length === needed,
+    conditionMet: good >= needed,
   };
 }
 
 export type ProgressEvent =
-  /** Not ready when the time was up: the step got `weeks` more weeks (no blame). */
-  | { kind: 'extended'; weeks: number }
   /** Ask «جاهز لإضافة الذكر التالي؟»; the app never moves on by itself. */
   | { kind: 'ready' }
   /** The last step is done: maintenance from now on. */
   | { kind: 'finished' };
 
-/** What the app should do now. Returns the (maybe extended or finished) state. */
+/** What the app should do now. Returns the (maybe finished) state. */
 export function evaluate(
   state: PlanState,
   plan: UserPlan,
@@ -145,17 +134,7 @@ export function evaluate(
 ): { state: PlanState; event: ProgressEvent | null } {
   if (state.maintenance) return { state, event: null };
   const status = moveOnStatus(state, plan, records, pauses, today, firstDay);
-  if (!status.minimumPassed) return { state, event: null };
-  if (!status.conditionMet) {
-    // A week started inside the step is not full: wait for the full weeks to settle.
-    if (!status.decided) return { state, event: null };
-    // Enough weeks that the new minimum is still ahead (the app may not have opened for a while).
-    const weeks = Math.floor((status.daysOnStep - status.minimumDays) / WEEK_DAYS) + 1;
-    return {
-      state: { ...state, extraWeeks: state.extraWeeks + weeks },
-      event: { kind: 'extended', weeks },
-    };
-  }
+  if (!status.conditionMet) return { state, event: null };
   if (state.step >= plan.steps.length) {
     return {
       state: { ...state, maintenance: true, askAgainOn: null },
@@ -273,9 +252,10 @@ export function shouldSuggestStepBack(
 }
 
 /**
- * The last full week of this step that is over, for the end-of-week message.
- * Null before one is over (a week cut by the step's start or a break has no
- * message: it does not count).
+ * The last week of this step that is over, for the end-of-week message: a full
+ * week, or a cut one (the step began in it, or a break) that still had 4 and 4
+ * (it counted). Null before one is over; a cut week short of the target has no
+ * message (it was not a fair week).
  */
 export function lastFinishedWeek(
   state: PlanState,
@@ -284,6 +264,8 @@ export function lastFinishedWeek(
   today: DayKey,
   firstDay: Weekday,
 ): { weekStart: DayKey; reachedTarget: boolean } | null {
-  const week = finishedWeeks(weeksOfStep(state, records, pauses, today, firstDay))[0];
+  const week = weeksOfStep(state, records, pauses, today, firstDay).find(
+    (w) => w.complete && (w.full || w.met),
+  );
   return week ? { weekStart: week.start, reachedTarget: week.met } : null;
 }

@@ -113,6 +113,57 @@ describe('the Adwamuha ward in the reader', () => {
     expect(screen.getByLabelText(/^تم \d+ من \d+$/).props.accessibilityLabel).toBe(second);
   });
 
+  it('read in parts (owner, 2026-11-14): kept for its window, gone the next day or once finished', async () => {
+    const repos = await withPlan(3);
+    setRouteParams({ session: 'morning' });
+    const first = await renderWithApp(<WardScreen />, repos, { now: at(7) });
+    await screen.findByText('1 من 4');
+    await fireEvent.press(completeButton()); // the opening
+    await waitFor(() => expect(screen.getByText('2 من 4')).toBeOnTheScreen(), { timeout: 2000 });
+    await waitFor(async () =>
+      expect(Object.keys(await repos.adwamuha.loadWardProgress('morning', DAY))).toEqual(['1901']),
+    );
+    await first.unmount();
+    expect(counterStore.get(1901)).toBe(0); // leaving still resets the reader itself
+
+    // Back later the same morning: it goes on at the first dhikr not read.
+    const again = await renderWithApp(<WardScreen />, repos, { now: at(11) });
+    expect(await screen.findByText('2 من 4')).toBeOnTheScreen();
+    await again.unmount();
+
+    // The next day's ward starts from the beginning.
+    const tomorrow = await renderWithApp(<WardScreen />, repos, {
+      now: () => new Date(2026, 0, 16, 7, 0),
+    });
+    expect(await screen.findByText('1 من 4')).toBeOnTheScreen();
+    await tomorrow.unmount();
+
+    // Finished: nothing kept any more.
+    await renderWithApp(<WardScreen />, repos, { now: at(11) });
+    await screen.findByText('2 من 4');
+    for (const position of [3, 4]) {
+      await fireEvent.press(completeButton());
+      await waitFor(() => expect(screen.getByText(`${position} من 4`)).toBeOnTheScreen(), {
+        timeout: 2000,
+      });
+    }
+    await fireEvent.press(completeButton());
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalled(), { timeout: 2000 });
+    await waitFor(async () =>
+      expect(await repos.adwamuha.loadWardProgress('morning', DAY)).toEqual({}),
+    );
+  });
+
+  it('outside its window nothing is kept (it would not count either)', async () => {
+    const repos = await withPlan(1);
+    setRouteParams({ session: 'morning' });
+    await renderWithApp(<WardScreen />, repos, { now: at(17) });
+    await screen.findByText('1 من 2');
+    await fireEvent.press(completeButton());
+    await waitFor(() => expect(screen.getByText('2 من 2')).toBeOnTheScreen(), { timeout: 2000 });
+    expect(await repos.adwamuha.loadWardProgress('morning', DAY)).toEqual({});
+  });
+
   it('has no «read the rest» mode: an old link still opens the ward only', async () => {
     const repos = await withPlan(1);
     setRouteParams({ session: 'morning', rest: '1' });
