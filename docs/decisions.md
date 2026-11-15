@@ -314,7 +314,9 @@ The owner's four points (2026-11-14) and their answers. These win over the 2026-
 
 How the good weeks work (Claude, following the rule above):
 
-- A week counts as soon as it has 4 and 4, even before it ends (as before for full weeks).
+- A week counts only once it is over (owner, 2026-11-15, after first counting it on its 4th good
+  day): on its last day once both wards are done, or the day after. The bars still show «✓ تحقّق»
+  as soon as the week has 4 and 4. A steady user is asked after exactly the step's weeks.
 - The week the step began in counts only its days in the step, and counts when it still reaches
   4 and 4 (a step begun early in the week usually can). Its earlier days count for nothing, so
   the bars can show less than the dots: a line under the bars says «يُحسب هذا الأسبوع من بدء

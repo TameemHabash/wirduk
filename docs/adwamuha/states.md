@@ -25,7 +25,7 @@ Each state below is reached in a test, and what the app decides and shows there 
 | A late ward | Read after its on-time end | A clock; it still counts | `scenarios` (late), `sessions.test.ts` |
 | The first (cut) week | The step began inside the week | The bars, counted from the step's start, and «يُحسب هذا الأسبوع من بدء خطوتك.»; good with 4 + 4 | `progress-screens.test.tsx`, `scenarios`, `progress.test.ts` |
 | A full week | All 7 days in the step | Goal bars = the dots | `plan-walk`, `scenarios` |
-| A good week | 4 mornings and 4 evenings in a week (any week, also cut) | Bars «✓ تحقّق»; it counts for the step at once | `progress.test.ts`, `weeks.test.ts`, `plan-walk`, `scenarios` |
+| A good week | 4 mornings and 4 evenings in a week (any week, also cut) | Bars «✓ تحقّق» at once; it counts for the step once the week is over | `progress.test.ts`, `weeks.test.ts`, `plan-walk`, `scenarios` |
 | A week short of 4 + 4 | Fewer reads | It does not count (no blame, nothing added) | `progress.test.ts`, `plan-walk` (good and bad weeks), `scenarios` (3 days a week) |
 | End of a week | A full week is over, or a cut week that was good | A word (target reached, or not) | `scenarios` (steady, break), `messages.test.tsx`, `progress.test.ts` |
 | Before the good weeks | Fewer good weeks than the step's weeks | Ring: «الأسابيع المكتملة في هذه الخطوة: N من M» | `scenarios`, `progress-screens.test.tsx` |

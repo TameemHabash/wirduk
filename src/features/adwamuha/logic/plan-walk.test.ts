@@ -20,7 +20,7 @@ import {
 } from './progress';
 import type { Session } from './sessions';
 import type { PlanState, UserPlan, WardRecord } from './types';
-import { type Weekday, stepWeeks, weekGrid } from './weeks';
+import { type Weekday, stepWeeks, weekGrid, weekdayOf } from './weeks';
 
 /** The default plan, as the content build stores it (content-source/adwamuha-plan.json). */
 function defaultPlan(): UserPlan {
@@ -112,9 +112,10 @@ function walk(
     }
     const out = evaluate(state, PLAN, records, [], today, SATURDAY);
     const status = moveOnStatus(state, PLAN, records, [], today, SATURDAY);
-    // The good weeks are exactly the weeks with 4 and 4, and never more than the weeks so far.
+    // The good weeks are exactly the weeks over with 4 and 4.
     expect(status.goodWeeks).toBe(
-      status.weeks.filter((x) => x.morning >= WEEK_TARGET && x.evening >= WEEK_TARGET).length,
+      status.weeks.filter((x) => x.complete && x.morning >= WEEK_TARGET && x.evening >= WEEK_TARGET)
+        .length,
     );
     if (out.event?.kind === 'finished') {
       expect(status.conditionMet).toBe(true);
@@ -151,22 +152,22 @@ const fourOfSeven: Reads = (_d, i) => ({ morning: i % 7 < 4, evening: i % 7 < 4 
 const threeOfSeven: Reads = (_d, i) => ({ morning: i % 7 < 3, evening: i % 7 < 3 });
 
 describe('whole plans, day by day with the app’s rules', () => {
-  it('a steady user: asked on the day the last good week has 4 and 4, then maintenance', () => {
+  it('a steady user: asked on the last day of the last good week, then maintenance', () => {
     const w = walk(every, 900);
     expect(w.asked.map((a) => a.step)).toEqual(PLAN.steps.slice(0, -1).map((_, i) => i + 1));
     for (const a of w.asked) {
       expect(a.good).toBe(a.needed);
-      // The last good week is met on its 4th day; the step's first week counts when it can
-      // still have 4 and 4 (each step begins in the evening of the question).
-      expect(a.days).toBeGreaterThan((a.needed - 1) * 7);
-      expect(a.days).toBeLessThanOrEqual(a.needed * 7 + 1);
+      // Asked on a week's last day (a Friday). Each later step begins that evening, so its
+      // first week is that one day and does not count: the step is its weeks and a day.
+      expect(weekdayOf(addDays(START, a.day))).toBe((SATURDAY + 6) % 7);
+      expect(a.days).toBe(a.step === 1 ? a.needed * 7 : a.needed * 7 + 1);
     }
     expect(w.suggested).toBe(0);
     expect(w.state).toMatchObject({ step: PLAN.steps.length, maintenance: true });
-    // Never longer than the plan's weeks.
+    // Exactly the plan's weeks (the day of «أضِف الذكر التالي» is the old step's last day and the
+    // new step's first).
     const planDays = PLAN.steps.reduce((n, s) => n + s.weeks * 7, 0);
-    expect(w.days).toBeLessThanOrEqual(planDays + PLAN.steps.length);
-    expect(w.days).toBeGreaterThan(planDays - 7 * PLAN.steps.length);
+    expect(w.days).toBe(planDays);
   });
 
   it('exactly 4 of 7 days (the target): every full week is good, the whole plan done', () => {
@@ -193,10 +194,10 @@ describe('whole plans, day by day with the app’s rules', () => {
       return { morning: read, evening: read };
     }, 200);
     expect(w.asked.length).toBeGreaterThan(0);
-    // Step 1 (4 weeks) needed 4 good weeks, so about 7 calendar weeks.
+    // Step 1 (4 weeks) needed 4 good weeks, so 7 calendar weeks: the 7th counts the day after it
+    // ends (its Friday is not read, so it is over only then).
     expect(w.asked[0]).toMatchObject({ step: 1, good: 4, needed: 4 });
-    expect(w.asked[0]!.days).toBeGreaterThan(6 * 7);
-    expect(w.asked[0]!.days).toBeLessThanOrEqual(7 * 7);
+    expect(w.asked[0]!.days).toBe(7 * 7 + 1);
   });
 
   it('«أبقِني أسبوعًا آخر» at every question: asked again a week later each time, never moved on', () => {

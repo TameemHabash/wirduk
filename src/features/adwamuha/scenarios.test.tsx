@@ -63,7 +63,7 @@ describe('a steady user', () => {
     await readToday(s);
     expect(s.view!.status).toMatchObject({ goodWeeks: 0, weeksNeeded: 4, weeksLeft: 4 });
     const words: DayKey[] = [];
-    await s.live(23, undefined, async (date) => {
+    await s.live(26, undefined, async (date) => {
       expectNumbersMatchDots(s);
       expect(s.app.readyToMoveOn).toBe(false);
       const kinds = await readMessages(s);
@@ -71,10 +71,13 @@ describe('a steady user', () => {
     });
     // A word at the end of each full week (Fridays), none in between.
     expect(words).toEqual(['2026-01-09', '2026-01-16', '2026-01-23']);
+    // Thursday of the 4th week: it has 4 and 4 already, but counts only once it is over
+    // (owner, 2026-11-15).
     expect(s.view!.status).toMatchObject({ goodWeeks: 3, weeksLeft: 1 });
-    // Tuesday of the 4th week: its 4th day with both wards, so it is good before it ends.
+    expect(s.view!.status.weeks[0]).toMatchObject({ met: true, complete: false });
+    // Friday, its last day, both wards read: the 4th good week.
     await s.live(1);
-    expect(s.today).toBe('2026-01-27');
+    expect(s.today).toBe('2026-01-30');
     expect(s.app.readyToMoveOn).toBe(true);
     expect(s.view!.status).toMatchObject({ goodWeeks: 4, weeksLeft: 0, conditionMet: true });
 
@@ -106,11 +109,11 @@ describe('special starts', () => {
     expect(s.view!.status.weeksNeeded).toBe(2);
     expect((await readMessages(s))[0]).toBe('welcome');
     await readToday(s);
-    // The second week (from Saturday 10 January) is good on its 4th day, Tuesday 13.
-    await s.live(9);
+    // The second week (from Saturday 10 January) counts at its end, Friday 16.
+    await s.live(12);
     expect(s.app.readyToMoveOn).toBe(false);
     await s.live(1);
-    expect(s.today).toBe('2026-01-13');
+    expect(s.today).toBe('2026-01-16');
     expect(s.app.readyToMoveOn).toBe(true);
   }, 60_000);
 
@@ -255,7 +258,7 @@ describe('the user’s choices', () => {
     const s = await startScenario({ day: SAT, hour: 9 });
     await readMessages(s);
     await readToday(s);
-    await s.live(4);
+    await s.live(6); // to Friday 9: the first week is over, and good
     const before = s.view!.status.goodWeeks;
     expect(before).toBe(1);
     await s.run((app) => app.turnOff());
@@ -264,9 +267,9 @@ describe('the user’s choices', () => {
     await s.setTime(addDays(s.today, 10), 9);
     await s.run((app) => app.resume());
     expect(s.app.enabled).toBe(true);
-    // The day it was turned off (Wednesday, both wards read) still counts.
+    // The day it was turned off (Friday, both wards read) still counts.
     expect(s.app.pauses).toEqual([
-      expect.objectContaining({ kind: 'off', from: '2026-01-08', to: '2026-01-16' }),
+      expect.objectContaining({ kind: 'off', from: '2026-01-10', to: '2026-01-18' }),
     ]);
     expect(s.view!.status.goodWeeks).toBe(before);
     expect(s.app.stored!.state.step).toBe(1);

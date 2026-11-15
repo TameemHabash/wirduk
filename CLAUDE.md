@@ -131,8 +131,8 @@ README.md is long: read only the section you need.
   `shrink-image.ts`, and `report-protocol.ts` (format + limits, **shared with the relay**).
 - Adwamuha (أدومها, milestone 10): `docs/adwamuha/` (the owner's description, the build plan, the
   matching). The move-on rule (owner, 2026-11-14): a step of N weeks needs N good weeks (4
-  mornings and 4 evenings each, not in a row; `goodWeeks` in `logic/weeks.ts`, `moveOnStatus`);
-  never extended. The ward read in parts: `ward-progress.ts` + user.db `WardProgress` (migration
+  mornings and 4 evenings each, not in a row, counted once the week is over; `goodWeeks` in
+  `logic/weeks.ts`, `moveOnStatus`); never extended. The ward read in parts: `ward-progress.ts` + user.db `WardProgress` (migration
   6, a phone table, not in backups), kept while its window is open. Home's «أدومها» badge while
   off: `HomeHeader.tsx`. The default plan: `content-source/adwamuha-plan.json`, written by
   `scripts/adwamuha/match-plan.ts --write` (keys and stage names cut from the owner's file),

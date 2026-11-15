@@ -63,17 +63,17 @@ describe("a step's weeks", () => {
     expect(cut.map((w) => w.full)).toEqual([true, false]);
   });
 
-  it('good weeks: 4 and 4, full or not, before they end too; finished weeks: full and over', () => {
+  it('good weeks: over with 4 and 4, full or not; finished weeks: full and over', () => {
     const list = weeks();
-    // The first week (days 0–1 in the step) has only 2 and 2: not good.
-    expect(goodWeeks(list).map((w) => w.start)).toEqual([day(9), day(2)]);
+    // This week (from day 9) has 4 and 4 but is not over; the first (days 0–1) has 2 and 2.
+    expect(list[0]).toMatchObject({ met: true, complete: false });
+    expect(goodWeeks(list).map((w) => w.start)).toEqual([day(2)]);
     expect(finishedWeeks(list).map((w) => w.start)).toEqual([day(2)]);
-    const thin = weeks([...daily(0, 8), rec(day(9), 'morning')]);
-    expect(goodWeeks(thin).map((w) => w.start)).toEqual([day(2)]);
-    // A step begun on a Sunday (day 3): its first week has 6 days, and 4 and 4 make it good.
-    const cut = stepWeeks(daily(3, 6), [], day(3), day(6), SATURDAY);
+    // A step begun on a Sunday (day 3): its first week has 6 days; over with 4 and 4, it is good.
+    const cut = stepWeeks(daily(3, 6), [], day(3), day(8), SATURDAY);
     expect(cut[0]).toMatchObject({ full: false, morning: 4, evening: 4, met: true });
-    expect(goodWeeks(cut)).toHaveLength(1);
+    expect(goodWeeks(cut)).toEqual([]); // day 8 not done yet: not over
+    expect(goodWeeks(stepWeeks(daily(3, 6), [], day(3), day(9), SATURDAY))).toHaveLength(1);
   });
 });
 

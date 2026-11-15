@@ -79,7 +79,7 @@ export const weeksOfStep = (
 export interface MoveOnStatus {
   /** Good weeks the step needs (see `weeksNeeded`). */
   weeksNeeded: number;
-  /** The step's good weeks so far: 4 mornings and 4 evenings each (owner, 2026-11-14). */
+  /** The step's good weeks so far: over, with 4 mornings and 4 evenings (owner, 2026-11-14). */
   goodWeeks: number;
   /** Good weeks still to go (0 once there are enough). */
   weeksLeft: number;
@@ -93,9 +93,9 @@ export interface MoveOnStatus {
  * The move-on condition (owner, 2026-11-14): a step of N weeks needs N good
  * weeks, each with 4 mornings and 4 evenings. They need not follow each other:
  * a week short of 4 and 4 just does not count (it is not held against the
- * user, and nothing is extended). A week counts as soon as it has 4 and 4,
- * even before it ends, and the step's first week counts too when it gets there
- * (only the days since the step began are counted in it).
+ * user, and nothing is extended). A week counts once it is over (owner,
+ * 2026-11-15: not on its 4th good day), and the step's first week counts too
+ * when it gets there (only the days since the step began are counted in it).
  */
 export function moveOnStatus(
   state: PlanState,

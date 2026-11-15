@@ -30,7 +30,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | 12 | Backup: Android's automatic backup fixed + a backup file (save, restore) | 🟢 Done | 45ccb23, 4eb9e45, 050538f |
 | 13 | Quality and edge cases (every «أدومها» state tested, dev clock, cleanup, edge cases, the owner's phone) | 🟢 Done | 2d49084, 698aff6, 9373c31, 68a8074 |
 | — | Owner feedback 2026-11-01: «مساري»'s dot drawn square after «قرأتها من حفظي» (Galaxy only); "continue where I stopped" after the audio played (the process kept); the second ward's finish screen like the first (option ب) | 🟢 Done | 63091f6, ae60182, one commit 2026-11-01 |
-| — | Owner feedback 2026-11-14: a reminder tap checks the ward first; the ward read in parts (kept for its window); the «أدومها» badge on Home while off; the good-weeks rule, the goal bars always shown | 🟢 Done | one commit 2026-11-15 |
+| — | Owner feedback 2026-11-14: a reminder tap checks the ward first; the ward read in parts (kept for its window); the «أدومها» badge on Home while off; the good-weeks rule (a week counts once it is over), the goal bars always shown | 🟢 Done | 907c445, one commit 2026-11-15 |
 | 14 | Google Play | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -112,8 +112,8 @@ The owner's four points; decisions and details in `docs/decisions.md` (2026-11-1
    خطوتك.»), and under the ring «الأسابيع المكتملة في هذه الخطوة: N من M». The owner asked for
    Claude's advice on the rule (any good weeks, not in a row): to confirm.
 
-A steady user now moves on a little sooner: a week counts on its 4th good day, so the last week
-of a step can end the step mid-week (before: the step's full days had to pass first).
+A week counts only once it is over (owner, 2026-11-15): on its last day after both wards, or the
+day after. So a steady user is asked after exactly the step's weeks, as before.
 
 ## Milestone 9 — notifications and "report an issue"
 

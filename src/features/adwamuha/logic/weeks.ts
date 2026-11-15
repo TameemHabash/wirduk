@@ -112,9 +112,10 @@ export function stepWeeks(
 /**
  * The good weeks of a step, newest first (owner, 2026-11-14): 4 mornings and 4
  * evenings, counted on the days in the step. Any week can be one, even cut (the
- * step began in it, or a break), and it counts as soon as it has them.
+ * step began in it, or a break). It counts only once it is over (owner,
+ * 2026-11-15: on its last day once both wards are done, or the day after).
  */
-export const goodWeeks = (weeks: readonly StepWeek[]) => weeks.filter((w) => w.met);
+export const goodWeeks = (weeks: readonly StepWeek[]) => weeks.filter((w) => w.met && w.complete);
 
 /** Full weeks that are over, newest first (a week can only fall short once it is over). */
 export const finishedWeeks = (weeks: readonly StepWeek[]) =>

@@ -82,31 +82,38 @@ describe('begun in the evening: that first morning counts for nothing', () => {
     // Step 3 (one week) begun on day 0 (Thursday) in the evening, weeks from Thursday. Day 0's
     // morning (read on the step before) counts for nothing.
     const s = startPlan(3, day(0), 'evening');
-    const first = moveOnStatus(s, plan, daily(0, 5), [], day(5), W);
-    expect(first.weeks[0]).toMatchObject({ full: false, morning: 5, evening: 6, met: true });
+    const first = moveOnStatus(s, plan, daily(0, 6), [], day(6), W);
+    expect(first.weeks[0]).toMatchObject({ full: false, morning: 6, evening: 7, met: true });
     expect(first.conditionMet).toBe(true);
-    // Only 2 mornings and 3 evenings in it: it does not count; days 7–10 make the next one good.
+    // Only 2 mornings and 3 evenings in it: it does not count; days 7–10 make the next one good
+    // (once it is over).
     const thin = daily(0, 2);
     expect(evaluate(s, plan, thin, [], day(7), W).event).toBeNull();
-    expect(evaluate(s, plan, [...thin, ...daily(7, 10)], [], day(10), W).event).toEqual({
+    expect(evaluate(s, plan, [...thin, ...daily(7, 10)], [], day(14), W).event).toEqual({
       kind: 'ready',
     });
   });
 });
 
 describe('the move-on condition (good weeks, owner 2026-11-14)', () => {
-  it('a step of 4 weeks needs 4 good weeks; a week counts once it has 4 and 4', () => {
+  it('a step of 4 weeks needs 4 good weeks; a week counts once it is over (2026-11-15)', () => {
     const s = stateAt(1, day(0));
-    // Days 0–23: weeks 0–6, 7–13, 14–20 full, and days 21–23 (3 and 3) so far.
+    // Days 0–23: weeks 0–6, 7–13, 14–20 good, and days 21–23 (3 and 3) so far.
     expect(moveOnStatus(s, plan, daily(0, 23), [], day(23), W)).toMatchObject({
       weeksNeeded: 4,
       goodWeeks: 3,
       weeksLeft: 1,
       conditionMet: false,
     });
-    expect(evaluate(s, plan, daily(0, 23), [], day(24), W).event).toBeNull();
-    // Day 24 with both wards: the fourth week has 4 and 4 before it ends.
-    expect(evaluate(s, plan, daily(0, 24), [], day(24), W).event).toEqual({ kind: 'ready' });
+    // Day 24: the fourth week has 4 and 4 already, but it is not over: it does not count yet.
+    const at24 = moveOnStatus(s, plan, daily(0, 24), [], day(24), W);
+    expect(at24.weeks[0]).toMatchObject({ met: true, complete: false });
+    expect(at24.goodWeeks).toBe(3);
+    expect(evaluate(s, plan, daily(0, 24), [], day(24), W).event).toBeNull();
+    // Its last day (27): once both wards are done; or the day after.
+    expect(evaluate(s, plan, daily(0, 26), [], day(27), W).event).toBeNull();
+    expect(evaluate(s, plan, daily(0, 27), [], day(27), W).event).toEqual({ kind: 'ready' });
+    expect(evaluate(s, plan, daily(0, 26), [], day(28), W).event).toEqual({ kind: 'ready' });
   });
 
   it('needs 4 mornings AND 4 evenings in the week', () => {
@@ -129,9 +136,9 @@ describe('the move-on condition (good weeks, owner 2026-11-14)', () => {
       goodWeeks: 1,
       weeksLeft: 1,
     });
-    expect(evaluate(s, plan, records.slice(0, -2), [], day(16), W).event).toBeNull();
+    expect(evaluate(s, plan, records, [], day(17), W).event).toBeNull(); // week 14–20 not over
     // Two good weeks: done (step 4 is the plan's last, so the path is finished).
-    expect(evaluate(s, plan, records, [], day(17), W).event).toEqual({ kind: 'finished' });
+    expect(evaluate(s, plan, records, [], day(21), W).event).toEqual({ kind: 'finished' });
     // Nothing is ever added to the step (no automatic extension any more).
     expect(evaluate(s, plan, daily(0, 2), [], day(60), W)).toEqual({ state: s, event: null });
   });
@@ -152,8 +159,8 @@ describe('the move-on condition (good weeks, owner 2026-11-14)', () => {
     const at9 = moveOnStatus(s, plan, daily(0, 9), [], day(9), W3);
     expect(at9.weeks.at(-1)).toMatchObject({ start: day(-4), full: false, morning: 3, met: false });
     expect(at9).toMatchObject({ goodWeeks: 1, conditionMet: false });
-    // Days 10–13: the week 10–16 has 4 and 4 already.
-    expect(moveOnStatus(s, plan, daily(0, 13), [], day(13), W3).conditionMet).toBe(true);
+    // The week 10–16, over with 4 and 4.
+    expect(moveOnStatus(s, plan, daily(0, 13), [], day(17), W3).conditionMet).toBe(true);
   });
 });
 
@@ -224,8 +231,9 @@ describe('step back («طرأ عليّ ظرف»)', () => {
     expect(evaluate(s, plan, upTo(28), [pause], day(28), W).event).toBeNull();
     // The weeks of days 7–13 and 14–20 had break days: not full.
     expect(at28.weeks.filter((w) => !w.full).map((w) => w.start)).toEqual([day(14), day(7)]);
-    // Day 31 (done): the week 28–34 has 4 and 4.
-    expect(evaluate(s, plan, upTo(31), [pause], day(31), W).event).toEqual({ kind: 'ready' });
+    // The week 28–34 has 4 and 4 by day 31, and counts once it is over (day 34, both done).
+    expect(evaluate(s, plan, upTo(31), [pause], day(31), W).event).toBeNull();
+    expect(evaluate(s, plan, upTo(34), [pause], day(34), W).event).toEqual({ kind: 'ready' });
   });
 
   it('a break can end early; one that has not begun goes away', () => {
