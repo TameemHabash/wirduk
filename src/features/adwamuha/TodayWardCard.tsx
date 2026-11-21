@@ -48,7 +48,7 @@ export function TodayWardCard() {
     suggestStepBack,
     dismissSuggestion,
     messages,
-    messageFor,
+    textFor,
     shown,
     markShown,
   } = useAdwamuha();
@@ -89,7 +89,8 @@ export function TodayWardCard() {
     t('settings.am'),
     t('settings.pm'),
   );
-  const prayer = bothDone ? messageFor('bothDone', `both:${now.date}`) : null;
+  // Both wards done: the owner's prayer only (owner, 2026-10-29; kept on Home, 2026-11-21).
+  const prayer = bothDone ? textFor('bothDone', '') : null;
   const wardSize = wardIds(show.session).length;
 
   return (
@@ -142,8 +143,9 @@ export function TodayWardCard() {
       </DhikrText>
 
       {/*
-        The one-time place: a message due (once, tied to what just happened), then the
-        move-on question and the gentle suggestion (they stay until answered).
+        The one-time place: the welcome or a new stage's tip (once), then the move-on question
+        and the gentle suggestion (they stay until answered). No encouraging words here
+        (owner, 2026-11-21).
       */}
       {messages.length > 0 ? (
         <MessageCard />
@@ -189,8 +191,8 @@ export function TodayWardCard() {
       </View>
 
       {bothDone ? (
-        prayer?.kind === 'owner' ? (
-          <AppText style={[styles.prayer, { fontFamily: DISPLAY_FONT }]}>{prayer.text}</AppText>
+        prayer !== null ? (
+          <AppText style={[styles.prayer, { fontFamily: DISPLAY_FONT }]}>{prayer}</AppText>
         ) : null
       ) : show.open ? (
         <View style={{ gap: spacing.xs }}>

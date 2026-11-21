@@ -17,6 +17,7 @@ import { mockRouter } from '@/test-utils/router-mock';
 import { AdwamuhaSettingsScreen } from './AdwamuhaSettingsScreen';
 import { addDays } from './logic/days';
 import { startPlan } from './logic/progress';
+import { DEFAULT_WARD_TIMES } from './logic/sessions';
 import { copyDefaultPlan } from './logic/ward';
 import { OWNER_TEXTS } from './owner-texts';
 import { ProgressScreen } from './ProgressScreen';
@@ -263,12 +264,56 @@ describe('reminders with «أدومها» on', () => {
     expect(mockRouter.push).not.toHaveBeenCalledWith(
       expect.objectContaining({ pathname: '/adwamuha/ward/[session]' }),
     );
-    // A tap while the app runs, on the evening reminder (not read yet): its ward opens.
+  });
+
+  it("a tap after its ward's time: Home stays, with a note (owner, 2026-11-21)", async () => {
+    notificationState.lastResponse = responseFor(1);
+    await renderWithApp(<HomeScreen />, await withPlan(true), { now: at(17) });
+    expect(await screen.findByText('انتهى وقت ورد الصباح.')).toBeOnTheScreen();
+    expect(mockRouter.push).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/adwamuha/ward/[session]' }),
+    );
+    // A tap while the app runs, on the evening reminder (its time now): its ward opens.
     await act(async () => tapNotification(133));
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: '/adwamuha/ward/[session]',
       params: { session: 'evening' },
     });
+  });
+
+  it("last night's evening reminder tapped in the morning: its time is over", async () => {
+    notificationState.lastResponse = responseFor(133);
+    await renderWithApp(<HomeScreen />, await withPlan(true), { now: at(9) });
+    expect(await screen.findByText('انتهى وقت ورد المساء.')).toBeOnTheScreen();
+    expect(mockRouter.push).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/adwamuha/ward/[session]' }),
+    );
+  });
+
+  it('the ward times come from the settings', async () => {
+    const repos = await withPlan(true);
+    await repos.settings.set('wardTimes', { ...DEFAULT_WARD_TIMES, eveningStart: '17:30' });
+    // 17:00 is still the morning with these times: its ward opens.
+    notificationState.lastResponse = responseFor(1);
+    await renderWithApp(<HomeScreen />, repos, { now: at(17) });
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        pathname: '/adwamuha/ward/[session]',
+        params: { session: 'morning' },
+      }),
+    );
+  });
+
+  it('a reminder set before its ward begins: when the ward starts, from the settings', async () => {
+    const repos = await withPlan(true);
+    await repos.settings.set('wardTimes', { ...DEFAULT_WARD_TIMES, eveningStart: '17:30' });
+    await repos.settings.set('eveningReminder', { enabled: true, time: '16:00' });
+    notificationState.lastResponse = responseFor(133);
+    await renderWithApp(<HomeScreen />, repos, { now: () => new Date(2026, 2, 4, 16, 5) });
+    expect(await screen.findByText('يبدأ ورد المساء الساعة 5:30 م')).toBeOnTheScreen();
+    expect(mockRouter.push).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/adwamuha/ward/[session]' }),
+    );
   });
 
   it('with it off, a tap opens the category as before', async () => {

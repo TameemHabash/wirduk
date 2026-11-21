@@ -7,6 +7,8 @@ import { isCustomId } from '@/data/custom-ids';
 import { useRepositories } from '@/data/DataProvider';
 import { isFresh } from '@/data/session';
 import { useSettings } from '@/data/settings/SettingsProvider';
+import { useAdwamuhaOptional } from '@/features/adwamuha/AdwamuhaProvider';
+import { recordSlot } from '@/features/adwamuha/logic/sessions';
 import { counterStore } from '@/features/counter/counter-store';
 import { startupFromNotification } from '@/features/reminders/useReminders';
 
@@ -39,6 +41,8 @@ export function useSessionRestore(): void {
   const toast = useToast();
   const { t, i18n } = useTranslation();
   const enabled = settings.restoreSession;
+  const wardTimes = settings.wardTimes;
+  const clock = useAdwamuhaOptional()?.now;
   const lang = i18n.language;
 
   useEffect(() => {
@@ -50,6 +54,9 @@ export function useSessionRestore(): void {
       // The app was opened by a tap on a reminder: that one opens its own adhkar.
       if (startupFromNotification.opened) return;
       if (!saved || !enabled || !isFresh(saved, Date.now())) return;
+      // A ward whose window is over is not opened again (owner, 2026-11-21: never outside its
+      // window); Home shows the ward of now.
+      if (saved.ward && !recordSlot(saved.ward, clock?.() ?? new Date(), wardTimes)) return;
       const adhkar = isCustomId(saved.categoryId)
         ? await custom.listAdhkar(saved.categoryId)
         : await content.listAdhkar(saved.categoryId, lang);
@@ -75,5 +82,5 @@ export function useSessionRestore(): void {
       });
     };
     run().catch(() => undefined);
-  }, [content, custom, enabled, lang, router, session, t, toast]);
+  }, [clock, content, custom, enabled, lang, router, session, t, toast, wardTimes]);
 }

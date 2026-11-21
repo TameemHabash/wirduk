@@ -1,4 +1,4 @@
-import { daily, day, planOf, rec, stateAt } from '@/test-utils/adwamuha';
+import { daily, day, planOf, stateAt } from '@/test-utils/adwamuha';
 
 import {
   LATER_START_WEEKS,
@@ -6,7 +6,6 @@ import {
   breakFrom,
   endBreak,
   evaluate,
-  lastFinishedWeek,
   moveOnStatus,
   offPause,
   planSkipped,
@@ -299,32 +298,5 @@ describe('after the last step', () => {
     expect(state.maintenance).toBe(true);
     expect(evaluate(state, plan, daily(0, 40), [], day(41), W).event).toBeNull();
     expect(advance(last, plan, day(14)).maintenance).toBe(true);
-  });
-});
-
-describe('end of a week (for the encouragement messages)', () => {
-  it('is the end of each full calendar week, with whether the target was reached', () => {
-    const s = stateAt(1, day(0));
-    expect(lastFinishedWeek(s, daily(0, 5), [], day(6), W)).toBeNull();
-    expect(lastFinishedWeek(s, daily(0, 6), [], day(7), W)).toEqual({
-      weekStart: day(0),
-      reachedTarget: true,
-    });
-    const thin = [rec(day(0), 'morning'), rec(day(1), 'evening')];
-    expect(lastFinishedWeek(s, thin, [], day(9), W)).toEqual({
-      weekStart: day(0),
-      reachedTarget: false,
-    });
-  });
-
-  it('none for a week the step began inside, unless it still had 4 and 4 (it counted)', () => {
-    // Weeks from day 3: the step's first week is days 0–2 only.
-    expect(lastFinishedWeek(stateAt(1, day(0)), daily(0, 5), [], day(6), W3)).toBeNull();
-    // Weeks from day -1: the step's first week is days 0–5, all read.
-    const Wm1 = ((W + 6) % 7) as Weekday;
-    expect(lastFinishedWeek(stateAt(1, day(0)), daily(0, 5), [], day(6), Wm1)).toEqual({
-      weekStart: day(-1),
-      reachedTarget: true,
-    });
   });
 });

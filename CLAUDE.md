@@ -126,7 +126,9 @@ README.md is long: read only the section you need.
 - `src/features/reminders/` morning/evening reminders: `reminders.ts` (permission, channel,
   daily schedule), `useReminders.ts` (`useReminderSync` in the root layout, `useNotificationTaps`
   in Home, before `useSessionRestore`; with «أدومها» on, a tap opens the ward unless it is read
-  today: then a toast). Settings rows: `settings/ReminderSettings.tsx`.
+  today or not its time: then a toast). A ward never opens outside its window (owner,
+  2026-11-21; `closedWard` in `adwamuha/logic/sessions.ts`, checked by the tap, the session
+  restore and `WardScreen`). Settings rows: `settings/ReminderSettings.tsx`.
 - `src/features/report/` "report an issue": `ReportScreen.tsx`, `report.ts` (details, send),
   `shrink-image.ts`, and `report-protocol.ts` (format + limits, **shared with the relay**).
 - Adwamuha (أدومها, milestone 10): `docs/adwamuha/` (the owner's description, the build plan, the
@@ -146,7 +148,10 @@ README.md is long: read only the section you need.
   The owner's Arabic texts: `node scripts/adwamuha/owner-texts.ts` GENERATES the labels and the
   hadith (`src/features/adwamuha/owner-texts.ts`) and the messages and tips, each chosen by state
   (`content-source/adwamuha-texts.json` → content table `AdwamuhaTexts`, read with
-  `ContentRepository.listAdwamuhaTexts`; `textFor` / `messageFor` in `AdwamuhaProvider`). Inputs:
+  `ContentRepository.listAdwamuhaTexts`; `textFor` / `chooseMessage` in `AdwamuhaProvider`).
+  Home's one-time place shows only the welcome and the stage tip (owner, 2026-11-21: no
+  encouraging words on Home). The message after a ward never repeats before all were shown
+  (`nextPick`, rounds kept in user.db migration 7 `AdwamuhaMessagePicks`). Inputs:
   the description, the owner's later edits in `docs/adwamuha/owner-edits.json` (cut from the
   owner's chat messages by script), the design `docs/adwamuha/flow-design.html`, and Claude's
   drafts for review in `docs/adwamuha/claude-drafts.json`. Never edit the outputs by hand; after

@@ -83,3 +83,23 @@ export function recordSlot(session: Session, at: Date, times: WardTimes): WardSl
   const slot = slotAt(at, times);
   return slot.session === session ? slot : null;
 }
+
+/**
+ * Why a ward cannot be opened at `at` (owner, 2026-11-21: never outside its window, even from
+ * a reminder); null while its window is open. 'over': its window has ended. 'notYet': a
+ * reminder set at a time outside the window (`reminderTime`, "HH:MM") came before the window
+ * began. A reminder set inside the window, or no reminder, can only be late: 'over'.
+ */
+export function closedWard(
+  session: Session,
+  at: Date,
+  times: WardTimes,
+  reminderTime?: string,
+): 'over' | 'notYet' | null {
+  if (slotAt(at, times).session === session) return null;
+  if (reminderTime === undefined) return 'over';
+  const { hour, minute } = parseTime(reminderTime);
+  const reminder = new Date(at);
+  reminder.setHours(hour, minute, 0, 0);
+  return slotAt(reminder, times).session === session ? 'over' : 'notYet';
+}

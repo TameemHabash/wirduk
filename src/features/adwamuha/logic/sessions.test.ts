@@ -1,5 +1,5 @@
 import { addDays, dayKeyOf, daysBetween, daysFrom } from './days';
-import { DEFAULT_WARD_TIMES, recordSlot, slotAt, validWardTimes } from './sessions';
+import { DEFAULT_WARD_TIMES, closedWard, recordSlot, slotAt, validWardTimes } from './sessions';
 
 /** A local moment on 2026-01-15 (day 15) or the next day (16). */
 const at = (day: 15 | 16, hh: number, mm: number) => new Date(2026, 0, day, hh, mm);
@@ -55,6 +55,35 @@ describe('which ward a moment belongs to (default times)', () => {
     });
     expect(slotAt(at(15, 22, 30), times).late).toBe(true);
     expect(slotAt(at(15, 21, 59), times).late).toBe(false);
+  });
+});
+
+describe('a ward outside its window cannot be opened (owner, 2026-11-21)', () => {
+  const T = DEFAULT_WARD_TIMES;
+
+  it('opens only in its window, with the times from the settings', () => {
+    expect(closedWard('morning', at(15, 15, 59), T, '06:00')).toBeNull();
+    expect(closedWard('morning', at(15, 16, 0), T, '06:00')).toBe('over');
+    const later = { ...T, eveningStart: '17:30' };
+    expect(closedWard('morning', at(15, 17, 0), later, '06:00')).toBeNull();
+    expect(closedWard('morning', at(15, 17, 30), later, '06:00')).toBe('over');
+  });
+
+  it("a reminder inside the ward's window, tapped after it: over", () => {
+    expect(closedWard('evening', at(15, 9, 0), T, '17:00')).toBe('over'); // last night's
+    expect(closedWard('evening', at(16, 3, 59), T, '17:00')).toBeNull(); // still last night's
+    expect(closedWard('morning', at(16, 1, 0), T, '06:00')).toBe('over');
+  });
+
+  it('a reminder set before its ward begins, tapped before it: not yet', () => {
+    expect(closedWard('morning', at(15, 3, 30), T, '03:00')).toBe('notYet');
+    expect(closedWard('evening', at(15, 15, 10), T, '15:00')).toBe('notYet');
+    expect(closedWard('evening', at(15, 16, 0), T, '15:00')).toBeNull();
+  });
+
+  it('without a reminder (a screen left open): over', () => {
+    expect(closedWard('morning', at(15, 16, 1), T)).toBe('over');
+    expect(closedWard('evening', at(15, 4, 1), T)).toBe('over');
   });
 });
 

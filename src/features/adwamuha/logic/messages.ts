@@ -7,6 +7,13 @@ import type { AdwamuhaMessage, AdwamuhaMoment, AdwamuhaText } from '@/data/model
 export type MessageContent =
   { kind: 'owner'; text: string } | { kind: 'library'; message: AdwamuhaMessage };
 
+/** A message of a moment's pool, with a key that stays the same across launches. */
+export interface PoolMessage {
+  /** 'text:<id>' (the app's own words) or 'library:<id>' (a verse or hadith). */
+  key: string;
+  content: MessageContent;
+}
+
 /** Moments that show only the owner's own words (owner, 2026-10-29: both wards done → the prayer). */
 export const OWNER_ONLY_MOMENTS: readonly AdwamuhaMoment[] = ['bothDone'];
 
@@ -15,16 +22,19 @@ export function messagePool(
   moment: AdwamuhaMoment,
   texts: readonly AdwamuhaText[],
   library: readonly AdwamuhaMessage[],
-): MessageContent[] {
+): PoolMessage[] {
   const own = texts
     .filter((t) => t.moment === moment && t.state === '')
-    .map((t) => ({ kind: 'owner' as const, text: t.text }));
+    .map((t) => ({ key: `text:${t.id}`, content: { kind: 'owner' as const, text: t.text } }));
   if (OWNER_ONLY_MOMENTS.includes(moment)) return own;
   return [
     ...own,
     ...library
       .filter((m) => m.moments.includes(moment))
-      .map((message) => ({ kind: 'library' as const, message })),
+      .map((message) => ({
+        key: `library:${message.id}`,
+        content: { kind: 'library' as const, message },
+      })),
   ];
 }
 
@@ -41,23 +51,39 @@ export function textFor(
   return texts.find((t) => t.moment === moment && t.state === state)?.text ?? null;
 }
 
-/** FNV-1a: a small, stable hash of a string. */
-function hash(text: string): number {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) {
-    h ^= text.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return h >>> 0;
+/** The message an occasion (a day's ward) got, kept in user.db. */
+export interface MessagePick {
+  occasion: string;
+  /** The message's `PoolMessage.key`. */
+  messageId: string;
+  /** Messages go in rounds: a round ends once each message of the pool came once. */
+  round: number;
 }
 
 /**
- * One message of the pool, picked by `key` (the occasion: a day's ward, an
- * event, a week). The same occasion always gets the same message, so it does
- * not change on a re-render or the next launch; different occasions vary.
+ * The next message of a moment (owner, 2026-11-21): no message comes again
+ * until every message of the pool has been shown. Within a round the order is
+ * random; the next round starts with another message than the last one shown.
+ * Messages added to the content join the round; removed ones are skipped.
+ * `picks`: the moment's earlier picks, the latest first. `random`: in [0, 1).
  * Null for an empty pool (the texts are not read yet).
  */
-export function pickMessage(pool: readonly MessageContent[], key: string): MessageContent | null {
+export function nextPick(
+  pool: readonly PoolMessage[],
+  picks: readonly MessagePick[],
+  random: () => number,
+): { message: PoolMessage; round: number } | null {
   if (pool.length === 0) return null;
-  return pool[hash(key) % pool.length]!;
+  const round = picks.reduce((max, p) => Math.max(max, p.round), 1);
+  const used = new Set(picks.filter((p) => p.round === round).map((p) => p.messageId));
+  let left = pool.filter((m) => !used.has(m.key));
+  let next = round;
+  if (left.length === 0) {
+    // Every message came once: a new round, not starting with the message just shown.
+    next = round + 1;
+    const last = picks[0]?.messageId;
+    left = pool.length > 1 ? pool.filter((m) => m.key !== last) : [...pool];
+  }
+  const index = Math.min(left.length - 1, Math.floor(random() * left.length));
+  return { message: left[index]!, round: next };
 }

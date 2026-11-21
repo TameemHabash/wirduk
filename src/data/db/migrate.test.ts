@@ -16,11 +16,13 @@ describe('migrate', () => {
     );
     expect(tables.map((t) => t.name)).toEqual(
       expect.arrayContaining([
+        'AdwamuhaMessagePicks',
         'CategoryOrder',
         'CustomAdhkar',
         'DownloadedAudio',
         'Favorites',
         'Settings',
+        'WardProgress',
       ]),
     );
   });

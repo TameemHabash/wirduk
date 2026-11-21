@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -33,7 +33,7 @@ export function WardDoneScreen() {
   const params = useLocalSearchParams<{ session: string; counted?: string }>();
   const session: Session = params.session === 'evening' ? 'evening' : 'morning';
   const counted = params.counted === '1';
-  const { slot, messageFor } = useAdwamuha();
+  const { slot, chooseMessage } = useAdwamuha();
   const buzzed = useRef(false);
 
   useEffect(() => {
@@ -42,10 +42,22 @@ export function WardDoneScreen() {
     haptics.categoryComplete(settings.completionVibration);
   }, [settings.completionVibration]);
 
-  const today = slot().date;
-  // The same message for the same ward of the same day (owner's words or the library).
+  // The owner's words or a verse / hadith: none comes again until every one has been shown
+  // (owner, 2026-11-21), and the same ward of the same day keeps its message.
+  const [occasion] = useState(() => `ward:${slot().date}:${session}`);
+  const [chosen, setChosen] = useState<MessageContent | null>(null);
+  useEffect(() => {
+    if (!counted) return;
+    let cancelled = false;
+    chooseMessage('wardDone', occasion)
+      .then((content) => !cancelled && content && setChosen(content))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [chooseMessage, counted, occasion]);
   const message: MessageContent | null = counted
-    ? messageFor('wardDone', `ward:${today}:${session}`)
+    ? chosen
     : { kind: 'owner', text: t('adwamuha.notCounted') };
 
   return (

@@ -122,4 +122,25 @@ describe('AdwamuhaRepository — pauses, history, shown messages', () => {
     expect(await r.markShown('tip:1')).toBe(false);
     expect(await r.wasShown('tip:1')).toBe(true);
   });
+
+  it("keeps each occasion's message (the first one stays), the latest first", async () => {
+    const { repo: r } = await repo();
+    expect(await r.listPicks('wardDone')).toEqual([]);
+    const pick = (occasion: string, messageId: string, round = 1) => ({
+      occasion,
+      messageId,
+      round,
+    });
+    expect(await r.addPick('wardDone', pick('ward:d1:morning', 'library:a'))).toBe('library:a');
+    expect(await r.addPick('wardDone', pick('ward:d1:evening', 'text:x'))).toBe('text:x');
+    // Two screens choosing at once: the first message stays.
+    expect(await r.addPick('wardDone', pick('ward:d1:morning', 'library:b'))).toBe('library:a');
+    expect(await r.listPicks('wardDone')).toEqual([
+      pick('ward:d1:evening', 'text:x'),
+      pick('ward:d1:morning', 'library:a'),
+    ]);
+    expect(await r.listPicks('weekBelow')).toEqual([]); // by moment
+    await r.removePick('wardDone', 'ward:d1:morning');
+    expect(await r.listPicks('wardDone')).toEqual([pick('ward:d1:evening', 'text:x')]);
+  });
 });

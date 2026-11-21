@@ -176,6 +176,22 @@ export const USER_MIGRATIONS: readonly string[] = [
     SavedAt INTEGER NOT NULL
   );
   `,
+
+  // 7 — Adwamuha: the message each occasion got (owner, 2026-11-21: the message after a
+  // ward does not come again until every message has been shown). Messages go in rounds:
+  // a round ends once each message of the moment came once.
+  `
+  CREATE TABLE AdwamuhaMessagePicks (
+    -- The moment ('wardDone') and its occasion ('ward:2026-11-21:morning').
+    Moment    TEXT    NOT NULL,
+    Occasion  TEXT    NOT NULL,
+    -- 'text:<id>' (the app's own words) or 'library:<id>' (a verse or hadith).
+    MessageId TEXT    NOT NULL,
+    Round     INTEGER NOT NULL,
+    PickedAt  INTEGER NOT NULL,
+    PRIMARY KEY (Moment, Occasion)
+  );
+  `,
 ];
 
 export const USER_SCHEMA_VERSION = USER_MIGRATIONS.length;

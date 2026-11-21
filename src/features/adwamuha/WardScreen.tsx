@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
+import { useToast } from '@/components/Toast';
 import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
 import type { Category, Dhikr } from '@/data/models';
@@ -14,6 +15,7 @@ import { Reader } from '@/features/reader/ReaderScreen';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { useAdwamuha } from './AdwamuhaProvider';
+import { closedWardText } from './closed-ward';
 import { type Session, recordSlot } from './logic/sessions';
 import { orderWard } from './logic/ward';
 import { latestWriter } from './ward-progress';
@@ -41,9 +43,19 @@ export function WardScreen() {
   const categoryId = categoryOfSession(session);
   const { wardOrder: order, wardTimes } = useSettings().settings;
 
-  // The ward's window open now (null outside it: then it neither counts nor is kept). Its
-  // counts are kept for that window (owner, 2026-11-14: read in parts, a new ward each day).
+  // The ward's window open now. Its counts are kept for that window (owner, 2026-11-14: read in
+  // parts, a new ward each day). Outside it the ward does not open (owner, 2026-11-21): back to
+  // Home with a note (e.g. Home was left open on the morning ward until the evening began). A
+  // ward opened in its window stays open after it; finished then, it just does not count.
   const [windowDate] = useState(() => recordSlot(session, adwamuha.now(), wardTimes)?.date ?? null);
+  const toast = useToast();
+  const leaving = useRef(false);
+  useEffect(() => {
+    if (windowDate !== null || leaving.current) return;
+    leaving.current = true;
+    toast.show({ message: closedWardText(t, session, 'over', wardTimes) });
+    router.dismissTo('/');
+  }, [router, session, t, toast, wardTimes, windowDate]);
   const keep = useMemo(
     () =>
       windowDate === null
@@ -60,12 +72,12 @@ export function WardScreen() {
   const idsKey = adwamuha.wardIds(session).join(',');
   const [adhkar, setAdhkar] = useState<Dhikr[] | null>(null);
   useEffect(() => {
-    if (!adwamuha.ready || !idsKey) return;
+    if (!adwamuha.ready || !idsKey || windowDate === null) return;
     let cancelled = false;
     const ids = idsKey.split(',').map(Number);
     Promise.all([
       content.listAdhkar(categoryId, i18n.language),
-      windowDate === null ? {} : repo.loadWardProgress(session, windowDate).catch(() => ({})),
+      repo.loadWardProgress(session, windowDate).catch(() => ({})),
     ])
       .then(([all, kept]) => {
         if (cancelled) return;
@@ -122,6 +134,9 @@ export function WardScreen() {
       );
   }, [completeWard, keep, router, session]);
 
+  if (windowDate === null) {
+    return <View style={[styles.fill, { backgroundColor: colors.background }]} />;
+  }
   if (adwamuha.ready && !idsKey) {
     return (
       <SafeAreaView style={[styles.fill, styles.center, { backgroundColor: colors.background }]}>

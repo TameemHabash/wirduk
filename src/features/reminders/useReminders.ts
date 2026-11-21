@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useToast } from '@/components/Toast';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { useAdwamuhaOptional } from '@/features/adwamuha/AdwamuhaProvider';
+import { closedWardText } from '@/features/adwamuha/closed-ward';
+import { closedWard } from '@/features/adwamuha/logic/sessions';
 import { OWNER_TEXTS } from '@/features/adwamuha/owner-texts';
 
 import { REMINDER_CATEGORY, type ReminderTexts, categoryOf, syncReminders } from './reminders';
@@ -54,21 +56,23 @@ const SESSION_OF_CATEGORY: Record<number, 'morning' | 'evening'> = {
 
 /**
  * A tap on a reminder opens its adhkar — or, with «أدومها» on, that session's
- * ward, unless that ward is already read today: then Home stays, with a toast
- * (owner, 2026-11-14). At app start (the tap that opened the app) and while
- * the app runs. Used by the Home screen, the first screen.
+ * ward, unless that ward is already read today (owner, 2026-11-14) or its time
+ * is not now (owner, 2026-11-21: e.g. the morning reminder tapped after the
+ * evening began): then Home stays, with a toast. At app start (the tap that
+ * opened the app) and while the app runs. Used by the Home screen, the first screen.
  */
 export function useNotificationTaps(): void {
   const router = useRouter();
   const toast = useToast();
   const { t } = useTranslation();
+  const { settings } = useSettings();
   const adwamuha = useAdwamuhaOptional();
   const adwamuhaReady = adwamuha?.ready ?? true;
   const adwamuhaOn = adwamuha?.enabled ?? false;
-  // Read at the tap, not effect dependencies: the day's records, the clock, the toast.
-  const latest = useRef({ adwamuha, toast, t });
+  // Read at the tap, not effect dependencies: the day's records, the clock, the times, the toast.
+  const latest = useRef({ adwamuha, settings, toast, t });
   useEffect(() => {
-    latest.current = { adwamuha, toast, t };
+    latest.current = { adwamuha, settings, toast, t };
   });
 
   // The tap that opened the app: noted at once (it wins over "continue where I
@@ -91,11 +95,18 @@ export function useNotificationTaps(): void {
       void Notifications.clearLastNotificationResponseAsync().catch(() => undefined);
       const session = SESSION_OF_CATEGORY[categoryId];
       if (adwamuhaOn && session) {
-        const { adwamuha: now, toast: notice, t: tr } = latest.current;
+        const { adwamuha: now, settings: set, toast: notice, t: tr } = latest.current;
         const today = now?.slot().date;
         if (now?.records.some((r) => r.date === today && r.session === session)) {
           // Already read today: Home's «وردك اليوم» shows it; no need to open the ward again.
           notice.show({ message: tr(`adwamuha.alreadyRead.${session}`) });
+          return;
+        }
+        // Not its time: the ward never opens outside its window (Home shows the ward of now).
+        const reminder = session === 'morning' ? set.morningReminder : set.eveningReminder;
+        const closed = closedWard(session, now?.now() ?? new Date(), set.wardTimes, reminder.time);
+        if (closed) {
+          notice.show({ message: closedWardText(tr, session, closed, set.wardTimes) });
           return;
         }
         router.push({ pathname: '/adwamuha/ward/[session]', params: { session } });

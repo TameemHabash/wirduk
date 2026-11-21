@@ -11,6 +11,8 @@ import { newAppStart } from './useSessionRestore';
 
 const RESTORED = 'استُعيدت آخر حالة، ويمكنك إيقاف ذلك من الإعدادات';
 const SAVED = { categoryId: 1, dhikrId: 1017, counts: { '1017': 40, '1013': 3 } };
+/** «أدومها»'s clock in the morning ward's window. */
+const MORNING = () => new Date(2026, 0, 15, 7, 0);
 
 async function startWith(opts: { ageMs?: number; restoreSession?: boolean } = {}) {
   const repos = await createTestRepositories();
@@ -54,7 +56,7 @@ describe('Continue where I stopped — app start', () => {
     const repos = await createTestRepositories();
     await repos.session.save({ ...SAVED, ward: 'morning' });
     counterStore.resetMany([1013, 1017]);
-    await renderWithApp(<HomeScreen />, repos);
+    await renderWithApp(<HomeScreen />, repos, { now: MORNING });
     await waitFor(() =>
       expect(mockRouter.push).toHaveBeenCalledWith({
         pathname: '/adwamuha/ward/[session]',
@@ -62,6 +64,18 @@ describe('Continue where I stopped — app start', () => {
       }),
     );
     expect(counterStore.get(1017)).toBe(40);
+  });
+
+  it('not a ward whose time is over (owner, 2026-11-21): Home shows the ward of now', async () => {
+    const repos = await createTestRepositories();
+    await repos.session.save({ ...SAVED, ward: 'morning' });
+    counterStore.resetMany([1013, 1017]);
+    await renderWithApp(<HomeScreen />, repos, { now: () => new Date(2026, 0, 15, 16, 30) });
+    await waitFor(async () => expect(await repos.session.load()).toBeNull());
+    await settleLists();
+    expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(counterStore.get(1017)).toBe(0);
+    expect(screen.queryByText(RESTORED)).toBeNull();
   });
 
   it('restores again when Android starts the app again in a process it kept', async () => {
@@ -82,7 +96,7 @@ describe('Continue where I stopped — app start', () => {
     counterStore.resetMany([1013, 1017]);
     mockRouter.push.mockClear();
     newAppStart(); // what the root layout does when it mounts
-    await renderWithApp(<HomeScreen />, repos);
+    await renderWithApp(<HomeScreen />, repos, { now: MORNING });
     await waitFor(() =>
       expect(mockRouter.push).toHaveBeenCalledWith({
         pathname: '/adwamuha/ward/[session]',

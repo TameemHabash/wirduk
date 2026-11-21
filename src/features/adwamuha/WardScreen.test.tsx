@@ -1,12 +1,16 @@
 import { Text } from 'react-native';
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
+import type { Repositories } from '@/data/DataProvider';
 import { counterStore } from '@/features/counter/counter-store';
+import { momentSnippets, snippetOf } from '@/test-utils/adwamuha-messages';
+import { startScenario } from '@/test-utils/adwamuha-scenario';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
 import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
 
 import { useAdwamuha } from './AdwamuhaProvider';
-import { messagePool, pickMessage } from './logic/messages';
+import { addDays } from './logic/days';
+import { messagePool } from './logic/messages';
 import { startPlan } from './logic/progress';
 import { copyDefaultPlan } from './logic/ward';
 import { WardDoneScreen } from './WardDoneScreen';
@@ -80,13 +84,15 @@ describe('the Adwamuha ward in the reader', () => {
     ]);
   });
 
-  it('does not count a morning ward finished in the evening', async () => {
+  it('does not count a morning ward finished after the evening began', async () => {
     const repos = await withPlan(1);
     setRouteParams({ session: 'morning' });
-    await renderWithApp(<WardScreen />, repos, { now: at(17) });
+    const clock = { now: at(15, 58) };
+    await renderWithApp(<WardScreen />, repos, { now: () => clock.now() });
     await screen.findByText('1 من 2');
     await fireEvent.press(completeButton());
     await waitFor(() => expect(screen.getByText('2 من 2')).toBeOnTheScreen(), { timeout: 2000 });
+    clock.now = at(16, 1); // opened in its window: it stays open, but no longer counts
     await fireEvent.press(completeButton());
     await waitFor(
       () =>
@@ -154,15 +160,20 @@ describe('the Adwamuha ward in the reader', () => {
     );
   });
 
-  it('outside its window nothing is kept (it would not count either)', async () => {
-    const repos = await withPlan(1);
-    setRouteParams({ session: 'morning' });
-    await renderWithApp(<WardScreen />, repos, { now: at(17) });
-    await screen.findByText('1 من 2');
-    await fireEvent.press(completeButton());
-    await waitFor(() => expect(screen.getByText('2 من 2')).toBeOnTheScreen(), { timeout: 2000 });
-    expect(await repos.adwamuha.loadWardProgress('morning', DAY)).toEqual({});
-  });
+  it.each([
+    ['morning', 17, 'انتهى وقت ورد الصباح.'],
+    ['evening', 9, 'انتهى وقت ورد المساء.'],
+  ] as const)(
+    'outside its window the %s ward does not open: back to Home with a note (owner, 2026-11-21)',
+    async (session, hh, note) => {
+      const repos = await withPlan(1);
+      setRouteParams({ session });
+      await renderWithApp(<WardScreen />, repos, { now: at(hh) });
+      expect(await screen.findByText(note)).toBeOnTheScreen();
+      expect(mockRouter.dismissTo).toHaveBeenCalledWith('/');
+      expect(screen.queryByText('1 من 2')).toBeNull();
+    },
+  );
 
   it('has no «read the rest» mode: an old link still opens the ward only', async () => {
     const repos = await withPlan(1);
@@ -218,13 +229,14 @@ describe('after a ward', () => {
       step: 1,
     });
     setRouteParams({ session: 'morning', counted: '1' });
-    await renderWithApp(<WardDoneScreen />, repos, { now: at(7) });
-    // The owner's prayer or a library message, always the same for this ward of this day.
-    const texts = await repos.content.listAdwamuhaTexts('ar');
-    const library = await repos.content.listAdwamuhaMessages('ar');
-    const picked = pickMessage(messagePool('wardDone', texts, library), `ward:${DAY}:morning`)!;
-    const snippet = picked.kind === 'owner' ? picked.text : picked.message.texts[0]!;
+    const first = await renderWithApp(<WardDoneScreen />, repos, { now: at(7) });
+    // The owner's prayer or a library message, kept for this ward of this day.
+    const snippet = await shownFor(repos, `ward:${DAY}:morning`);
     expect(await screen.findByText(snippet, { exact: false })).toBeOnTheScreen();
+    await first.unmount();
+    await renderWithApp(<WardDoneScreen />, repos, { now: at(8) });
+    expect(await screen.findByText(snippet, { exact: false })).toBeOnTheScreen();
+    expect(await repos.adwamuha.listPicks('wardDone')).toHaveLength(1);
     expect(screen.getByText(/^اكتفِ اليوم بوردك/)).toBeOnTheScreen();
     expect(screen.queryByText(/باقي/)).toBeNull();
     expect(screen.getByText('العودة إلى الرئيسية')).toBeOnTheScreen();
@@ -246,13 +258,11 @@ describe('after a ward', () => {
     }
     setRouteParams({ session: 'evening', counted: '1' });
     await renderWithApp(<WardDoneScreen />, repos, { now: at(18) });
-    const texts = await repos.content.listAdwamuhaTexts('ar');
-    const library = await repos.content.listAdwamuhaMessages('ar');
-    const picked = pickMessage(messagePool('wardDone', texts, library), `ward:${DAY}:evening`)!;
-    const snippet = picked.kind === 'owner' ? picked.text : picked.message.texts[0]!;
+    const snippet = await shownFor(repos, `ward:${DAY}:evening`);
     expect(await screen.findByText(snippet, { exact: false })).toBeOnTheScreen();
     expect(screen.getByText(/^اكتفِ الليلة بوردك/)).toBeOnTheScreen();
     // The prayer for both wards is Home's only.
+    const texts = await repos.content.listAdwamuhaTexts('ar');
     const prayer = texts.find((t) => t.id === 'owner:bothDone')!.text;
     expect(screen.queryByText(prayer)).toBeNull();
     expect(screen.getByText('العودة إلى الرئيسية')).toBeOnTheScreen();
@@ -265,5 +275,39 @@ describe('after a ward', () => {
     expect(
       await screen.findByText('أتممتَ الورد، لكنه لا يُحسب لليوم لأن وقته ليس الآن.'),
     ).toBeOnTheScreen();
+    expect(await repos.adwamuha.listPicks('wardDone')).toEqual([]); // no message used up
   });
+
+  it('no message comes again until every one was shown (owner, 2026-11-21)', async () => {
+    const s = await startScenario({ day: DAY, hour: 7 });
+    const size = (await momentSnippets(s.repos, 'wardDone')).length;
+    expect(size).toBeGreaterThan(10); // the owner's words and the approved verses and hadiths
+    const choose = (n: number) =>
+      s.run((app) => app.chooseMessage('wardDone', `ward:${addDays(DAY, n)}:morning`));
+    const shown: string[] = [];
+    for (let n = 0; n < size; n++) shown.push(snippetOf((await choose(n))!));
+    const picks = async () => s.repos.adwamuha.listPicks('wardDone'); // the latest first
+    expect(new Set((await picks()).map((p) => p.messageId)).size).toBe(size);
+    // A ward keeps its message.
+    expect(snippetOf((await choose(3))!)).toBe(shown[3]);
+    expect(await picks()).toHaveLength(size);
+    // Then a new round, not starting with the message just shown.
+    await choose(size);
+    const [next, last] = await picks();
+    expect(next).toMatchObject({ round: 2 });
+    expect(next!.messageId).not.toBe(last!.messageId);
+  }, 30_000);
 });
+
+/** The message saved for a ward (`occasion`), as it shows on screen. */
+async function shownFor(repos: Repositories, occasion: string): Promise<string> {
+  let id = '';
+  await waitFor(async () => {
+    const pick = (await repos.adwamuha.listPicks('wardDone')).find((p) => p.occasion === occasion);
+    expect(pick).toBeDefined();
+    id = pick!.messageId;
+  });
+  const texts = await repos.content.listAdwamuhaTexts('ar');
+  const library = await repos.content.listAdwamuhaMessages('ar');
+  return snippetOf(messagePool('wardDone', texts, library).find((m) => m.key === id)!.content);
+}

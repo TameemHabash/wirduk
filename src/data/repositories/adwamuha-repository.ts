@@ -3,6 +3,7 @@
  * they are, the day records, pauses, history and shown messages. All local.
  */
 import type { DayKey } from '@/features/adwamuha/logic/days';
+import type { MessagePick } from '@/features/adwamuha/logic/messages';
 import type { Session } from '@/features/adwamuha/logic/sessions';
 import { parsePlanState, parseUserPlan } from '@/features/adwamuha/logic/stored';
 import type { Pause, PlanState, UserPlan, WardRecord } from '@/features/adwamuha/logic/types';
@@ -220,5 +221,39 @@ export class AdwamuhaRepository {
       [key, this.now()],
     );
     return result.changes > 0;
+  }
+
+  /** The messages a moment's occasions got, the latest first. */
+  async listPicks(moment: string): Promise<MessagePick[]> {
+    return this.db.getAll<MessagePick>(
+      `SELECT Occasion AS occasion, MessageId AS messageId, Round AS round
+         FROM AdwamuhaMessagePicks WHERE Moment = ? ORDER BY PickedAt DESC, rowid DESC`,
+      [moment],
+    );
+  }
+
+  /**
+   * Saves the message an occasion got. The first one stays (two screens choosing at once
+   * agree): returns the message id saved for the occasion.
+   */
+  async addPick(moment: string, pick: MessagePick): Promise<string> {
+    await this.db.run(
+      `INSERT OR IGNORE INTO AdwamuhaMessagePicks (Moment, Occasion, MessageId, Round, PickedAt)
+       VALUES (?, ?, ?, ?, ?)`,
+      [moment, pick.occasion, pick.messageId, pick.round, this.now()],
+    );
+    const row = await this.db.getFirst<{ messageId: string }>(
+      'SELECT MessageId AS messageId FROM AdwamuhaMessagePicks WHERE Moment = ? AND Occasion = ?',
+      [moment, pick.occasion],
+    );
+    return row?.messageId ?? pick.messageId;
+  }
+
+  /** Forgets an occasion's message (it is no longer in the content). */
+  async removePick(moment: string, occasion: string): Promise<void> {
+    await this.db.run('DELETE FROM AdwamuhaMessagePicks WHERE Moment = ? AND Occasion = ?', [
+      moment,
+      occasion,
+    ]);
   }
 }

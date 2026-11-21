@@ -329,6 +329,33 @@ How the good weeks work (Claude, following the rule above):
 - Later start: 2 good weeks; climbing back after a step back: 1 good week per step.
 - The old `extraWeeks` stays in stored data and is no longer read. No word for an extension.
 
+## 2026-11-21 — Owner feedback («أدومها»)
+
+The owner's three points (2026-11-21) and their answers. These win over the earlier decisions
+where they differ.
+
+| Topic | Decision |
+|---|---|
+| The message after a ward | No message comes again until every message has been shown (owner). The owner's words and the approved verses and hadiths for "a ward is completed" (19 today) come in rounds, in a random order; a new round never starts with the message just shown. Replaces "picked by a hash of the occasion" (2026-10-23). |
+| A ward outside its time | It never opens, also not from a reminder (owner: e.g. the morning ward after 4:00 م, the evening start in «أوقات الورد»). A reminder tapped then: Home stays, with «انتهى وقت ورد الصباح.» / «انتهى وقت ورد المساء.» (owner's choice of two options). A reminder set at a time before its ward begins: «يبدأ ورد الصباح الساعة …». Every time comes from the settings, never a fixed one (owner). |
+| Home's «وردك اليوم» | No encouraging words on Home; only adding the next dhikr and what is important (owner). Asked which of the earlier decisions stay, the owner kept: the move-on question, the gentle step-back suggestion, the welcome (first day), the stage tip, and the both-wards prayer. Out of Home: the end-of-week words, the new-step word, the step-back / break word, and the end-of-path message with its "keep it on / turn it off" offer. They showed only on Home, so they show nowhere now (the owner found the question of a new place for them unclear: the list already answered it). Replaces, from 2026-10-23: "A new step and a step back / break show in the message card on Home" and the description's §11 offer; from 2026-10-29: the one-time place shows "a message due" of any kind. |
+
+Claude's choices:
+
+- Each ward of a day keeps its message (user.db migration 7, `AdwamuhaMessagePicks`; it goes
+  into backups). A message added to the content joins the round; a removed one is skipped. A
+  ward that did not count uses up no message.
+- A reminder tap checks "already read today" first, then the time.
+- "Not yet" or "over" is decided by the reminder's own time: a reminder set inside its ward's
+  window can only be late (it is over); one set outside it came before the ward began.
+- The same rule everywhere a ward opens: "continue where I stopped" does not reopen a ward whose
+  time is over (quietly: Home shows the ward of now); the ward screen opened late anyway (Home
+  left open past the time) goes back to Home with «انتهى وقت …». A ward opened in its time stays
+  open after it; finished then, it does not count (as before).
+- The texts of the moments that no longer show stay in the content database (no content change).
+  «مساري» still offers «إيقاف أدومها» after the path, and the maintenance tip still shows once on
+  Home (it takes the stage tip's place).
+
 ## Technical choices (milestone 0–1)
 
 | Topic | Choice | Why |
