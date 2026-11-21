@@ -66,6 +66,8 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     `scripts/dev/phone-apk.ps1` (CLAUDE.md, "Phone"): the APKs are in `.local/apk/`, and the
     latest is always at https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk
     (public pre-release `test-build`, owner's choice 2026-11-01).
+  - On the link since 2026-11-21: the APK of 385b255 (the owner feedback of 2026-11-14 and
+    2026-11-21), for the owner to install and check.
   - A second phone (Samsung): the same APK (eecb345), installed by the owner from the link (no USB).
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
