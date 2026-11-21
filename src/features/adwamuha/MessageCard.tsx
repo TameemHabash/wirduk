@@ -6,16 +6,19 @@ import { Button } from '@/components/Button';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { useAdwamuha } from './AdwamuhaProvider';
+import { LibraryMessageView } from './LibraryMessageView';
 
 /**
- * The one-time message due now on Home: the welcome, or a new stage's tip (owner's design,
- * 2026-10-29). Gone once dismissed with «حسنًا». (Owner, 2026-11-21: no encouraging words on
- * Home.)
+ * The message due now, once (prompt §9, §11): the end of the path (with the
+ * offer to keep «أدومها» on or turn it off), the welcome, a new step, a step
+ * back or break, the end of a week, a new stage's tip. The owner's own words or
+ * an approved verse / hadith (none again until all of its moment were shown).
+ * Shown on Home only; gone once dismissed.
  */
 export function MessageCard() {
   const { t } = useTranslation();
   const { colors, radii, spacing } = useAppTheme();
-  const { messages, dismissMessage } = useAdwamuha();
+  const { messages, dismissMessage, turnOff } = useAdwamuha();
   const message = messages[0];
   if (!message) return null;
 
@@ -29,12 +32,31 @@ export function MessageCard() {
         gap: spacing.sm,
       }}
     >
-      <AppText>{message.text}</AppText>
-      <Button
-        title={t('adwamuha.message.ok')}
-        kind="secondary"
-        onPress={() => void dismissMessage(message)}
-      />
+      {message.content.kind === 'owner' ? (
+        <AppText>{message.content.text}</AppText>
+      ) : (
+        <LibraryMessageView message={message.content.message} size={20} />
+      )}
+      {message.kind === 'finished' ? (
+        <>
+          <AppText tone="muted">{t('adwamuha.message.finishedOffer')}</AppText>
+          <Button
+            title={t('adwamuha.message.keepOn')}
+            onPress={() => void dismissMessage(message)}
+          />
+          <Button
+            title={t('adwamuha.message.turnOff')}
+            kind="secondary"
+            onPress={() => void dismissMessage(message).then(turnOff)}
+          />
+        </>
+      ) : (
+        <Button
+          title={t('adwamuha.message.ok')}
+          kind="secondary"
+          onPress={() => void dismissMessage(message)}
+        />
+      )}
     </View>
   );
 }

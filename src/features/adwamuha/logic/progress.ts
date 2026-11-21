@@ -250,3 +250,22 @@ export function shouldSuggestStepBack(
   if (last.length < 2) return false;
   return last.every((w) => w.morning < WEEK_TARGET) || last.every((w) => w.evening < WEEK_TARGET);
 }
+
+/**
+ * The last week of this step that is over, for the end-of-week message: a full
+ * week, or a cut one (the step began in it, or a break) that still had 4 and 4
+ * (it counted). Null before one is over; a cut week short of the target has no
+ * message (it was not a fair week).
+ */
+export function lastFinishedWeek(
+  state: PlanState,
+  records: readonly WardRecord[],
+  pauses: readonly Pause[],
+  today: DayKey,
+  firstDay: Weekday,
+): { weekStart: DayKey; reachedTarget: boolean } | null {
+  const week = weeksOfStep(state, records, pauses, today, firstDay).find(
+    (w) => w.complete && (w.full || w.met),
+  );
+  return week ? { weekStart: week.start, reachedTarget: week.met } : null;
+}

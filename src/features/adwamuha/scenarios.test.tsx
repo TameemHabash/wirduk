@@ -57,19 +57,24 @@ const firstDaysOfWeek = (n: number) => (date: DayKey) => {
 };
 
 describe('a steady user', () => {
-  it('the welcome and the stage tip; no week words; asked at the 4th good week; no word for a new step', async () => {
+  it('the welcome and the stage tip; week words; asked at the 4th good week; a new step gets its word', async () => {
     const s = await startScenario({ day: SAT, hour: 9 });
     expect(await readMessages(s)).toEqual(['welcome', 'tip']);
     await readToday(s);
     expect(s.view!.status).toMatchObject({ goodWeeks: 0, weeksNeeded: 4, weeksLeft: 4 });
-    const words: string[] = [];
-    await s.live(26, undefined, async () => {
+    const words: DayKey[] = [];
+    await s.live(26, undefined, async (date) => {
       expectNumbersMatchDots(s);
       expect(s.app.readyToMoveOn).toBe(false);
-      words.push(...(await readMessages(s)));
+      const kinds = await readMessages(s);
+      if (kinds.includes('week')) words.push(date);
     });
-    // No word at the end of a week (owner, 2026-11-21: no encouraging words on Home).
-    expect(words).toEqual([]);
+    // A word at the end of each full week (Fridays), none in between.
+    expect(words).toEqual(['2026-01-09', '2026-01-16', '2026-01-23']);
+    // Three different words: none comes again before all were shown (owner, 2026-11-21).
+    const weekWords = await s.repos.adwamuha.listPicks('weekReached');
+    expect(weekWords).toHaveLength(3);
+    expect(new Set(weekWords.map((p) => p.messageId)).size).toBe(3);
     // Thursday of the 4th week: it has 4 and 4 already, but counts only once it is over
     // (owner, 2026-11-15).
     expect(s.view!.status).toMatchObject({ goodWeeks: 3, weeksLeft: 1 });
@@ -80,14 +85,14 @@ describe('a steady user', () => {
     expect(s.app.readyToMoveOn).toBe(true);
     expect(s.view!.status).toMatchObject({ goodWeeks: 4, weeksLeft: 0, conditionMet: true });
 
-    // Home shows the question in «وردك اليوم».
-    expect(await readMessages(s)).toEqual([]);
+    // Home shows the question in «وردك اليوم» (after the week's word).
+    await readMessages(s);
     await s.show(<HomeScreen />);
     expect(await screen.findByText('جاهز لإضافة الذكر التالي؟', { exact: false })).toBeTruthy();
 
     await s.run((app) => app.advance());
     expect(s.app.stored!.state).toMatchObject({ step: 2, stepStartedIn: 'evening' });
-    expect(await readMessages(s)).toEqual([]); // no word for a new step; same stage: no new tip
+    expect(await readMessages(s)).toEqual(['newStep']); // same stage: no new tip
     // The new step began in the evening: its week is cut, and the bars count from the step's
     // start (that morning, read on step 1, counts for nothing; the evening counts).
     expect(s.view!.thisWeek).toMatchObject({
@@ -186,13 +191,12 @@ describe('the user’s choices', () => {
     expect(s.app.readyToMoveOn).toBe(true);
   }, 60_000);
 
-  it('«طرأ عليّ ظرف» back to half: no word; the steps reached before are climbed again a week each', async () => {
+  it('«طرأ عليّ ظرف» back to half: a word; the steps reached before are climbed again a week each', async () => {
     const s = await startScenario({ day: SAT, hour: 9, step: 7 });
     await readMessages(s);
     await s.run((app) => app.stepBack('half'));
     expect(s.app.stored!.state).toMatchObject({ step: 3, reclimb: true, highestStep: 7 });
-    // Only the tip of stage 1 (step 7 was stage 2), no word for the step back (2026-11-21).
-    expect(await readMessages(s)).toEqual(['tip']);
+    expect(await readMessages(s)).toContain('afterStepBack');
     expect(s.view!.status.weeksNeeded).toBe(1);
     await readToday(s);
     await s.live(6);
@@ -228,26 +232,29 @@ describe('the user’s choices', () => {
     ]);
     await s.show(<ProgressScreen />);
     expect(screen.getByText(/^استراحة حتى/)).toBeTruthy();
-    expect(await readMessages(s)).toEqual([]); // no word for the break (2026-11-21)
+    expect(await readMessages(s)).toContain('week'); // the full week before (3–9 January)
     await s.run((app) => app.endBreak());
     expect(s.app.activeBreak).toBeNull();
     expect(s.app.pauses[0]).toMatchObject({ from: '2026-01-12', to: '2026-01-13' });
     // This week has paused days: it is not full, but 4 and 4 on its other days still make it
-    // good (owner, 2026-11-14).
+    // good (owner, 2026-11-14), and then it brings its week word.
     expect(s.view!.thisWeek.full).toBe(false);
     await s.live(3); // Thursday 15 to Saturday 17
     expect(s.view!.status.goodWeeks).toBe(2);
+    expect(s.app.messages.map((m) => m.kind)).toContain('week');
   }, 60_000);
 
-  it('a break that cuts a week short of 4 and 4: it does not count, no suggestion', async () => {
+  it('a break that cuts a week short of 4 and 4: no week word, no suggestion', async () => {
     const s = await startScenario({ day: SAT, hour: 9 });
     await readMessages(s);
     await readToday(s);
     await s.live(6); // the first week, all read
+    await readMessages(s);
     await s.live(1); // Saturday 10, read
     await s.run((app) => app.takeBreak(1));
     await s.live(7, () => ({ morning: false, evening: false }));
     expect(s.view!.status.goodWeeks).toBe(1);
+    expect(s.app.messages.map((m) => m.kind)).not.toContain('week');
     expect(s.app.suggestStepBack).toBe(false);
   }, 60_000);
 
@@ -346,8 +353,7 @@ describe('the end of the path', () => {
     const state = s.app.stored!.state;
     expect(state).toMatchObject({ step: 24, maintenance: true });
     expect(await s.events()).toContain('finish:24');
-    // Only the maintenance tip; no end-of-path word or offer on Home (owner, 2026-11-21).
-    expect(s.app.messages.map((m) => m.kind)).toEqual(['tip']);
+    expect(s.app.messages.map((m) => m.kind)).toEqual(expect.arrayContaining(['finished', 'tip']));
     expect(s.app.readyToMoveOn).toBe(false);
     expect(s.app.suggestStepBack).toBe(false);
     // Maintenance: the grid goes on, nothing more to add.

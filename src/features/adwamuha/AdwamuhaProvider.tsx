@@ -23,12 +23,20 @@ import { useSettings } from '@/data/settings/SettingsProvider';
 
 import { type DayKey, addDays, daysBetween } from './logic/days';
 import { isPaused } from './logic/commitment';
-import { type MessageContent, messagePool, nextPick, textFor } from './logic/messages';
+import {
+  type MessageContent,
+  type MessagePick,
+  messagePool,
+  nextPick,
+  stableRandom,
+  textFor,
+} from './logic/messages';
 import {
   advance as advanceState,
   breakFrom,
   endBreak as endBreakPause,
   evaluate,
+  lastFinishedWeek,
   offPause,
   postpone as postponeState,
   shouldSuggestStepBack,
@@ -61,7 +69,10 @@ export interface AdwamuhaValue {
   slot: () => WardSlot;
   /** The first day of the week («بداية الأسبوع» in the settings): every week starts on it. */
   weekStart: Weekday;
-  /** Saves a new first day of the week. The weeks are cut again from the stored days at once. */
+  /**
+   * Saves a new first day of the week. The weeks are cut again from the stored days at once;
+   * the week that just ended on the new days brings no end-of-week message (it is no news).
+   */
   setWeekStart: (day: Weekday) => Promise<void>;
   /** The current ward's dhikr ids (the opening first); empty when the feature is off. */
   wardIds: (session: Session) => number[];
@@ -99,16 +110,15 @@ export interface AdwamuhaValue {
   /** The suggestion was shown (accepted or not): not again for 14 days. */
   dismissSuggestion: () => Promise<void>;
   /**
-   * The one-time messages due now on Home, the welcome first, then a new stage's tip. Show
-   * one. (Owner, 2026-11-21: no encouraging words on Home; the end-of-week, new-step, step-back
-   * and end-of-path messages are shown nowhere.)
+   * The one-time messages due now on Home, the most important first (the end of the path, the
+   * welcome, a new step, a step back or break, the end of a week, a new stage's tip). Show one.
    */
   messages: DueMessage[];
   /**
-   * The message for an occasion of a moment (a day's ward done): the owner's own message or one
-   * from the approved library. None comes again until every message of the moment has been
-   * shown (owner, 2026-11-21); the occasion keeps its message (saved in user.db). Null until
-   * the texts are read.
+   * The message for an occasion of a moment shown in place (a day's ward done): the owner's own
+   * message or one from the approved library. None comes again until every message of the
+   * moment has been shown (owner, 2026-11-21); the occasion keeps its message (saved in
+   * user.db). Null until the texts are read.
    */
   chooseMessage: (moment: AdwamuhaMoment, occasion: string) => Promise<MessageContent | null>;
   /**
@@ -146,18 +156,38 @@ interface Loaded {
   events: AdwamuhaEvent[];
   /** Keys of the messages already shown. */
   shown: ReadonlySet<string>;
+  /** The message each occasion of a moment got, the latest first. */
+  picks: (MessagePick & { moment: string })[];
 }
 
-const EMPTY: Loaded = { stored: null, records: [], pauses: [], events: [], shown: new Set() };
+const EMPTY: Loaded = {
+  stored: null,
+  records: [],
+  pauses: [],
+  events: [],
+  shown: new Set(),
+  picks: [],
+};
 
 /** A message due now on Home (each is shown once). */
 export interface DueMessage {
-  /** Marked as shown when dismissed. */
+  /** Marked as shown when dismissed (all of them: e.g. several new steps the same day). */
   keys: string[];
-  kind: 'welcome' | 'tip';
-  /** The words (the owner's, the design's, or Claude's drafts approved with them). */
-  text: string;
+  kind: 'finished' | 'welcome' | 'newStep' | 'afterStepBack' | 'week' | 'tip';
+  content: MessageContent;
+  /** A message of a moment's pool: saved as its pick when dismissed (no repeats). */
+  pick?: MessagePick & { moment: AdwamuhaMoment };
 }
+
+/** The end-of-week message's key: once per step and week. */
+const weekMessageKey = (state: { step: number; stepStartedOn: DayKey }, weekStart: DayKey) =>
+  `week:${state.step}:${state.stepStartedOn}:${weekStart}`;
+
+/** Event kinds behind a message shown only soon after (today or yesterday). */
+const RECENT_EVENT_MOMENTS: { kinds: string[]; moment: 'newStep' | 'afterStepBack' }[] = [
+  { kinds: ['advance'], moment: 'newStep' },
+  { kinds: ['step-back', 'break'], moment: 'afterStepBack' },
+];
 
 export function AdwamuhaProvider({
   children,
@@ -174,17 +204,18 @@ export function AdwamuhaProvider({
 
   const [ready, setReady] = useState(false);
   const [data, setData] = useState<Loaded>(EMPTY);
-  const { stored, records, pauses, events, shown } = data;
+  const { stored, records, pauses, events, shown, picks } = data;
 
   const readAll = useCallback(async (): Promise<Loaded> => {
-    const [s, r, p, e, k] = await Promise.all([
+    const [s, r, p, e, k, m] = await Promise.all([
       repo.load(),
       repo.listRecords(),
       repo.listPauses(),
       repo.listEvents(),
       repo.listShown(),
+      repo.listAllPicks(),
     ]);
-    return { stored: s, records: r, pauses: p, events: e, shown: new Set(k) };
+    return { stored: s, records: r, pauses: p, events: e, shown: new Set(k), picks: m };
   }, [repo]);
   const reload = useCallback(async () => {
     setData(await readAll());
@@ -461,30 +492,85 @@ export function AdwamuhaProvider({
     await reload();
   }, [reload, repo, stored, today]);
 
-  // Home's one-time messages: only the welcome and the stage tip (owner, 2026-11-21: no
-  // encouraging words on Home, only adding the next dhikr and what matters). The end-of-week,
-  // new-step, step-back / break and end-of-path messages were shown only here: now nowhere.
+  // Home's one-time messages (owner, 2026-11-21: all of them stay on Home).
   const messages = useMemo<DueMessage[]>(() => {
     if (!stored || !enabled) return [];
     const out: DueMessage[] = [];
-    const add = (key: string, kind: DueMessage['kind'], text: string | null) => {
-      if (text !== null) out.push({ keys: [key], kind, text });
+    const own = (keys: string[], kind: DueMessage['kind'], text: string | null) => {
+      if (keys.length > 0 && text !== null) {
+        out.push({ keys, kind, content: { kind: 'owner', text } });
+      }
     };
+    /**
+     * A message of a moment's pool for an occasion: none again until every message of the
+     * moment was shown (as after a ward, owner 2026-11-21). The same on screen until dismissed;
+     * saved as the moment's pick then.
+     */
+    const fromPool = (keys: string[], kind: DueMessage['kind'], moment: AdwamuhaMoment) => {
+      const occasion = keys[0];
+      if (!occasion || !textsRead) return;
+      const pool = messagePool(moment, texts, library);
+      const earlier = picks.filter((p) => p.moment === moment && p.occasion !== occasion);
+      const next = nextPick(pool, earlier, () => stableRandom(`${moment}:${occasion}`));
+      if (!next) return;
+      out.push({
+        keys,
+        kind,
+        content: next.message.content,
+        pick: { moment, occasion, messageId: next.message.key, round: next.round },
+      });
+    };
+    /** Unshown events of these kinds (`recent`: today or yesterday only). */
+    const unshown = (kinds: string[], recent = false) =>
+      events
+        .filter(
+          (e) =>
+            kinds.includes(e.kind) &&
+            !shown.has(`event:${e.id}`) &&
+            (!recent || daysBetween(e.day, today) <= 1),
+        )
+        .map((e) => `event:${e.id}`);
+
+    fromPool(unshown(['finish']), 'finished', 'finished');
     // The welcome right after turning it on: for the starting step and the ward open then.
     const start = events.find(
       (e) => e.kind === 'start' && !shown.has(`event:${e.id}`) && daysBetween(e.day, today) <= 1,
     );
     if (start) {
       const state = `${(start.step ?? 1) > 1 ? 'later' : 'first'}:${stored.state.planStartedIn ?? 'morning'}`;
-      add(`event:${start.id}`, 'welcome', textFor(texts, 'welcome', state));
+      own([`event:${start.id}`], 'welcome', textFor(texts, 'welcome', state));
+    }
+    // A new step, a step back or a break: a word right after (not days later).
+    for (const { kinds, moment } of RECENT_EVENT_MOMENTS) {
+      fromPool(unshown(kinds, true), moment, moment);
+    }
+    // No word for an extension any more (2026-11-14: the step is never extended; an old
+    // 'extend' event stays in the history only).
+    const week = lastFinishedWeek(stored.state, records, pauses, today, weekStart);
+    const weekKey = week ? weekMessageKey(stored.state, week.weekStart) : '';
+    if (week && !shown.has(weekKey)) {
+      fromPool([weekKey], 'week', week.reachedTarget ? 'weekReached' : 'weekBelow');
     }
     // A new stage's tip (stored as 'stage:N'), or the maintenance tip after the last step.
     const stage = stored.plan.steps[stored.state.step - 1]?.stage;
     const tipState = stored.state.maintenance ? 'maintenance' : `stage:${stage}`;
     const tipKey = stored.state.maintenance ? 'tip:maintenance' : `tip:${stage}`;
-    if (!shown.has(tipKey)) add(tipKey, 'tip', textFor(texts, 'tip', tipState));
+    if (!shown.has(tipKey)) own([tipKey], 'tip', textFor(texts, 'tip', tipState));
     return out;
-  }, [enabled, events, shown, stored, texts, today]);
+  }, [
+    enabled,
+    events,
+    library,
+    pauses,
+    picks,
+    records,
+    shown,
+    stored,
+    texts,
+    textsRead,
+    today,
+    weekStart,
+  ]);
 
   const markShown = useCallback(
     async (key: string) => {
@@ -497,6 +583,10 @@ export function AdwamuhaProvider({
 
   const dismissMessage = useCallback(
     async (message: DueMessage) => {
+      if (message.pick) {
+        const { moment, ...pick } = message.pick;
+        await repo.addPick(moment, pick);
+      }
       for (const key of message.keys) await repo.markShown(key);
       await reload();
     },
@@ -505,10 +595,14 @@ export function AdwamuhaProvider({
 
   const setWeekStart = useCallback(
     async (day: Weekday) => {
+      if (stored && enabled) {
+        const week = lastFinishedWeek(stored.state, records, pauses, today, day);
+        if (week) await repo.markShown(weekMessageKey(stored.state, week.weekStart));
+      }
       await update('weekStart', day);
       await reload();
     },
-    [reload, update],
+    [enabled, pauses, records, reload, repo, stored, today, update],
   );
 
   const turnOff = useCallback(async () => {

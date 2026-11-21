@@ -149,9 +149,9 @@ README.md is long: read only the section you need.
   hadith (`src/features/adwamuha/owner-texts.ts`) and the messages and tips, each chosen by state
   (`content-source/adwamuha-texts.json` → content table `AdwamuhaTexts`, read with
   `ContentRepository.listAdwamuhaTexts`; `textFor` / `chooseMessage` in `AdwamuhaProvider`).
-  Home's one-time place shows only the welcome and the stage tip (owner, 2026-11-21: no
-  encouraging words on Home). The message after a ward never repeats before all were shown
-  (`nextPick`, rounds kept in user.db migration 7 `AdwamuhaMessagePicks`). Inputs:
+  No message (after a ward, or Home's one-time ones) repeats before all of its moment were
+  shown (owner, 2026-11-21; `nextPick`, rounds kept in user.db migration 7
+  `AdwamuhaMessagePicks`; Home's are saved when dismissed). Inputs:
   the description, the owner's later edits in `docs/adwamuha/owner-edits.json` (cut from the
   owner's chat messages by script), the design `docs/adwamuha/flow-design.html`, and Claude's
   drafts for review in `docs/adwamuha/claude-drafts.json`. Never edit the outputs by hand; after

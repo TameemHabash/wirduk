@@ -143,9 +143,8 @@ export function TodayWardCard() {
       </DhikrText>
 
       {/*
-        The one-time place: the welcome or a new stage's tip (once), then the move-on question
-        and the gentle suggestion (they stay until answered). No encouraging words here
-        (owner, 2026-11-21).
+        The one-time place: a message due (once, tied to what just happened), then the
+        move-on question and the gentle suggestion (they stay until answered).
       */}
       {messages.length > 0 ? (
         <MessageCard />

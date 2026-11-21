@@ -338,7 +338,7 @@ where they differ.
 |---|---|
 | The message after a ward | No message comes again until every message has been shown (owner). The owner's words and the approved verses and hadiths for "a ward is completed" (19 today) come in rounds, in a random order; a new round never starts with the message just shown. Replaces "picked by a hash of the occasion" (2026-10-23). |
 | A ward outside its time | It never opens, also not from a reminder (owner: e.g. the morning ward after 4:00 م, the evening start in «أوقات الورد»). A reminder tapped then: Home stays, with «انتهى وقت ورد الصباح.» / «انتهى وقت ورد المساء.» (owner's choice of two options). A reminder set at a time before its ward begins: «يبدأ ورد الصباح الساعة …». Every time comes from the settings, never a fixed one (owner). |
-| Home's «وردك اليوم» | No encouraging words on Home; only adding the next dhikr and what is important (owner). Asked which of the earlier decisions stay, the owner kept: the move-on question, the gentle step-back suggestion, the welcome (first day), the stage tip, and the both-wards prayer. Out of Home: the end-of-week words, the new-step word, the step-back / break word, and the end-of-path message with its "keep it on / turn it off" offer. They showed only on Home, so they show nowhere now (the owner found the question of a new place for them unclear: the list already answered it). Replaces, from 2026-10-23: "A new step and a step back / break show in the message card on Home" and the description's §11 offer; from 2026-10-29: the one-time place shows "a message due" of any kind. |
+| Home's «وردك اليوم» | ~~No encouraging words on Home; only adding the next dhikr and what is important (owner). The owner kept the move-on question, the step-back suggestion, the welcome, the stage tip and the both-wards prayer; the end-of-week, new-step, step-back / break and end-of-path messages left Home (and so showed nowhere).~~ The same day, after seeing that, the owner asked to bring these four back to Home. So Home's messages are as before (2026-10-23, 2026-10-29), with one change: like the message after a ward, none comes again until every message of its moment was shown. |
 
 Claude's choices:
 
@@ -352,9 +352,11 @@ Claude's choices:
   time is over (quietly: Home shows the ward of now); the ward screen opened late anyway (Home
   left open past the time) goes back to Home with «انتهى وقت …». A ward opened in its time stays
   open after it; finished then, it does not count (as before).
-- The texts of the moments that no longer show stay in the content database (no content change).
-  «مساري» still offers «إيقاف أدومها» after the path, and the maintenance tip still shows once on
-  Home (it takes the stage tip's place).
+- Home's messages from the library (end of a week, new step, step back / break, end of the path)
+  come in rounds too, one round per moment (9 to 15 messages each). A message stays the same on
+  screen until «حسنًا» (or the end-of-path buttons), and is saved as its moment's pick then.
+- A few library messages are approved for two moments (e.g. after a ward and the end of a
+  week), so the same verse can show after a ward and on Home: each moment has its own round.
 
 ## Technical choices (milestone 0–1)
 

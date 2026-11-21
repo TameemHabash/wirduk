@@ -1,11 +1,11 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import type { Repositories } from '@/data/DataProvider';
-import type { AdwamuhaMoment } from '@/data/models';
 import { HomeScreen } from '@/features/home/HomeScreen';
-import { momentSnippets, stateText } from '@/test-utils/adwamuha-messages';
+import { expectMomentMessage, stateText } from '@/test-utils/adwamuha-messages';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 
+import { AdwamuhaSettingsScreen } from './AdwamuhaSettingsScreen';
 import { addDays } from './logic/days';
 import { startPlan } from './logic/progress';
 import type { Session } from './logic/sessions';
@@ -39,18 +39,6 @@ async function withPlan(step: number, daysAgo: number, seen: string[] = []): Pro
   return repos;
 }
 
-/** Home is on screen with no one-time message, and no message of these moments anywhere. */
-async function expectNoWords(repos: Repositories, moments: AdwamuhaMoment[]) {
-  expect(await screen.findByText(OWNER_TEXTS.labels.todayWard)).toBeOnTheScreen();
-  await settleLists();
-  expect(screen.queryByText('حسنًا')).toBeNull();
-  for (const moment of moments) {
-    for (const snippet of await momentSnippets(repos, moment)) {
-      expect(screen.queryAllByText(snippet, { exact: false })).toHaveLength(0);
-    }
-  }
-}
-
 async function read(repos: Repositories, daysAgo: number, session: Session) {
   await repos.adwamuha.addRecord({
     date: addDays(DAY, -daysAgo),
@@ -62,7 +50,7 @@ async function read(repos: Repositories, daysAgo: number, session: Session) {
   });
 }
 
-describe("Home's one-time messages: only the welcome and the stage tip (owner, 2026-11-21)", () => {
+describe("the owner's messages, each once (on Home only)", () => {
   it("a stage's tip when it begins; «حسنًا» puts it away, and «مساري» keeps it to read", async () => {
     const repos = await withPlan(1, 0);
     const tip = await stateText(repos, 'tip', 'stage:1');
@@ -76,70 +64,95 @@ describe("Home's one-time messages: only the welcome and the stage tip (owner, 2
     expect(screen.queryByText('حسنًا')).toBeNull();
   });
 
-  it('no word at the end of a week, the target reached or not', async () => {
+  it('the end of a week: the target reached, or a kind word', async () => {
     const good = await withPlan(1, 7, ['tip:1']);
     for (let d = 1; d <= 7; d++) await read(good, d, 'morning');
     for (let d = 1; d <= 4; d++) await read(good, d, 'evening');
-    const first = await renderWithApp(<HomeScreen />, good, {
-      now: at(9),
-      weekStartsOn: stepWeek,
-    });
-    await expectNoWords(good, ['weekReached', 'weekBelow']);
-    await first.unmount();
+    await renderWithApp(<HomeScreen />, good, { now: at(9), weekStartsOn: stepWeek });
+    const key = await expectMomentMessage(good, 'weekReached');
+    // «حسنًا» keeps the message shown as the moment's pick: it does not come again until every
+    // message of the moment was shown (owner, 2026-11-21).
+    await fireEvent.press(screen.getByText('حسنًا'));
+    await waitFor(async () =>
+      expect(await good.adwamuha.listPicks('weekReached')).toEqual([
+        { occasion: 'week:1:2026-05-05:2026-05-05', messageId: key, round: 1 },
+      ]),
+    );
+  });
 
+  it('the end of a week below the target', async () => {
     const thin = await withPlan(1, 7, ['tip:1']);
     await read(thin, 1, 'morning');
     await renderWithApp(<HomeScreen />, thin, { now: at(9), weekStartsOn: stepWeek });
-    await expectNoWords(thin, ['weekReached', 'weekBelow']);
+    await expectMomentMessage(thin, 'weekBelow');
   });
 
-  it('no word after «أضِف الذكر التالي» (the question itself stays on Home)', async () => {
+  it('a new week start cuts the weeks again, with no end-of-week message for that (owner, 2026-10-30)', async () => {
+    // Begun on Tuesday 28 April; the week from Saturday 2 May was over and its word shown.
+    const repos = await withPlan(1, 14, ['tip:1', 'week:1:2026-04-28:2026-05-02']);
+    for (let d = 1; d <= 14; d++) {
+      await read(repos, d, 'morning');
+      await read(repos, d, 'evening');
+    }
+    await renderWithApp(<AdwamuhaSettingsScreen />, repos, { now: at(9) });
+    await fireEvent.press(await screen.findByRole('radio', { name: 'الأحد' }));
+    await waitFor(async () => expect((await repos.settings.getAll()).weekStart).toBe(0));
+    // The week from Sunday 3 May is over too, but it is no news.
+    expect(await repos.adwamuha.wasShown('week:1:2026-04-28:2026-05-03')).toBe(true);
+    await renderWithApp(<HomeScreen />, repos, { now: at(9) });
+    await screen.findByText(OWNER_TEXTS.labels.todayWard);
+    expect(screen.queryByText('حسنًا')).toBeNull();
+  });
+
+  it('a new step: a word on Home right after «أضِف الذكر التالي»', async () => {
     const repos = await withPlan(1, 28, ['tip:1']); // stage 1: 4 weeks
     for (let d = 1; d <= 28; d++) {
       await read(repos, d, 'morning');
       await read(repos, d, 'evening');
     }
-    await renderWithApp(<HomeScreen />, repos, { now: at(9) });
+    await renderWithApp(<ProgressScreen />, repos, { now: at(9) });
     await fireEvent.press(await screen.findByText(OWNER_TEXTS.labels.addNext));
     await waitFor(async () => expect((await repos.adwamuha.load())?.state.step).toBe(2));
-    await waitFor(() => expect(screen.queryByText(OWNER_TEXTS.labels.addNext)).toBeNull());
-    await expectNoWords(repos, ['newStep']); // step 2: the same stage, no new tip
+    await renderWithApp(<HomeScreen />, repos, { now: at(9) });
+    await expectMomentMessage(repos, 'newStep');
   });
 
-  it('no word after a step back or a break, even the same day', async () => {
+  it('no word for a new step or a step back days later', async () => {
     const repos = await withPlan(2, 3, ['tip:1']);
-    await repos.adwamuha.logEvent(DAY, 'step-back', 1);
-    await repos.adwamuha.logEvent(DAY, 'break', 1);
+    await repos.adwamuha.logEvent(addDays(DAY, -3), 'advance', 2);
+    await repos.adwamuha.logEvent(addDays(DAY, -2), 'break', 2);
     await renderWithApp(<HomeScreen />, repos, { now: at(9) });
-    await expectNoWords(repos, ['afterStepBack']);
+    expect(await screen.findByText(OWNER_TEXTS.labels.todayWard)).toBeOnTheScreen();
+    expect(screen.queryByText('حسنًا')).toBeNull();
   });
 
   it('no extension word any more (2026-11-14): weeks short of the target just do not count', async () => {
     // Four weeks without a ward, and an extension left from the old rule.
     const repos = await withPlan(1, 28, ['tip:1']);
     await repos.adwamuha.logEvent(addDays(DAY, -1), 'extend', 1, { weeks: 1 });
+    for (const week of [7, 14, 21, 28]) {
+      await repos.adwamuha.markShown(`week:1:${addDays(DAY, -28)}:${addDays(DAY, -week)}`);
+    }
     await renderWithApp(<HomeScreen />, repos, {
       now: at(9),
       weekStartsOn: weekdayOf(addDays(DAY, -28)),
     });
-    await expectNoWords(repos, ['extended']);
+    expect(await screen.findByText(OWNER_TEXTS.labels.todayWard)).toBeOnTheScreen();
+    expect(screen.queryByText('حسنًا')).toBeNull();
     expect((await repos.adwamuha.listEvents()).map((e) => e.kind)).toEqual(['extend']);
   });
 
-  it('the end of the path: no word and no offer; «وضع المحافظة» and its tip', async () => {
+  it('the end of the path: a message, then keep it on or turn it off (once)', async () => {
     const repos = await withPlan(24, 28, ['tip:4']);
     for (let d = 1; d <= 28; d++) {
       await read(repos, d, 'morning');
       await read(repos, d, 'evening');
     }
-    const tip = await stateText(repos, 'tip', 'maintenance');
     await renderWithApp(<HomeScreen />, repos, { now: at(9) });
-    expect(await screen.findByText(tip)).toBeOnTheScreen();
+    await expectMomentMessage(repos, 'finished');
     await waitFor(async () => expect((await repos.adwamuha.load())?.state.maintenance).toBe(true));
-    for (const snippet of await momentSnippets(repos, 'finished')) {
-      expect(screen.queryAllByText(snippet, { exact: false })).toHaveLength(0);
-    }
-    expect(screen.queryByText('أوقف «أدومها»')).toBeNull();
+    await fireEvent.press(screen.getByText('أوقف «أدومها»'));
+    await waitFor(async () => expect((await repos.adwamuha.load())?.enabled).toBe(false));
   });
 });
 describe('texts chosen by state (content database)', () => {

@@ -51,7 +51,20 @@ export function textFor(
   return texts.find((t) => t.moment === moment && t.state === state)?.text ?? null;
 }
 
-/** The message an occasion (a day's ward) got, kept in user.db. */
+/**
+ * A number in [0, 1) that is always the same for the same key (FNV-1a): the "random" choice
+ * for a message on Home, so it does not change on screen before it is dismissed (and saved).
+ */
+export function stableRandom(key: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0) / 2 ** 32;
+}
+
+/** The message an occasion (a day's ward, an event, a week) got, kept in user.db. */
 export interface MessagePick {
   occasion: string;
   /** The message's `PoolMessage.key`. */

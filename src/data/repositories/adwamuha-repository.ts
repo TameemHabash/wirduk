@@ -232,6 +232,14 @@ export class AdwamuhaRepository {
     );
   }
 
+  /** Every moment's picks, the latest first. */
+  async listAllPicks(): Promise<(MessagePick & { moment: string })[]> {
+    return this.db.getAll<MessagePick & { moment: string }>(
+      `SELECT Moment AS moment, Occasion AS occasion, MessageId AS messageId, Round AS round
+         FROM AdwamuhaMessagePicks ORDER BY PickedAt DESC, rowid DESC`,
+    );
+  }
+
   /**
    * Saves the message an occasion got. The first one stays (two screens choosing at once
    * agree): returns the message id saved for the occasion.

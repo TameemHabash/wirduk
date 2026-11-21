@@ -31,7 +31,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | 13 | Quality and edge cases (every «أدومها» state tested, dev clock, cleanup, edge cases, the owner's phone) | 🟢 Done | 2d49084, 698aff6, 9373c31, 68a8074 |
 | — | Owner feedback 2026-11-01: «مساري»'s dot drawn square after «قرأتها من حفظي» (Galaxy only); "continue where I stopped" after the audio played (the process kept); the second ward's finish screen like the first (option ب) | 🟢 Done | 63091f6, ae60182, one commit 2026-11-01 |
 | — | Owner feedback 2026-11-14: a reminder tap checks the ward first; the ward read in parts (kept for its window); the «أدومها» badge on Home while off; the good-weeks rule (a week counts once it is over), the goal bars always shown | 🟢 Done | 907c445, one commit 2026-11-15 |
-| — | Owner feedback 2026-11-21: the message after a ward never repeats before all were shown; a ward never opens outside its time (also from a reminder); no encouraging words on Home | 🟢 Done | one commit, 2026-11-21 |
+| — | Owner feedback 2026-11-21: no message repeats before all of its kind were shown (after a ward and on Home); a ward never opens outside its time (also from a reminder); Home's messages back as before | 🟢 Done | 4e6afd0, one commit 2026-11-21 |
 | 14 | Google Play | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -70,7 +70,7 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
     test build first (their own adhkar and settings are lost, unless a backup feature exists).
-- **Tests:** 751 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
+- **Tests:** 755 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
   `AdwamuhaMessagePicks`, the message each ward got, 2026-11-21).
 
@@ -79,9 +79,6 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
 - **The owner feedback of 2026-11-14 and 2026-11-21** (below): to check on the phone with the
   next APK (built only when the owner asks). The week rule is Claude's advice, asked for by the
   owner: confirm or change it.
-- **2026-11-21:** the end-of-week, new-step, step-back and end-of-path messages now show nowhere
-  (they were on Home only). If the owner wants them somewhere else (e.g. the next ward's finish
-  screen), say so.
 
 Before that, nothing (2026-11-01). The old items, all closed:
 
@@ -125,7 +122,8 @@ day after. So a steady user is asked after exactly the step's weeks, as before.
 The owner's three points; decisions and details in `docs/decisions.md` (2026-11-21). Done
 (2026-11-21), checked in tests (not on the emulator or phone yet):
 
-1. **The message after a ward never repeats before all were shown**: the 19 messages (the
+1. **The message after a ward never repeats before all were shown** (and Home's too, see 3): the
+   19 messages (the
    owner's words + 18 approved verses and hadiths) come in rounds, in a random order; a new round
    does not start with the last one. Each ward keeps its message (user.db migration 7,
    `AdwamuhaMessagePicks`; `chooseMessage` in `AdwamuhaProvider`, `nextPick` in
@@ -134,9 +132,9 @@ The owner's three points; decisions and details in `docs/decisions.md` (2026-11-
    tapped late keeps Home, with «انتهى وقت ورد الصباح.» / «… المساء.» (or «يبدأ ورد … الساعة …» for
    a reminder set before the ward begins; times from the settings). "Continue where I stopped"
    does not reopen it, and the ward screen opened late goes back to Home with the note.
-3. **No encouraging words on Home**: «وردك اليوم» keeps the welcome, the stage tip, the move-on
-   question, the step-back suggestion and the both-wards prayer (the owner's choice). The
-   end-of-week, new-step, step-back / break and end-of-path messages show nowhere now.
+3. **Home's messages**: first taken off Home (the end-of-week, new-step, step-back / break and
+   end-of-path messages), then brought back the same day at the owner's request (second
+   commit). They now come in rounds too (one per moment): none again before all were shown.
 
 ## Milestone 9 — notifications and "report an issue"
 

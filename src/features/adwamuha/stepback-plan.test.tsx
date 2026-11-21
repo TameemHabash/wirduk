@@ -3,7 +3,7 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/HomeScreen';
-import { afterMessages, momentSnippets } from '@/test-utils/adwamuha-messages';
+import { afterMessages, expectMomentMessage } from '@/test-utils/adwamuha-messages';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 import { mockRouter } from '@/test-utils/router-mock';
 
@@ -46,7 +46,7 @@ afterEach(async () => {
 });
 
 describe('«طرأ عليّ ظرف أو مستجد في حياتي»', () => {
-  it('back to half the step: climbing again is faster, history kept, no word on Home', async () => {
+  it('back to half the step: climbing again is faster, history kept, a kind word', async () => {
     const repos = await withPlan(10);
     await openStepBack(repos);
     await fireEvent.press(screen.getByText('ارجع إلى نصف خطوتك: الخطوة 5'));
@@ -59,12 +59,9 @@ describe('«طرأ عليّ ظرف أو مستجد في حياتي»', () => {
     expect((await repos.adwamuha.listEvents()).map((e) => [e.kind, e.data])).toEqual([
       ['step-back', { from: 10, kind: 'half' }],
     ]);
-    // No encouraging word on Home (owner, 2026-11-21); only the new stage's tip.
+    // The kind word shows on Home (one-time messages are there only).
     await renderWithApp(<HomeScreen />, repos, { now: at(9) });
-    await screen.findByText(OWNER_TEXTS.labels.todayWard);
-    for (const snippet of await momentSnippets(repos, 'afterStepBack')) {
-      expect(screen.queryAllByText(snippet, { exact: false })).toHaveLength(0);
-    }
+    await expectMomentMessage(repos, 'afterStepBack');
   });
 
   it('back to the first three steps', async () => {
