@@ -67,7 +67,8 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     latest is always at https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk
     (public pre-release `test-build`, owner's choice 2026-11-01).
   - On the link since 2026-11-21: the APK of 385b255 (the owner feedback of 2026-11-14 and
-    2026-11-21), for the owner to install and check.
+    2026-11-21). The owner installed it and tested the 2026-11-14 changes (2026-11-21); the
+    2026-11-21 changes still wait for the owner's check.
   - A second phone (Samsung): the same APK (eecb345), installed by the owner from the link (no USB).
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
@@ -78,9 +79,10 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
 
 ## Waiting for the owner
 
-- **The owner feedback of 2026-11-14 and 2026-11-21** (below): to check on the phone with the
-  next APK (built only when the owner asks). The week rule is Claude's advice, asked for by the
-  owner: confirm or change it.
+- **The owner feedback of 2026-11-21** (below): to check on the phone with the APK of 385b255
+  (on the link). The 2026-11-14 changes: tested by the owner (2026-11-21).
+- **The week rule** (2026-11-14, point 4) is Claude's advice, asked for by the owner: confirm or
+  change it.
 
 Before that, nothing (2026-11-01). The old items, all closed:
 
@@ -100,7 +102,8 @@ eecb345 (2026-11-01): all good.
 ## Owner feedback 2026-11-14 («أدومها»)
 
 The owner's four points; decisions and details in `docs/decisions.md` (2026-11-14). Done
-(2026-11-15), checked on the emulator (dev build) and in tests:
+(2026-11-15), checked on the emulator (dev build) and in tests, and tested by the owner on the
+phone with the APK of 385b255 (2026-11-21):
 
 1. **A reminder tap checks the ward first** (`useNotificationTaps`): already read today, Home
    stays with a toast «قرأتَ ورد الصباح / المساء اليوم، تقبّل الله منك.»; otherwise the ward opens.
