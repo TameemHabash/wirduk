@@ -20,7 +20,8 @@ export const OWNER_TEXTS = {
     "keepWeek": "أبقِني أسبوعًا آخر",
     "editPlan": "عدّل الخطة",
     "resetPlan": "استعادة الخطة الافتراضية",
-    "morningReminder": "وردك الصباحي جاهز"
+    "morningReminder": "وردك الصباحي جاهز",
+    "stepPassed": "قطعتها"
   },
   "hadith": {
     "text": "أَحَبُّ الأعمالِ إلى اللّهِ أدْومُها و إن قَلَّ",

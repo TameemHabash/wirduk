@@ -1,6 +1,6 @@
 # Project status and next steps
 
-Last updated: 2026-11-21. Read this first when you come back to the project.
+Last updated: 2026-11-22. Read this first when you come back to the project.
 Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 
 ## Milestones
@@ -32,6 +32,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | — | Owner feedback 2026-11-01: «مساري»'s dot drawn square after «قرأتها من حفظي» (Galaxy only); "continue where I stopped" after the audio played (the process kept); the second ward's finish screen like the first (option ب) | 🟢 Done | 63091f6, ae60182, one commit 2026-11-01 |
 | — | Owner feedback 2026-11-14: a reminder tap checks the ward first; the ward read in parts (kept for its window); the «أدومها» badge on Home while off; the good-weeks rule (a week counts once it is over), the goal bars always shown | 🟢 Done | 907c445, one commit 2026-11-15 |
 | — | Owner feedback 2026-11-21: no message repeats before all of its kind were shown (after a ward and on Home); a ward never opens outside its time (also from a reminder); Home's messages back as before | 🟢 Done | 4e6afd0, one commit 2026-11-21 |
+| — | Owner feedback 2026-11-22 («عدّل الخطة»): «قطعتها» marks a step as passed (saved after the warning); steps 4 and 5 by the owner's names | 🟢 Done | one commit 2026-11-22 |
 | 14 | Google Play | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -73,7 +74,7 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
     test build first (their own adhkar and settings are lost, unless a backup feature exists).
-- **Tests:** 755 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
+- **Tests:** 771 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
   `AdwamuhaMessagePicks`, the message each ward got, 2026-11-21).
 
@@ -81,6 +82,9 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
 
 - **The owner feedback of 2026-11-21** (below): to check on the phone with the APK of 385b255
   (on the link). The 2026-11-14 changes: tested by the owner (2026-11-21).
+- **The owner feedback of 2026-11-22** («قطعتها», below): not on the phone yet (needs a new APK,
+  only when the owner asks). Claude's choices to confirm: «قطعتها» on later steps too, the last
+  step cannot be marked, reset keeps the steps done, the intro line.
 - **The week rule** (2026-11-14, point 4) is Claude's advice, asked for by the owner: confirm or
   change it.
 
@@ -140,6 +144,17 @@ The owner's three points; decisions and details in `docs/decisions.md` (2026-11-
 3. **Home's messages**: first taken off Home (the end-of-week, new-step, step-back / break and
    end-of-path messages), then brought back the same day at the owner's request (second
    commit). They now come in rounds too (one per moment): none again before all were shown.
+
+## Owner feedback 2026-11-22 («عدّل الخطة»)
+
+The owner's two points; decisions and details in `docs/decisions.md` (2026-11-22). Done
+(2026-11-22), checked in tests:
+
+1. **«قطعتها»** on the current step and every later one (`PlanEditorScreen.tsx`,
+   `logic/plan-edit.ts`: `withPassed`, `passSteps`): a marked step joins the steps done and the
+   current step moves on by one; saved only with «حفظ التعديل», after the same light-plan
+   warning. «تراجع» undoes a mark before saving. Reset now keeps the steps done.
+2. **Steps 4 and 5** show «الإخلاص والمعوذتين» and «آية الكرسي» (`dhikrLabel`, as «ترتيب الورد»).
 
 ## Milestone 9 — notifications and "report an issue"
 

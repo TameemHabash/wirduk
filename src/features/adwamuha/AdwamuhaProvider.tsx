@@ -44,6 +44,7 @@ import {
   type StepBack,
   stepBack as stepBackState,
 } from './logic/progress';
+import { keepsCurrent, passSteps } from './logic/plan-edit';
 import { type Session, type WardSlot, recordSlot, slotAt } from './logic/sessions';
 import type { UserPlan, WardRecord } from './logic/types';
 import type { Weekday } from './logic/weeks';
@@ -103,8 +104,12 @@ export interface AdwamuhaValue {
   activeBreak: StoredPause | null;
   /** Ends the break today. */
   endBreak: () => Promise<void>;
-  /** Saves the user's own plan (after the warning; the current step number stays). */
-  savePlan: (plan: UserPlan) => Promise<void>;
+  /**
+   * Saves the user's own plan (after the warning). `passed`: steps marked «قطعتها»
+   * (owner, 2026-11-22), already moved right after the steps done: the current step
+   * moves on by as many. Otherwise the current step number stays.
+   */
+  savePlan: (plan: UserPlan, passed?: number) => Promise<void>;
   /** The gentle step-back suggestion is due (low commitment; at most once every 14 days). */
   suggestStepBack: boolean;
   /** The suggestion was shown (accepted or not): not again for 14 days. */
@@ -470,13 +475,29 @@ export function AdwamuhaProvider({
   }, [activeBreak, reload, repo, stored, today]);
 
   const savePlan = useCallback(
-    async (plan: UserPlan) => {
+    async (plan: UserPlan, passed = 0) => {
       if (!stored) return;
-      await repo.save({ ...stored, plan });
-      await repo.logEvent(today, 'plan-edit', stored.state.step);
+      const state = passSteps(stored.state, stored.plan, plan, passed, today, slot().session);
+      if (
+        state.step !== stored.state.step &&
+        keepsCurrent(stored.state, stored.plan, plan, passed)
+      ) {
+        // Same step, new number: its last week's message, once seen, stays seen.
+        const week = lastFinishedWeek(stored.state, records, pauses, today, weekStart);
+        if (week && shown.has(weekMessageKey(stored.state, week.weekStart))) {
+          await repo.markShown(weekMessageKey(state, week.weekStart));
+        }
+      }
+      await repo.save({ ...stored, plan, state });
+      await repo.logEvent(
+        today,
+        'plan-edit',
+        state.step,
+        state.step !== stored.state.step ? { passed, from: stored.state.step } : undefined,
+      );
       await reload();
     },
-    [reload, repo, stored, today],
+    [pauses, records, reload, repo, shown, slot, stored, today, weekStart],
   );
 
   const suggestStepBack = useMemo(

@@ -3,6 +3,7 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/HomeScreen';
+import { resources } from '@/i18n/resources';
 import { afterMessages, expectMomentMessage } from '@/test-utils/adwamuha-messages';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 import { mockRouter } from '@/test-utils/router-mock';
@@ -18,6 +19,11 @@ import { ProgressScreen } from './ProgressScreen';
 const DAY = '2026-04-20';
 const at = (hh: number) => () => new Date(2026, 3, 20, hh, 0);
 const LIFE_LINK = 'طرأ عليّ ظرف';
+const PASSED = OWNER_TEXTS.labels.stepPassed;
+const KURSI = OWNER_TEXTS.wardNames['1001'];
+const QULS = OWNER_TEXTS.wardNames['1002'];
+/** The light-plan warning (the owner asked for the same one before saving «قطعتها»). */
+const PLAN_WARNING = resources.ar.common.adwamuha.plan.confirmBody;
 
 /** The feature on at `step` (highest = step), the step started `daysAgo` days ago. */
 async function withPlan(step: number, daysAgo = 3): Promise<Repositories> {
@@ -177,6 +183,118 @@ describe('«عدّل الخطة»', () => {
     expect(screen.queryByText('قبل أن تحفظ')).toBeNull();
     expect((await repos.adwamuha.load())?.state.step).toBe(2);
     alert.mockRestore();
+  });
+
+  it('steps 4 and 5 show by the owner’s names, as in «ترتيب الورد»', async () => {
+    await renderWithApp(<PlanEditorScreen />, await withPlan(1), { now: at(9) });
+    await screen.findByText(QULS);
+    const shown = screen
+      .getAllByText(new RegExp(`^(الخطوة [45]|${QULS}|${KURSI})$`))
+      .map((node) => node.props.children as string);
+    expect(shown).toEqual(['الخطوة 4', QULS, 'الخطوة 5', KURSI]);
+  });
+
+  it('«قطعتها» on later steps: they join the steps done once saved, after the warning; the step goes on', async () => {
+    const repos = await withPlan(1);
+    await renderWithApp(<PlanEditorScreen />, repos, { now: at(9) });
+    await fireEvent.press(await screen.findByLabelText(`${PASSED}: الخطوة 5`)); // آية الكرسي
+    // آية الكرسي is step 1 now, so الإخلاص والمعوذتين is still step 5.
+    await fireEvent.press(screen.getByLabelText(`${PASSED}: الخطوة 5`));
+    expect(screen.getAllByText('قطعتَها')).toHaveLength(2);
+    expect(screen.getByLabelText('تراجع: الخطوة 1')).toBeOnTheScreen();
+    expect(screen.getByLabelText('تراجع: الخطوة 2')).toBeOnTheScreen();
+    expect(screen.queryByLabelText('أسبوع أقل للخطوة 2')).toBeNull(); // done now
+    expect(screen.getByLabelText('أسبوع أقل للخطوة 3')).toBeOnTheScreen(); // the current step
+    expect((await repos.adwamuha.load())?.state.step).toBe(1); // nothing saved yet
+
+    await fireEvent.press(screen.getByText('حفظ التعديل'));
+    expect(await screen.findByText('قبل أن تحفظ')).toBeOnTheScreen();
+    expect(screen.getByText(PLAN_WARNING)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText('نعم، احفظ التعديل'));
+    await waitFor(async () => expect((await repos.adwamuha.load())?.state.step).toBe(3));
+    const stored = (await repos.adwamuha.load())!;
+    expect(stored.plan.steps.slice(0, 4).map((s) => s.morningDhikrId)).toEqual([
+      1001, 1002, 1012, 1013,
+    ]);
+    // The same dhikr is worked on: its days go on.
+    expect(stored.state).toMatchObject({ stepStartedOn: addDays(DAY, -3), highestStep: 3 });
+    expect((await repos.adwamuha.listEvents()).map((e) => [e.kind, e.step, e.data])).toEqual([
+      ['plan-edit', 3, { passed: 2, from: 1 }],
+    ]);
+  });
+
+  it('«قطعتها» on the current step: the next step begins today', async () => {
+    const repos = await withPlan(2);
+    await renderWithApp(<PlanEditorScreen />, repos, { now: at(9) });
+    await fireEvent.press(await screen.findByLabelText(`${PASSED}: الخطوة 2`));
+    expect(screen.getByLabelText('أسبوع أقل للخطوة 3')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText('حفظ التعديل'));
+    await fireEvent.press(await screen.findByText('نعم، احفظ التعديل'));
+    await waitFor(async () => expect((await repos.adwamuha.load())?.state.step).toBe(3));
+    expect((await repos.adwamuha.load())?.state).toMatchObject({
+      stepStartedOn: DAY,
+      stepStartedIn: 'morning',
+      reclimb: false,
+    });
+  });
+
+  it('«تراجع» puts a marked step back: nothing left to save', async () => {
+    await renderWithApp(<PlanEditorScreen />, await withPlan(1), { now: at(9) });
+    await fireEvent.press(await screen.findByLabelText(`${PASSED}: الخطوة 5`));
+    expect(screen.getByText('حفظ التعديل')).toBeEnabled();
+    await fireEvent.press(screen.getByLabelText('تراجع: الخطوة 1'));
+    expect(screen.queryByText('قطعتَها')).toBeNull();
+    expect(screen.getByLabelText(`${PASSED}: الخطوة 5`)).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'حفظ التعديل' })).toBeDisabled();
+  });
+
+  it('one step at least stays: the last one cannot be marked', async () => {
+    await renderWithApp(<PlanEditorScreen />, await withPlan(23), { now: at(9) });
+    expect(await screen.findByLabelText(`${PASSED}: الخطوة 24`)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByLabelText(`${PASSED}: الخطوة 23`));
+    expect(screen.queryByLabelText(`${PASSED}: الخطوة 24`)).toBeNull();
+  });
+
+  it('reset after «قطعتها»: the steps done stay, the rest goes back to the default', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    const repos = await withPlan(3);
+    const stored = (await repos.adwamuha.load())!;
+    const order = [5, 4, 1, 2, 3, 6, 7, 8]; // آية الكرسي and the Quls passed, now at step 3
+    const steps = [
+      ...order.map((n) => stored.plan.steps[n - 1]!),
+      ...stored.plan.steps.slice(order.length),
+    ].map((s, i) => (i === 6 ? { ...s, weeks: 1 } : s));
+    await repos.adwamuha.save({ ...stored, plan: { ...stored.plan, steps } });
+    await renderWithApp(<PlanEditorScreen />, repos, { now: at(9) });
+    await fireEvent.press(await screen.findByLabelText(`${PASSED}: الخطوة 4`));
+    await fireEvent.press(screen.getByText(OWNER_TEXTS.labels.resetPlan));
+    await act(async () => (alert.mock.calls[0]![2] as AlertButton[])[1]!.onPress!());
+    expect(screen.queryByLabelText('تراجع: الخطوة 3')).toBeNull(); // the mark is gone too
+    await fireEvent.press(screen.getByText('حفظ التعديل'));
+    await waitFor(async () => expect((await repos.adwamuha.load())?.plan.steps[6]!.weeks).toBe(3));
+    expect(screen.queryByText('قبل أن تحفظ')).toBeNull();
+    const saved = (await repos.adwamuha.load())!;
+    expect(saved.plan.steps.slice(0, 4).map((s) => s.morningDhikrId)).toEqual([
+      1001, 1002, 1012, 1013,
+    ]);
+    expect(saved.state.step).toBe(3);
+    alert.mockRestore();
+  });
+
+  it('the step goes on under a new number: its last week’s message is not shown again', async () => {
+    const repos = await withPlan(1, 10);
+    const weekStart = addDays(DAY, -7);
+    // The week just over was seen on Home under step 1.
+    await repos.adwamuha.markShown(`week:1:${addDays(DAY, -10)}:${weekStart}`);
+    await renderWithApp(<PlanEditorScreen />, repos, {
+      now: at(9),
+      weekStartsOn: weekdayOf(weekStart),
+    });
+    await fireEvent.press(await screen.findByLabelText(`${PASSED}: الخطوة 5`));
+    await fireEvent.press(screen.getByText('حفظ التعديل'));
+    await fireEvent.press(await screen.findByText('نعم، احفظ التعديل'));
+    await waitFor(async () => expect((await repos.adwamuha.load())?.state.step).toBe(2));
+    expect(await repos.adwamuha.markShown(`week:2:${addDays(DAY, -10)}:${weekStart}`)).toBe(false);
   });
 
   it('in the order mode, only the steps after the current one have a handle', async () => {

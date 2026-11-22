@@ -45,7 +45,8 @@ Each state below is reached in a test, and what the app decides and shows there 
 | Off, then on (start again) | «ابدأ من جديد» | A new plan from today; history kept | `scenarios`, `setup.test.tsx` |
 | Read outside the app | «قرأتُ وردي بدون التطبيق», yesterday's «+» | Today or yesterday only; undo | `scenarios`, `progress-screens.test.tsx` |
 | The last step done | Step 24, the rule met | «وضع المحافظة», the end word with its offer, its tip; no question | `plan-walk`, `scenarios` (end), `messages.test.tsx` |
-| The plan edited | «عدّل الخطة» | The step stays; the ward follows | `scenarios`, `stepback-plan.test.tsx` |
+| The plan edited | «عدّل الخطة» | The step stays; the ward follows; reset keeps the steps done | `scenarios`, `stepback-plan.test.tsx`, `plan-edit.test.ts` |
+| A step marked «قطعتها» (2026-11-22) | «عدّل الخطة», the current step or a later one, saved after the warning | It joins the steps done (the ward has it at once); the current step moves on by one per mark. Only later steps marked: the same step goes on (its days, weeks and week word kept). The current one marked: the next begins today. One step at least stays | `plan-edit.test.ts`, `stepback-plan.test.tsx` |
 | Ward times changed | «أوقات الورد» | The windows move | `sessions.test.ts`, `settings-reminders.test.tsx` |
 | Ward order | «ترتيب الورد» (setup 3, settings) | The same adhkar, another order | `ward.test.ts`, `WardScreen.test.tsx`, `setup.test.tsx` |
 | Week start changed | «بداية الأسبوع» (any of 4, mid-week) | Grid and bars from that day; no repeated word | `settings-reminders.test.tsx`, `messages.test.tsx`, `weeks.test.ts` |

@@ -48,5 +48,10 @@
         "name": "الإخلاص والمعوذتين"
       }
     ]
+  },
+  "stepPassed": {
+    "date": "2026-11-22",
+    "note": "The plan editor's button that marks a step as passed (owner, 2026-11-22: the user already keeps it). Cut from their message by script.",
+    "text": "قطعتها"
   }
 }

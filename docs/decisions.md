@@ -358,6 +358,35 @@ Claude's choices:
 - A few library messages are approved for two moments (e.g. after a ward and the end of a
   week), so the same verse can show after a ward and on Home: each moment has its own round.
 
+## 2026-11-22 — Owner feedback («عدّل الخطة»)
+
+The owner's two points (2026-11-22). The owner's word is cut from their message by script
+(`docs/adwamuha/owner-edits.json`, `stepPassed`).
+
+| Topic | Decision |
+|---|---|
+| «قطعتها» | In «عدّل الخطة» the user can mark a step as passed (owner). It is saved only with «حفظ التعديل», after the same light-plan warning (and hadith) as any other change. |
+| Steps 4 and 5 | They show as «الإخلاص والمعوذتين» and «آية الكرسي» (the owner's names), as in «ترتيب الورد»; the other steps keep their first words. Also in the order mode. |
+
+Claude's choices:
+
+- «قطعتها» is on the current step and on every later step (a user often already keeps «آية
+  الكرسي» or the Quls). A marked step joins the steps done, right after them, in the order
+  marked; the other steps keep their order. Each mark moves the current step on by one, so the
+  ward gets the marked dhikr at once.
+- Only later steps marked: the user goes on with the same dhikr (it gets a new number): its days,
+  its good weeks and its seen end-of-week word are kept. The current step marked: the next one
+  begins today, as after «أضِف الذكر التالي» (a step reached before a step back needs a week).
+  No "new step" word on Home: the user did it themselves (the toast «حُفظت الخطة.» shows).
+- One step at least stays: the last step left cannot be marked (it is reached the usual way, and
+  ends the path). None in «وضع المحافظة».
+- A mark not saved yet can be undone («تراجع»): the step goes back where it was.
+- «استعادة الخطة الافتراضية» now keeps the steps done as they are and puts the default order and
+  weeks back for the rest (before, it put the whole default back, so after a reorder or «قطعتها»
+  the ward could lose a dhikr the user keeps). It also clears the marks not saved.
+- The button word is the owner's, as written («قطعتها», no mark); the card of a step done keeps
+  «قطعتَها». The intro line says to tap it (Claude's words, for review).
+
 ## Technical choices (milestone 0–1)
 
 | Topic | Choice | Why |

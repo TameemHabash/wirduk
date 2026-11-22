@@ -44,6 +44,8 @@ export interface OwnerEdits {
   designFixes?: { date: string; note: string; fixes: { key: string; from: string; to: string }[] };
   /** Names shown instead of a dhikr's first words (owner, 2026-10-30), with its plan ids. */
   wardNames?: { date: string; note: string; names: { ids: number[]; name: string }[] };
+  /** The plan editor's button that marks a step as passed (owner, 2026-11-22). */
+  stepPassed?: { date: string; note: string; text: string };
 }
 
 export interface ClaudeDrafts {
@@ -153,6 +155,8 @@ export function extractOwnerTexts(prompt: string, edits: OwnerEdits = {}) {
       editPlan,
       resetPlan,
       morningReminder,
+      // «عدّل الخطة»: mark a step the user already keeps as passed (owner, 2026-11-22).
+      ...(edits.stepPassed && { stepPassed: edits.stepPassed.text }),
     },
     messages,
     tips,
