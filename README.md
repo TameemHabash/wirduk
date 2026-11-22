@@ -275,7 +275,8 @@ step's weeks. 24 steps in 4 stages lead to the full morning and evening adhkar.
   today or yesterday. Breaks and days with the feature off count for nothing. A ward that was
   already over when the plan or a step began is not counted.
 - **Never automatic:** «جاهز لإضافة الذكر التالي؟» waits for the user; a step that is not ready
-  gets more weeks, without blame. «طرأ عليّ ظرف» steps back or takes a break.
+  gets more weeks, without blame. «طرأ عليّ ظرف» steps back (half the step, the first three, or a
+  step picked with − and +) or takes a break.
 - **Messages:** at the owner's moments (a ward done, end of a week, a new step…) one message:
   the owner's own words or an approved verse / hadith from `content-source/adwamuha-messages.json`
   (verses from Tanzil, hadiths from Dorar; `scripts/adwamuha/messages.ts`).

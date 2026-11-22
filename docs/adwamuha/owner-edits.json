@@ -53,5 +53,10 @@
     "date": "2026-11-22",
     "note": "The plan editor's button that marks a step as passed (owner, 2026-11-22: the user already keeps it), with the damma the owner asked for in a second message the same day. Cut from their messages by script.",
     "text": "قطعتُها"
+  },
+  "stepBackTo": {
+    "date": "2026-11-22",
+    "note": "The step-back sheet's choice of a step to go back to, with − and + (owner, 2026-11-22: before the break; the design approved the same day). Cut from their message by script.",
+    "text": "ارجع إلى الخطوة:"
   }
 }

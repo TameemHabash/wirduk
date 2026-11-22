@@ -172,12 +172,20 @@ export function postpone(state: PlanState, today: DayKey): PlanState {
   return { ...state, askAgainOn: addDays(today, WEEK_DAYS) };
 }
 
-export type StepBack = 'half' | 'firstThree';
+/**
+ * A step back: half the current step, the first three, or a step the user
+ * picked with − and + («ارجع إلى الخطوة:», owner, 2026-11-22).
+ */
+export type StepBack = 'half' | 'firstThree' | { step: number };
 
-/** The step a step back goes to: half the current one, or the first three. */
+/** The step a step back goes to (never past the current one, never below 1). */
 export function stepBackTarget(step: number, kind: StepBack): number {
+  if (typeof kind === 'object') return Math.min(step, Math.max(1, Math.floor(kind.step)));
   return kind === 'half' ? Math.max(1, Math.floor(step / 2)) : Math.min(step, 3);
 }
+
+/** The steps «ارجع إلى الخطوة:» offers: 1 up to the one before the current step (none on step 1). */
+export const lastStepBackChoice = (step: number): number => step - 1;
 
 /**
  * «طرأ عليّ ظرف»: go back. History is kept; the steps reached before are

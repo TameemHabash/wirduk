@@ -10,7 +10,6 @@ import { Icon } from '@/components/Icon';
 import { IconButton } from '@/components/IconButton';
 import { SortableList } from '@/components/SortableList';
 import { useToast } from '@/components/Toast';
-import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
@@ -30,7 +29,8 @@ import {
 import type { UserPlan, UserPlanStep } from './logic/types';
 import { copyDefaultPlan } from './logic/ward';
 import { OWNER_TEXTS } from './owner-texts';
-import { dhikrLabel } from './setup';
+import { stepLabel, stepSession } from './setup';
+import { useDhikrTexts } from './useDhikrTexts';
 
 /**
  * «عدّل الخطة» (prompt §4.3; owner): later steps can be reordered, each step's
@@ -57,22 +57,16 @@ export function PlanEditorScreen() {
   // The steps marked «قطعتها» here, in the order marked (applied when saved).
   const [passed, setPassed] = useState<string[]>([]);
   const [defaultPlan, setDefaultPlan] = useState<UserPlan | null>(null);
-  const [texts, setTexts] = useState(new Map<number, string>());
+  const texts = useDhikrTexts();
   const [reordering, setReordering] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    const lang = i18n.language;
-    Promise.all([
-      content.getDefaultPlan(lang),
-      content.listAdhkar(APP_CONFIG.content.morningCategoryId, lang),
-      content.listAdhkar(APP_CONFIG.content.eveningCategoryId, lang),
-    ])
-      .then(([plan, morning, evening]) => {
-        if (cancelled) return;
-        setDefaultPlan(copyDefaultPlan(plan));
-        setTexts(new Map([...morning, ...evening].map((d) => [d.id, d.text])));
+    content
+      .getDefaultPlan(i18n.language)
+      .then((plan) => {
+        if (!cancelled) setDefaultPlan(copyDefaultPlan(plan));
       })
       .catch(() => undefined);
     return () => {
@@ -128,16 +122,10 @@ export function PlanEditorScreen() {
   const pass = (s: UserPlanStep) => setPassed([...passed, stepKey(s)]);
   const unpass = (s: UserPlanStep) => setPassed(passed.filter((k) => k !== stepKey(s)));
 
-  const describe = (s: UserPlanStep) => {
-    const session =
-      s.morningDhikrId !== null && s.eveningDhikrId !== null
-        ? t('adwamuha.plan.both')
-        : s.morningDhikrId !== null
-          ? t('adwamuha.plan.morning')
-          : t('adwamuha.plan.evening');
-    const id = s.morningDhikrId ?? s.eveningDhikrId!;
-    return { session, words: dhikrLabel(id, texts.get(id) ?? '', 6) };
-  };
+  const describe = (s: UserPlanStep) => ({
+    session: t(`adwamuha.plan.${stepSession(s)}`),
+    words: stepLabel(s, texts),
+  });
   const positionOf = (s: UserPlanStep) =>
     draft.steps.findIndex((x) => stepKey(x) === stepKey(s)) + 1;
 

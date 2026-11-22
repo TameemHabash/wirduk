@@ -7,6 +7,7 @@ import {
   endBreak,
   evaluate,
   lastFinishedWeek,
+  lastStepBackChoice,
   moveOnStatus,
   offPause,
   planSkipped,
@@ -196,6 +197,22 @@ describe('step back («طرأ عليّ ظرف»)', () => {
     [10, 'firstThree', 3],
   ] as const)('step %i, %s → step %i', (step, kind, target) => {
     expect(stepBackTarget(step, kind)).toBe(target);
+  });
+
+  it('a step the user picked («ارجع إلى الخطوة:»): never past the current one, never below 1', () => {
+    expect(stepBackTarget(10, { step: 4 })).toBe(4);
+    expect(stepBackTarget(10, { step: 9 })).toBe(9);
+    expect(stepBackTarget(10, { step: 12 })).toBe(10);
+    expect(stepBackTarget(10, { step: 0 })).toBe(1);
+    expect(lastStepBackChoice(10)).toBe(9);
+    expect(lastStepBackChoice(1)).toBe(0); // nothing to pick
+    const backed = stepBack(stateAt(10, day(0), { highestStep: 10 }), { step: 4 }, day(50));
+    expect(backed).toMatchObject({
+      step: 4,
+      stepStartedOn: day(50),
+      reclimb: true,
+      highestStep: 10,
+    });
   });
 
   it('climbs back faster: a step reached before takes 1 week', () => {

@@ -37,6 +37,7 @@ Each state below is reached in a test, and what the app decides and shows there 
 | Not opened for weeks | The app opens after a long gap | Nothing added; the good weeks before stay | `scenarios` (not opened) |
 | The gentle suggestion | 2 full weeks short | «طرأ عليّ ظرف» offered; then 14 days quiet | `plan-walk`, `scenarios`, `stepback-plan.test.tsx` |
 | Step back (half / first three) | «طرأ عليّ ظرف» | A word; reached steps a week each | `scenarios`, `stepback-plan.test.tsx` |
+| Step back to a picked step (2026-11-22) | «طرأ عليّ ظرف» → «ارجع إلى الخطوة:», − and + (1 to the step before the current one; one back to begin with), then «ارجع إلى الخطوة N» | As a step back: a word; reached steps a week each. Shows the step's first words and «…», or the owner's name (steps 4 and 5). None on step 1 | `progress.test.ts`, `stepback-plan.test.tsx` |
 | A break (1 or 2 weeks) | «طرأ عليّ ظرف» → break | A line in the grid, the bars faded; «أنهِ الاستراحة»; a week it cut still counts with 4 + 4 | `scenarios` (break, two cases), `stepback-plan.test.tsx`, `progress-screens.test.tsx` |
 | The ward read in parts | Leave the ward, open it again in its window | It goes on at the first dhikr not read; fresh in the next window; cleared once finished | `WardScreen.test.tsx`, `adwamuha-repository.test.ts`, `ward-progress.test.ts` |
 | A reminder tapped | The morning / evening reminder | Its ward; already read today, or not its time (2026-11-21): Home stays, with a toast | `settings-reminders.test.tsx` |

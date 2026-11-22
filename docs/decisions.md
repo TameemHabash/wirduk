@@ -388,6 +388,30 @@ Claude's choices:
   correction the same day). The card of a step done keeps «قطعتَها». The intro line says to tap
   it (Claude's words, for review).
 
+## 2026-11-22 (2) — Owner feedback («طرأ عليّ ظرف»)
+
+The owner asked for one more choice in the step-back sheet, saw an HTML design first
+(https://claude.ai/artifact/7KCktREA6T2xDbf2dp7ufM, private to the owner) and approved it the same
+day. The owner's words «ارجع إلى الخطوة:» are cut from their message by script
+(`docs/adwamuha/owner-edits.json`, `stepBackTo`).
+
+| Topic | Decision |
+|---|---|
+| «ارجع إلى الخطوة:» | A choice before the break: − and + pick the step to go back to (owner). It shows the step's first words with «…» at the end, except «الإخلاص والمعوذتين» and «آية الكرسي», which show by name (owner; as «عدّل الخطة»). |
+| The button | «ارجع إلى الخطوة N» saves it (Claude's words in the design; the owner: "good text"). |
+
+Claude's choices (in the approved design):
+
+- The steps offered: 1 up to the one before the current step. It starts one step back each time
+  the sheet opens. On step 1 the choice is hidden.
+- − and + only pick; nothing changes until the button. Then it is a step back like the other
+  two: history kept, a step reached before needs one week, the step-back word on Home. The event
+  log says `kind: 'chosen'`.
+- Under the words, the step's wards («صباحًا ومساءً», …), as in «عدّل الخطة». The steps come from
+  the user's own plan (after a reorder or «قطعتها», the step at that number now).
+- The sheet scrolls now (it is taller; small screens, big fonts), and keeps clear of the status
+  and navigation bars. Checked on the emulator with the system font at 1.0, 1.3 and 2.0.
+
 ## Technical choices (milestone 0–1)
 
 | Topic | Choice | Why |

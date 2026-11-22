@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 
+import type { UserPlanStep } from './logic/types';
 import { OWNER_TEXTS } from './owner-texts';
 
 /**
@@ -35,4 +36,19 @@ const WARD_NAMES: Readonly<Record<string, string>> = OWNER_TEXTS.wardNames;
  */
 export function dhikrLabel(id: number, text: string, count = 3): string {
   return WARD_NAMES[String(id)] ?? firstWords(text, count);
+}
+
+/** The ward(s) a plan step adds its dhikr to. */
+export function stepSession(step: UserPlanStep): 'both' | 'morning' | 'evening' {
+  if (step.morningDhikrId !== null && step.eveningDhikrId !== null) return 'both';
+  return step.morningDhikrId !== null ? 'morning' : 'evening';
+}
+
+/**
+ * A plan step by its dhikr: the first 6 words or the owner's name («عدّل الخطة»,
+ * «ارجع إلى الخطوة:»). `texts`: from `useDhikrTexts`.
+ */
+export function stepLabel(step: UserPlanStep, texts: ReadonlyMap<number, string>): string {
+  const id = step.morningDhikrId ?? step.eveningDhikrId!;
+  return dhikrLabel(id, texts.get(id) ?? '', 6);
 }

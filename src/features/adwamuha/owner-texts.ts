@@ -21,7 +21,8 @@ export const OWNER_TEXTS = {
     "editPlan": "عدّل الخطة",
     "resetPlan": "استعادة الخطة الافتراضية",
     "morningReminder": "وردك الصباحي جاهز",
-    "stepPassed": "قطعتُها"
+    "stepPassed": "قطعتُها",
+    "stepBackTo": "ارجع إلى الخطوة:"
   },
   "hadith": {
     "text": "أَحَبُّ الأعمالِ إلى اللّهِ أدْومُها و إن قَلَّ",

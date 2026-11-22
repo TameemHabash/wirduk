@@ -54,6 +54,11 @@ describe("the owner's texts for Adwamuha", () => {
     expect(extractOwnerTexts(prompt).labels).not.toHaveProperty('stepPassed');
   });
 
+  it("the step-back sheet's «go back to a step» is the owner's words from their edits (2026-11-22)", () => {
+    expect(extractOwnerTexts(prompt, edits).labels.stepBackTo).toBe(edits.stepBackTo!.text);
+    expect(extractOwnerTexts(prompt).labels).not.toHaveProperty('stepBackTo');
+  });
+
   it('the module keeps only the labels and the hadith (the messages are in the database)', () => {
     expect(read(MODULE_FILE)).not.toMatch(/"messages"|"tips"/);
   });

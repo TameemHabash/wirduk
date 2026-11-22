@@ -46,6 +46,8 @@ export interface OwnerEdits {
   wardNames?: { date: string; note: string; names: { ids: number[]; name: string }[] };
   /** The plan editor's button that marks a step as passed (owner, 2026-11-22). */
   stepPassed?: { date: string; note: string; text: string };
+  /** The step-back sheet's choice of a step to go back to (owner, 2026-11-22). */
+  stepBackTo?: { date: string; note: string; text: string };
 }
 
 export interface ClaudeDrafts {
@@ -157,6 +159,8 @@ export function extractOwnerTexts(prompt: string, edits: OwnerEdits = {}) {
       morningReminder,
       // «عدّل الخطة»: mark a step the user already keeps as passed (owner, 2026-11-22).
       ...(edits.stepPassed && { stepPassed: edits.stepPassed.text }),
+      // «طرأ عليّ ظرف»: go back to a step the user picks with − and + (owner, 2026-11-22).
+      ...(edits.stepBackTo && { stepBackTo: edits.stepBackTo.text }),
     },
     messages,
     tips,

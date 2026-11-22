@@ -1,6 +1,7 @@
 import { Alert, type AlertButton } from 'react-native';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
+import { APP_CONFIG } from '@/config/app-config';
 import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { resources } from '@/i18n/resources';
@@ -15,6 +16,7 @@ import { copyDefaultPlan } from './logic/ward';
 import { OWNER_TEXTS } from './owner-texts';
 import { PlanEditorScreen } from './PlanEditorScreen';
 import { ProgressScreen } from './ProgressScreen';
+import { stepLabel } from './setup';
 
 const DAY = '2026-04-20';
 const at = (hh: number) => () => new Date(2026, 3, 20, hh, 0);
@@ -24,6 +26,8 @@ const KURSI = OWNER_TEXTS.wardNames['1001'];
 const QULS = OWNER_TEXTS.wardNames['1002'];
 /** The light-plan warning (the owner asked for the same one before saving «قطعتها»). */
 const PLAN_WARNING = resources.ar.common.adwamuha.plan.confirmBody;
+const STEP_BACK = resources.ar.common.adwamuha.stepBack;
+const PLAN = resources.ar.common.adwamuha.plan;
 
 /** The feature on at `step` (highest = step), the step started `daysAgo` days ago. */
 async function withPlan(step: number, daysAgo = 3): Promise<Repositories> {
@@ -81,6 +85,57 @@ describe('«طرأ عليّ ظرف أو مستجد في حياتي»', () => {
     await openStepBack(await withPlan(1));
     expect(screen.getByText('ارجع إلى نصف خطوتك: الخطوة 1')).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'ارجع إلى نصف خطوتك: الخطوة 1' })).toBeDisabled();
+    // Nothing to pick either.
+    expect(screen.queryByText(OWNER_TEXTS.labels.stepBackTo)).toBeNull();
+  });
+
+  it('«ارجع إلى الخطوة:» (owner, 2026-11-22): − and + pick a step, shown by its first words or the owner’s name', async () => {
+    const repos = await withPlan(10);
+    const plan = (await repos.adwamuha.load())!.plan;
+    const texts = new Map(
+      [
+        ...(await repos.content.listAdhkar(APP_CONFIG.content.morningCategoryId, 'ar')),
+        ...(await repos.content.listAdhkar(APP_CONFIG.content.eveningCategoryId, 'ar')),
+      ].map((d) => [d.id, d.text] as const),
+    );
+    await openStepBack(repos);
+    expect(screen.getByText(OWNER_TEXTS.labels.stepBackTo)).toBeOnTheScreen();
+    // One step back to begin with: step 9, by its first words and «…».
+    const nine = stepLabel(plan.steps[8]!, texts);
+    expect(nine).toMatch(/…$/);
+    expect(await screen.findByText(nine)).toBeOnTheScreen();
+    expect(screen.getByText(STEP_BACK.toStep.replace('{{step}}', '9'))).toBeOnTheScreen();
+    expect(screen.getByText(PLAN.both)).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: STEP_BACK.later })).toBeDisabled();
+
+    // Steps 5 and 4: the owner's names, without «…».
+    for (let i = 0; i < 4; i++) await fireEvent.press(screen.getByLabelText(STEP_BACK.earlier));
+    expect(screen.getByText(KURSI)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByLabelText(STEP_BACK.earlier));
+    expect(screen.getByText(QULS)).toBeOnTheScreen();
+    expect(screen.queryByText(nine)).toBeNull();
+
+    await fireEvent.press(screen.getByText(STEP_BACK.toStep.replace('{{step}}', '4')));
+    await waitFor(async () => expect((await repos.adwamuha.load())?.state.step).toBe(4));
+    expect((await repos.adwamuha.load())?.state).toMatchObject({
+      stepStartedOn: DAY,
+      reclimb: true,
+      highestStep: 10,
+    });
+    expect((await repos.adwamuha.listEvents()).map((e) => [e.kind, e.data])).toEqual([
+      ['step-back', { from: 10, kind: 'chosen' }],
+    ]);
+  });
+
+  it('«ارجع إلى الخطوة:» stops at step 1, and starts one step back each time it opens', async () => {
+    await openStepBack(await withPlan(3));
+    await fireEvent.press(screen.getByLabelText(STEP_BACK.earlier));
+    expect(screen.getByText(STEP_BACK.toStep.replace('{{step}}', '1'))).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: STEP_BACK.earlier })).toBeDisabled();
+    expect(screen.getByRole('button', { name: STEP_BACK.later })).toBeEnabled();
+    await fireEvent.press(screen.getByText(resources.ar.common.common.cancel));
+    await fireEvent.press(screen.getByText(LIFE_LINK));
+    expect(await screen.findByText(STEP_BACK.toStep.replace('{{step}}', '2'))).toBeOnTheScreen();
   });
 
   it('a break of a week, which can end early', async () => {

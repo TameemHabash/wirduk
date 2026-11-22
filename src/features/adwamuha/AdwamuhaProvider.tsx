@@ -96,7 +96,10 @@ export interface AdwamuhaValue {
   postpone: () => Promise<void>;
   /** Turns the feature on with a fresh copy of the default plan, at `startStep`. */
   start: (startStep: number) => Promise<void>;
-  /** «طرأ عليّ ظرف»: back to half the step, or to the first three (history kept). */
+  /**
+   * «طرأ عليّ ظرف»: back to half the step, to the first three, or to a step the user
+   * picked (owner, 2026-11-22). History kept.
+   */
   stepBack: (kind: StepBack) => Promise<void>;
   /** A break of 1 or 2 weeks from today (those days count for nothing). */
   takeBreak: (weeks: 1 | 2) => Promise<void>;
@@ -445,7 +448,10 @@ export function AdwamuhaProvider({
       if (!stored) return;
       const state = stepBackState(stored.state, kind, today, slot().session);
       await repo.save({ ...stored, state });
-      await repo.logEvent(today, 'step-back', state.step, { from: stored.state.step, kind });
+      await repo.logEvent(today, 'step-back', state.step, {
+        from: stored.state.step,
+        kind: typeof kind === 'string' ? kind : 'chosen',
+      });
       await reload();
     },
     [reload, repo, slot, stored, today],
