@@ -69,9 +69,9 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     `scripts/dev/phone-apk.ps1` (CLAUDE.md, "Phone"): the APKs are in `.local/apk/`, and the
     latest is always at https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk
     (public pre-release `test-build`, owner's choice 2026-11-01).
-  - On the link since 2026-11-21: the APK of 385b255 (the owner feedback of 2026-11-14 and
-    2026-11-21). The owner installed it and tested the 2026-11-14 changes (2026-11-21); the
-    2026-11-21 changes still wait for the owner's check.
+  - On the link since 2026-11-22: the APK of f477969 (the owner feedback of 2026-11-21 and both
+    of 2026-11-22; kept as `.local/apk/wirduk-f477969-phone-arm64.apk`). Before it, the APK of
+    385b255 (2026-11-21), with which the owner tested the 2026-11-14 changes.
   - A second phone (Samsung): the same APK (eecb345), installed by the owner from the link (no USB).
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
@@ -82,13 +82,13 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
 
 ## Waiting for the owner
 
-- **The owner feedback of 2026-11-21** (below): to check on the phone with the APK of 385b255
+- **The owner feedback of 2026-11-21** (below): to check on the phone with the APK of f477969
   (on the link). The 2026-11-14 changes: tested by the owner (2026-11-21).
-- **The owner feedback of 2026-11-22** («قطعتها», below): not on the phone yet (needs a new APK,
-  only when the owner asks). Claude's choices to confirm: «قطعتها» on later steps too, the last
-  step cannot be marked, reset keeps the steps done, the intro line.
+- **The owner feedback of 2026-11-22** («قطعتها», below): on the link (APK of f477969), to check
+  on the phone. Claude's choices to confirm: «قطعتها» on later steps too, the last step cannot be
+  marked, reset keeps the steps done, the intro line.
 - **The owner feedback of 2026-11-22 (2)** («ارجع إلى الخطوة:», below): built as the approved
-  design; not on the phone yet (needs a new APK, only when the owner asks).
+  design; on the link (APK of f477969), to check on the phone.
 - **The week rule** (2026-11-14, point 4) is Claude's advice, asked for by the owner: confirm or
   change it.
 
