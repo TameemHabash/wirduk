@@ -59,7 +59,8 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
 - **Devices:**
   - Emulator `Wirdak_Pixel` (Android 16, x86_64): dev build of 2026-10-31, content v13, signed
     in to the owner's Google account (for the backup screen). Its app data was empty on
-    2026-11-01; «أدومها» set up again then, with test days from the dev clock. If it hangs on start
+    2026-11-01; «أدومها» set up again then, with test days from the dev clock. On 2026-11-22 its
+    plan was edited by hand with «قطعتُها» (2 steps passed: step 1 → 3). If it hangs on start
     ("Not Responding", no CPU): stop it, delete the `*.lock` files in its `.avd` folder, start it
     with `-no-snapshot-load`.
   - Owner's phone: Galaxy S21+ (serial: `.local/devices.md`, Android 15, arm64): release build of commit

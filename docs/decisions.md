@@ -384,8 +384,9 @@ Claude's choices:
 - «استعادة الخطة الافتراضية» now keeps the steps done as they are and puts the default order and
   weeks back for the rest (before, it put the whole default back, so after a reorder or «قطعتها»
   the ward could lose a dhikr the user keeps). It also clears the marks not saved.
-- The button word is the owner's, as written («قطعتها», no mark); the card of a step done keeps
-  «قطعتَها». The intro line says to tap it (Claude's words, for review).
+- The button word is the owner's: «قطعتُها» (first written with no mark; the damma is the owner's
+  correction the same day). The card of a step done keeps «قطعتَها». The intro line says to tap
+  it (Claude's words, for review).
 
 ## Technical choices (milestone 0–1)
 
