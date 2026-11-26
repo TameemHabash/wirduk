@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 
+import { useDirection } from '@/i18n/direction';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -17,14 +18,27 @@ interface Props {
   progress: number;
   size?: number;
   stroke?: number;
+  /** Ring color while filling (default teal, as the design). */
+  color?: string;
   /** Ring color when full. */
   completeColor?: string;
   children?: ReactNode;
 }
 
-/** Circular progress (gold), with content in the middle. Starts at the top, fills clockwise. */
-export function ProgressRing({ progress, size = 112, stroke = 7, completeColor, children }: Props) {
+/**
+ * Circular progress, with content in the middle. Starts at the top and fills clockwise in
+ * right-to-left languages (Arabic), counterclockwise in left-to-right ones (owner, 2026-11-25).
+ */
+export function ProgressRing({
+  progress,
+  size = 112,
+  stroke = 7,
+  color,
+  completeColor,
+  children,
+}: Props) {
   const { colors } = useAppTheme();
+  const { isRtl } = useDirection();
   const reduceMotion = useReducedMotion();
   const r = (size - stroke) / 2;
   const circumference = 2 * Math.PI * r;
@@ -44,12 +58,19 @@ export function ProgressRing({ progress, size = 112, stroke = 7, completeColor, 
   const full = progress >= 1;
   return (
     <View style={{ width: size, height: size }}>
-      <Svg width={size} height={size} style={styles.rotate}>
+      <Svg
+        testID="progress-ring"
+        width={size}
+        height={size}
+        // A circle's stroke starts on the right and runs clockwise: turned to start at the
+        // top; flipped first (scaleY) to run counterclockwise in left-to-right languages.
+        style={isRtl ? styles.clockwise : styles.counterclockwise}
+      >
         <Circle
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={colors.border}
+          stroke={colors.surfaceMuted}
           strokeWidth={stroke}
           fill="none"
         />
@@ -57,7 +78,7 @@ export function ProgressRing({ progress, size = 112, stroke = 7, completeColor, 
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={full && completeColor ? completeColor : colors.accent}
+          stroke={full && completeColor ? completeColor : (color ?? colors.primary)}
           strokeWidth={stroke}
           strokeLinecap="round"
           fill="none"
@@ -71,6 +92,7 @@ export function ProgressRing({ progress, size = 112, stroke = 7, completeColor, 
 }
 
 const styles = StyleSheet.create({
-  rotate: { transform: [{ rotate: '-90deg' }] },
+  clockwise: { transform: [{ rotate: '-90deg' }] },
+  counterclockwise: { transform: [{ rotate: '-90deg' }, { scaleY: -1 }] },
   center: { alignItems: 'center', justifyContent: 'center' },
 });

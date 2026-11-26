@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { useDialog } from '@/components/Dialog';
 import { Icon } from '@/components/Icon';
 import { IconButton } from '@/components/IconButton';
 import { SortableList } from '@/components/SortableList';
@@ -44,6 +45,7 @@ export function PlanEditorScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const toast = useToast();
+  const dialog = useDialog();
   const { colors, radii, spacing } = useAppTheme();
   const { content } = useRepositories();
   const { stored, savePlan } = useAdwamuha();
@@ -59,7 +61,6 @@ export function PlanEditorScreen() {
   const [defaultPlan, setDefaultPlan] = useState<UserPlan | null>(null);
   const texts = useDhikrTexts();
   const [reordering, setReordering] = useState(false);
-  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,9 +89,8 @@ export function PlanEditorScreen() {
   const mayPass = !stored.state.maintenance && canPass(draft, saved, passed.length);
 
   const save = async () => {
-    setConfirming(false);
     await savePlan(draft, passed.length);
-    toast.show({ message: t('adwamuha.plan.saved') });
+    toast.show({ message: t('adwamuha.plan.saved'), icon: 'check', tone: 'gold' });
     router.back();
   };
   const onSave = () => {
@@ -99,21 +99,41 @@ export function PlanEditorScreen() {
       defaultPlan &&
       passed.length === 0 &&
       samePlan(draft, restoreDefault(stored.plan, saved, defaultPlan));
-    if (backToDefault) void save();
-    else setConfirming(true);
+    if (backToDefault) {
+      void save();
+      return;
+    }
+    // The light-plan notice with the hadith: keeping the plan is the main button, saving
+    // the quietest (owner, 2026-11-25: lead the user to the plan).
+    dialog.show({
+      icon: 'sprout',
+      tone: 'gold',
+      title: t('adwamuha.plan.confirmTitle'),
+      body: t('adwamuha.plan.confirmBody'),
+      content: <HadithCard />,
+      actions: [
+        { label: t('adwamuha.plan.confirmKeep'), cancel: true },
+        { label: t('adwamuha.plan.confirmSave'), kind: 'plain', onPress: () => void save() },
+      ],
+    });
   };
   const reset = () =>
-    Alert.alert(OWNER_TEXTS.labels.resetPlan, t('adwamuha.plan.resetBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: OWNER_TEXTS.labels.resetPlan,
-        onPress: () => {
-          if (!defaultPlan) return;
-          setEdited(restoreDefault(stored.plan, saved, defaultPlan));
-          setPassed([]);
+    dialog.show({
+      icon: 'reset',
+      title: OWNER_TEXTS.labels.resetPlan,
+      body: t('adwamuha.plan.resetBody'),
+      actions: [
+        {
+          label: OWNER_TEXTS.labels.resetPlan,
+          onPress: () => {
+            if (!defaultPlan) return;
+            setEdited(restoreDefault(stored.plan, saved, defaultPlan));
+            setPassed([]);
+          },
         },
-      },
-    ]);
+        { label: t('common.cancel'), cancel: true },
+      ],
+    });
   const setWeeks = (step: UserPlanStep, weeks: number) =>
     setEdited({
       ...base,
@@ -250,39 +270,6 @@ export function PlanEditorScreen() {
         <Button title={OWNER_TEXTS.labels.resetPlan} kind="secondary" onPress={reset} />
         <Button title={t('adwamuha.plan.save')} onPress={onSave} disabled={!dirty} />
       </ScrollView>
-
-      <Modal
-        visible={confirming}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setConfirming(false)}
-      >
-        <Pressable style={styles.backdrop} onPress={() => setConfirming(false)}>
-          <Pressable
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: colors.surface,
-                borderRadius: radii.lg,
-                padding: spacing.lg,
-                gap: spacing.md,
-              },
-            ]}
-          >
-            <AppText variant="heading" accessibilityRole="header">
-              {t('adwamuha.plan.confirmTitle')}
-            </AppText>
-            <AppText>{t('adwamuha.plan.confirmBody')}</AppText>
-            <HadithCard />
-            <Button title={t('adwamuha.plan.confirmKeep')} onPress={() => setConfirming(false)} />
-            <Button
-              title={t('adwamuha.plan.confirmSave')}
-              kind="secondary"
-              onPress={() => void save()}
-            />
-          </Pressable>
-        </Pressable>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -326,12 +313,4 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   // The step's own action, under a thin line (a touch target of 44).
   link: { minHeight: 44, borderTopWidth: StyleSheet.hairlineWidth, marginTop: 4 },
-  // The screen behind, dimmed (same in light and dark).
-  backdrop: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
-  },
-  sheet: { width: '100%', maxWidth: 420, alignSelf: 'center' },
 });

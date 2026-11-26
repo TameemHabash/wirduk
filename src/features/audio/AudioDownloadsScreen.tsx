@@ -1,9 +1,11 @@
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { useDialog } from '@/components/Dialog';
+import { TextButton } from '@/components/TextButton';
 import { APP_CONFIG } from '@/config/app-config';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
@@ -35,16 +37,23 @@ export function AudioDownloadsScreen() {
   const { colors, spacing } = useAppTheme();
   const { downloadAll, deleteAll } = useAudio();
   const everything = useAudioStatus('all');
+  const dialog = useDialog();
 
   const confirmDelete = () =>
-    Alert.alert(t('audio.downloads.deleteConfirmTitle'), t('audio.downloads.deleteConfirmBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('audio.downloads.deleteConfirm'),
-        style: 'destructive',
-        onPress: () => void deleteAll(),
-      },
-    ]);
+    dialog.show({
+      icon: 'audioOff',
+      tone: 'danger',
+      title: t('audio.downloads.deleteConfirmTitle'),
+      body: t('audio.downloads.deleteConfirmBody'),
+      actions: [
+        {
+          label: t('audio.downloads.deleteConfirm'),
+          kind: 'danger',
+          onPress: () => void deleteAll(),
+        },
+        { label: t('common.cancel'), cancel: true },
+      ],
+    });
 
   return (
     <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: colors.background }}>
@@ -54,7 +63,12 @@ export function AudioDownloadsScreen() {
         {APP_CONFIG.audio.showDownloadAll ? <DownloadBox scope="all" /> : null}
         {/* Every recording on the phone, also those downloaded by playing them. */}
         {everything && everything.downloadedFiles > 0 && downloadAll.phase !== 'running' ? (
-          <Button title={t('audio.downloads.delete')} kind="danger" onPress={confirmDelete} />
+          <TextButton
+            title={t('audio.downloads.delete')}
+            icon="audioOff"
+            tone="danger"
+            onPress={confirmDelete}
+          />
         ) : null}
       </ScrollView>
     </SafeAreaView>

@@ -1,10 +1,10 @@
-import { Alert, type AlertButton } from 'react-native';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { APP_CONFIG } from '@/config/app-config';
 import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { notificationState, pickTime } from '@/test-utils/notifications-mock';
+import { dialogButtons, openDialog, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
 
@@ -111,16 +111,15 @@ describe('setup 1: what «أدومها» is', () => {
   });
 
   it('turned off before: continue where they stopped, or start again', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     const repos = await withPlan(false);
     await renderWithApp(<SetupIntroScreen />, repos, { now: at(9) });
     await fireEvent.press(await screen.findByText('فعّل أدومها'));
-    const buttons = alert.mock.calls[0]![2] as AlertButton[];
-    expect(buttons.map((b) => b.text)).toEqual(['إلغاء', 'ابدأ من جديد', 'أكمل من حيث توقفت']);
-    await act(async () => buttons[2]!.onPress!());
+    expect(openDialog().getByText('متابعة «أدومها»')).toBeOnTheScreen();
+    // Continuing is the main button, then start again, then cancel (redesign).
+    expect(dialogButtons()).toEqual(['أكمل من حيث توقفت', 'ابدأ من جديد', 'إلغاء']);
+    await pressInDialog('أكمل من حيث توقفت');
     await waitFor(async () => expect((await repos.adwamuha.load())?.enabled).toBe(true));
     expect(mockRouter.dismissTo).toHaveBeenCalledWith('/');
-    alert.mockRestore();
   });
 });
 

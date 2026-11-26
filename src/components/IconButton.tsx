@@ -17,7 +17,7 @@ interface Props {
   disabled?: boolean;
 }
 
-/** A 44×44 touch target with one icon. */
+/** A 48×48 touch target with one icon. */
 export function IconButton({
   icon,
   label,

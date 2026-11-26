@@ -114,7 +114,12 @@ README.md is long: read only the section you need.
 - `src/features/reader/` the reader: `ReaderScreen.tsx` (tap zone, auto-advance, "إتمام",
   reset on leaving), `DhikrPage.tsx`, `CompletionScreen.tsx`, `navigation.ts`.
 - `src/features/counter/counter-store.ts` in-memory counts.
-- `src/components/Toast.tsx` the app's toast (`useToast().show({ message, onPress })`).
+- `src/components/Toast.tsx` the app's toast (`useToast().show({ message, icon, tone, onPress })`).
+  `src/components/Dialog.tsx` the app's own dialog (`useDialog().show({ icon, tone, title, body,
+  content, actions })`, the action first, `cancel: true` on the one a tap outside runs); never
+  Android's `Alert.alert` (redesign). Tests press it with `src/test-utils/dialog.ts`. Buttons:
+  `Button` (`kind`: primary, secondary, soft, danger, plain; `size="small"`), `TextButton`,
+  `IconTile`, `Segmented`; `AppText roomy` for a label in a box as wide as its content.
 - `src/data/session.ts` + `SessionRepository` + `src/features/session/useSessionRestore.ts`
   "continue where I stopped" (5 hours).
 - `src/features/audio/` `useDhikrAudio.ts` (play, repeat × count, autoplay, lock screen),

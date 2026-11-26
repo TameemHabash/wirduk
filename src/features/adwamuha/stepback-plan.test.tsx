@@ -1,11 +1,11 @@
-import { Alert, type AlertButton } from 'react-native';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { APP_CONFIG } from '@/config/app-config';
 import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { resources } from '@/i18n/resources';
 import { afterMessages, expectMomentMessage } from '@/test-utils/adwamuha-messages';
+import { dialogButtons, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 import { mockRouter } from '@/test-utils/router-mock';
 
@@ -222,7 +222,6 @@ describe('«عدّل الخطة»', () => {
   });
 
   it('reset brings the default plan back, saved without a warning; the step stays', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     const repos = await withPlan(2);
     const stored = (await repos.adwamuha.load())!;
     const edited = {
@@ -232,12 +231,12 @@ describe('«عدّل الخطة»', () => {
     await repos.adwamuha.save({ ...stored, plan: edited });
     await renderWithApp(<PlanEditorScreen />, repos, { now: at(9) });
     await fireEvent.press(await screen.findByText(OWNER_TEXTS.labels.resetPlan));
-    await act(async () => (alert.mock.calls[0]![2] as AlertButton[])[1]!.onPress!());
+    expect(dialogButtons()).toEqual([OWNER_TEXTS.labels.resetPlan, 'إلغاء']);
+    await pressInDialog(OWNER_TEXTS.labels.resetPlan);
     await fireEvent.press(screen.getByText('حفظ التعديل'));
     await waitFor(async () => expect((await repos.adwamuha.load())?.plan).toEqual(stored.plan));
     expect(screen.queryByText('قبل أن تحفظ')).toBeNull();
     expect((await repos.adwamuha.load())?.state.step).toBe(2);
-    alert.mockRestore();
   });
 
   it('steps 4 and 5 show by the owner’s names, as in «ترتيب الورد»', async () => {
@@ -311,7 +310,6 @@ describe('«عدّل الخطة»', () => {
   });
 
   it('reset after «قطعتها»: the steps done stay, the rest goes back to the default', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     const repos = await withPlan(3);
     const stored = (await repos.adwamuha.load())!;
     const order = [5, 4, 1, 2, 3, 6, 7, 8]; // آية الكرسي and the Quls passed, now at step 3
@@ -323,7 +321,7 @@ describe('«عدّل الخطة»', () => {
     await renderWithApp(<PlanEditorScreen />, repos, { now: at(9) });
     await fireEvent.press(await screen.findByLabelText(`${PASSED}: الخطوة 4`));
     await fireEvent.press(screen.getByText(OWNER_TEXTS.labels.resetPlan));
-    await act(async () => (alert.mock.calls[0]![2] as AlertButton[])[1]!.onPress!());
+    await pressInDialog(OWNER_TEXTS.labels.resetPlan);
     expect(screen.queryByLabelText('تراجع: الخطوة 3')).toBeNull(); // the mark is gone too
     await fireEvent.press(screen.getByText('حفظ التعديل'));
     await waitFor(async () => expect((await repos.adwamuha.load())?.plan.steps[6]!.weeks).toBe(3));
@@ -333,7 +331,6 @@ describe('«عدّل الخطة»', () => {
       1001, 1002, 1012, 1013,
     ]);
     expect(saved.state.step).toBe(3);
-    alert.mockRestore();
   });
 
   it('the step goes on under a new number: its last week’s message is not shown again', async () => {

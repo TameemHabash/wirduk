@@ -1,4 +1,4 @@
-import { Alert, Linking } from 'react-native';
+import { Linking } from 'react-native';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { APP_CONFIG } from '@/config/app-config';
@@ -8,6 +8,7 @@ import { counterStore } from '@/features/counter/counter-store';
 import { ReaderScreen } from '@/features/reader/ReaderScreen';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { mockAudioStorage, recitationPlayer } from '@/test-utils/audio-mock';
+import { dialogButtons, openDialog, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
 import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
 
@@ -495,13 +496,13 @@ describe('Audio downloads screen', () => {
     expect(mockAudioStorage.downloads).toHaveLength(files.length);
     expect(screen.getByText(`${files.length} من ${files.length} ملفًا`)).toBeOnTheScreen();
 
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation((_t, _b, buttons) => {
-      void buttons?.find((b) => b.style === 'destructive')?.onPress?.();
-    });
     await fireEvent.press(screen.getByText('حذف الصوتيات المحمّلة'));
+    expect(openDialog().getByText('حذف الصوتيات المحمّلة؟')).toBeOnTheScreen();
+    // A delete: the red button on top, cancel under it (redesign).
+    expect(dialogButtons()).toEqual(['حذف', 'إلغاء']);
+    await pressInDialog('حذف');
     expect(await screen.findByText(`0 من ${files.length} ملفًا`)).toBeOnTheScreen();
     expect(await repos.downloadedAudio.list('ar')).toEqual([]);
-    alert.mockRestore();
   });
 
   it('offers to download only the rest after some files are there', async () => {

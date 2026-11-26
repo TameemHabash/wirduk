@@ -23,14 +23,46 @@ describe.each(['light', 'dark'] as const)('%s colors', (scheme) => {
     for (const bg of [c.background, c.surface]) {
       expect(contrast(c.text, bg)).toBeGreaterThanOrEqual(7);
       expect(contrast(c.textMuted, bg)).toBeGreaterThanOrEqual(AA);
+      expect(contrast(c.primaryInk, bg)).toBeGreaterThanOrEqual(AA);
+      expect(contrast(c.accentInk, bg)).toBeGreaterThanOrEqual(AA);
     }
+    expect(contrast(c.textMuted, c.surfaceMuted)).toBeGreaterThanOrEqual(AA);
     expect(contrast(c.primary, c.surface)).toBeGreaterThanOrEqual(AA);
     expect(contrast(c.onPrimary, c.primary)).toBeGreaterThanOrEqual(AA);
   });
 
-  it('keeps faint text (fadl, source) readable on the reading card', () => {
+  it('keeps faint text (fadl, source) readable on the reading page', () => {
     expect(contrast(c.textFaint, c.surface)).toBeGreaterThanOrEqual(AA);
+    expect(contrast(c.textFaint, c.background)).toBeGreaterThanOrEqual(AA);
   });
+
+  it('keeps text readable on the soft fills (tiles, badges, soft buttons)', () => {
+    expect(contrast(c.primaryInk, c.primarySoft)).toBeGreaterThanOrEqual(AA);
+    expect(contrast(c.accentInk, c.accentSoft)).toBeGreaterThanOrEqual(AA);
+    expect(contrast(c.text, c.accentSoft)).toBeGreaterThanOrEqual(7);
+  });
+
+  it('keeps the dialog and toast readable (danger, toast)', () => {
+    expect(contrast(c.text, c.toast)).toBeGreaterThanOrEqual(7);
+    expect(contrast(c.textMuted, c.toast)).toBeGreaterThanOrEqual(AA);
+    expect(contrast(c.onDanger, c.danger)).toBeGreaterThanOrEqual(AA);
+    expect(contrast(c.danger, c.dangerSoft)).toBeGreaterThanOrEqual(AA);
+    expect(contrast(c.danger, c.surface)).toBeGreaterThanOrEqual(AA);
+  });
+
+  it.each(['morning', 'evening'] as const)(
+    'keeps text readable on both ends of the golden %s card',
+    (period) => {
+      for (const bg of [c[`${period}From`], c[`${period}To`]]) {
+        expect(contrast(c.text, bg)).toBeGreaterThanOrEqual(7);
+        expect(contrast(c.textMuted, bg)).toBeGreaterThanOrEqual(AA);
+        expect(contrast(c.primaryInk, bg)).toBeGreaterThanOrEqual(AA);
+        // Gold on the card: its icon and the large hadith line (3:1 for large text and icons).
+        expect(contrast(c.accentInk, bg)).toBeGreaterThanOrEqual(3);
+      }
+      expect(contrast(c.accentInk, c[`${period}To`])).toBeGreaterThanOrEqual(AA);
+    },
+  );
 
   it('keeps text readable on the custom (sand) surface', () => {
     expect(contrast(c.text, c.customSurface)).toBeGreaterThanOrEqual(7);

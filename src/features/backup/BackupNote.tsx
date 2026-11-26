@@ -26,7 +26,8 @@ export function BackupNote({ now = Date.now }: { now?: () => number }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (takeRestoredNotice()) toast.show({ message: t('backup.restored') });
+    if (takeRestoredNotice())
+      toast.show({ message: t('backup.restored'), icon: 'check', tone: 'gold' });
   }, [t, toast]);
 
   useEffect(() => {

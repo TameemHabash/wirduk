@@ -1,7 +1,7 @@
-import { Alert, type AlertButton } from 'react-native';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { BackupError, type BackupSummary } from '@/data/backup/backup-db';
+import { dismissDialog, openDialog, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
 
 import { BackupNote } from './BackupNote';
@@ -62,36 +62,39 @@ describe('Settings → «النسخ الاحتياطي»', () => {
   });
 
   it('restores a picked file after showing what is in it', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     mocked.pickBackupFile.mockResolvedValue(summary);
     const repos = await createTestRepositories();
     await renderWithApp(<BackupSettings />, repos);
     await fireEvent.press(await screen.findByText('استعادة نسخة احتياطية'));
-    await waitFor(() => expect(alert).toHaveBeenCalled());
-    const [title, body, buttons] = alert.mock.calls[0]!;
-    expect(title).toBe('استعادة هذه النسخة؟');
-    expect(body).toContain('نسخة 25/10/2026');
-    expect(body).toContain('أذكارك الخاصة: 3');
-    expect(body).toContain('خطوتك في «أدومها»: 4');
-    const confirm = (buttons as AlertButton[]).find((b) => b.text === 'استعادة')!;
-    await act(async () => confirm.onPress!());
+    await waitFor(() => expect(screen.getByTestId('dialog')).toBeOnTheScreen());
+    expect(openDialog().getByText('استعادة هذه النسخة؟')).toBeOnTheScreen();
+    expect(openDialog().getByText(/نسخة 25\/10\/2026/)).toBeOnTheScreen();
+    expect(openDialog().getByText(/أذكارك الخاصة: 3/)).toBeOnTheScreen();
+    expect(openDialog().getByText(/خطوتك في «أدومها»: 4/)).toBeOnTheScreen();
+    await pressInDialog('استعادة');
     await waitFor(() =>
       expect(mocked.restorePickedBackup).toHaveBeenCalledWith(repos.backup, summary),
     );
-    alert.mockRestore();
   });
 
   it('cancelling leaves everything as it was', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     mocked.pickBackupFile.mockResolvedValue(summary);
     await renderWithApp(<BackupSettings />);
     await fireEvent.press(await screen.findByText('استعادة نسخة احتياطية'));
-    await waitFor(() => expect(alert).toHaveBeenCalled());
-    const cancel = (alert.mock.calls[0]![2] as AlertButton[]).find((b) => b.style === 'cancel')!;
-    await act(async () => cancel.onPress!());
+    await pressInDialog('إلغاء');
     await waitFor(() => expect(mocked.discardPickedBackup).toHaveBeenCalled());
     expect(mocked.restorePickedBackup).not.toHaveBeenCalled();
-    alert.mockRestore();
+    expect(screen.queryByTestId('dialog')).toBeNull();
+  });
+
+  it('a tap outside the dialog cancels too', async () => {
+    mocked.pickBackupFile.mockResolvedValue(summary);
+    await renderWithApp(<BackupSettings />);
+    await fireEvent.press(await screen.findByText('استعادة نسخة احتياطية'));
+    await waitFor(() => expect(screen.getByTestId('dialog')).toBeOnTheScreen());
+    await dismissDialog();
+    await waitFor(() => expect(mocked.discardPickedBackup).toHaveBeenCalled());
+    expect(mocked.restorePickedBackup).not.toHaveBeenCalled();
   });
 
   it.each([

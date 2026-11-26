@@ -154,7 +154,7 @@ export function AudioField({ value, onChange }: Props) {
       ) : (
         <View style={[styles.row, styles.wrap, { gap: spacing.sm }]}>
           {button('mic', t('custom.record'), () => void startRecording())}
-          {button('file', t('custom.pickFile'), () => void pickFile())}
+          {button('fileAudio', t('custom.pickFile'), () => void pickFile())}
         </View>
       )}
 

@@ -77,6 +77,7 @@ export function useSessionRestore(): void {
       }
       toast.show({
         message: t('settings.restored'),
+        icon: 'history',
         onPress: () => router.push('/settings'),
         durationMs: RESTORED_TOAST_MS,
       });

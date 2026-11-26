@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { Alert } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { useDialog } from '@/components/Dialog';
+
 /**
  * Asks before leaving a screen with unsaved changes (back button, gesture).
- * `onDiscard` runs when the user chooses to leave anyway.
+ * `onDiscard` runs when the user chooses to leave anyway. Keeping on editing is the
+ * main button (the safe one, redesign).
  */
 export function useUnsavedGuard(
   dirty: boolean,
@@ -16,6 +18,7 @@ export function useUnsavedGuard(
 } {
   const navigation = useNavigation();
   const { t } = useTranslation();
+  const dialog = useDialog();
   const allowed = useRef(false);
   const discardRef = useRef(onDiscard);
 
@@ -27,21 +30,27 @@ export function useUnsavedGuard(
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       if (!dirty || allowed.current) return;
       e.preventDefault();
-      Alert.alert(t('custom.discardTitle'), t('custom.discardBody'), [
-        { text: t('custom.keepEditing'), style: 'cancel' },
-        {
-          text: t('custom.discard'),
-          style: 'destructive',
-          onPress: () => {
-            allowed.current = true;
-            discardRef.current?.();
-            navigation.dispatch(e.data.action);
+      dialog.show({
+        icon: 'info',
+        tone: 'gold',
+        title: t('custom.discardTitle'),
+        body: t('custom.discardBody'),
+        actions: [
+          { label: t('custom.keepEditing'), cancel: true },
+          {
+            label: t('custom.discard'),
+            destructive: true,
+            onPress: () => {
+              allowed.current = true;
+              discardRef.current?.();
+              navigation.dispatch(e.data.action);
+            },
           },
-        },
-      ]);
+        ],
+      });
     });
     return unsubscribe;
-  }, [navigation, dirty, t]);
+  }, [navigation, dirty, t, dialog]);
 
   return {
     allowLeave: () => {

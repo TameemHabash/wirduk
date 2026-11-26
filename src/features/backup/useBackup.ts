@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 
+import { useDialog } from '@/components/Dialog';
 import { useToast } from '@/components/Toast';
 import { BackupError, type BackupSummary } from '@/data/backup/backup-db';
 import { useRepositories, useRestartApp } from '@/data/DataProvider';
@@ -55,6 +55,7 @@ function describe(t: TFunction, s: BackupSummary): string {
 export function useBackup() {
   const { t } = useTranslation();
   const toast = useToast();
+  const dialog = useDialog();
   const { backup } = useRepositories();
   const restartApp = useRestartApp();
   const [fileSavedAt, setFileSavedAt] = useState<number | null>(null);
@@ -83,7 +84,7 @@ export function useBackup() {
       setFileSavedAt(made.summary.createdAt);
       return true;
     } catch {
-      toast.show({ message: t('backup.errors.saveFailed') });
+      toast.show({ message: t('backup.errors.saveFailed'), tone: 'danger' });
       return false;
     } finally {
       setBusy(null);
@@ -99,7 +100,7 @@ export function useBackup() {
     } catch (e) {
       setBusy(null);
       const problem = e instanceof BackupError ? e.problem : 'failed';
-      toast.show({ message: t(`backup.errors.${problem}`) });
+      toast.show({ message: t(`backup.errors.${problem}`), tone: 'danger' });
       return;
     }
     if (!summary) {
@@ -111,14 +112,14 @@ export function useBackup() {
       void discardPickedBackup().catch(() => undefined);
       setBusy(null);
     };
-    Alert.alert(
-      t('backup.confirmTitle'),
-      describe(t, picked),
-      [
-        { text: t('common.cancel'), style: 'cancel', onPress: cancel },
+    dialog.show({
+      icon: 'fileUp',
+      tone: 'gold',
+      title: t('backup.confirmTitle'),
+      body: describe(t, picked),
+      actions: [
         {
-          text: t('backup.confirm'),
-          style: 'destructive',
+          label: t('backup.confirm'),
           onPress: () => {
             void restorePickedBackup(backup, picked).then(
               () => {
@@ -127,15 +128,15 @@ export function useBackup() {
               },
               () => {
                 setBusy(null);
-                toast.show({ message: t('backup.errors.failed') });
+                toast.show({ message: t('backup.errors.failed'), tone: 'danger' });
               },
             );
           },
         },
+        { label: t('common.cancel'), cancel: true, onPress: cancel },
       ],
-      { cancelable: true, onDismiss: cancel },
-    );
-  }, [backup, busy, restartApp, t, toast]);
+    });
+  }, [backup, busy, dialog, restartApp, t, toast]);
 
   return { fileSavedAt, autoBackupAt, busy, save, restore };
 }

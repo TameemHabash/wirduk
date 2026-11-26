@@ -99,14 +99,22 @@ export function useNotificationTaps(): void {
         const today = now?.slot().date;
         if (now?.records.some((r) => r.date === today && r.session === session)) {
           // Already read today: Home's «وردك اليوم» shows it; no need to open the ward again.
-          notice.show({ message: tr(`adwamuha.alreadyRead.${session}`) });
+          notice.show({
+            message: tr(`adwamuha.alreadyRead.${session}`),
+            icon: 'check',
+            tone: 'gold',
+          });
           return;
         }
         // Not its time: the ward never opens outside its window (Home shows the ward of now).
         const reminder = session === 'morning' ? set.morningReminder : set.eveningReminder;
         const closed = closedWard(session, now?.now() ?? new Date(), set.wardTimes, reminder.time);
         if (closed) {
-          notice.show({ message: closedWardText(tr, session, closed, set.wardTimes) });
+          notice.show({
+            message: closedWardText(tr, session, closed, set.wardTimes),
+            icon: 'clock',
+            tone: 'gold',
+          });
           return;
         }
         router.push({ pathname: '/adwamuha/ward/[session]', params: { session } });

@@ -51,6 +51,8 @@ export function SetupRemindersScreen() {
       if (!allowed) {
         toast.show({
           message: t('settings.notificationsDenied'),
+          icon: 'bell',
+          tone: 'gold',
           onPress: () => void Linking.openSettings(),
         });
       }

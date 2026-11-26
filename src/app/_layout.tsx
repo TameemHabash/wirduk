@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { DialogProvider } from '@/components/Dialog';
 import { StartupError } from '@/components/StartupError';
 import { ToastProvider } from '@/components/Toast';
 import { DataProvider } from '@/data/DataProvider';
@@ -116,7 +117,9 @@ function ThemedApp() {
     <AppThemeProvider initialPreference={settings.theme} onPreferenceChange={saveTheme}>
       <NavigationTheme>
         <ToastProvider>
-          <RootStack />
+          <DialogProvider>
+            <RootStack />
+          </DialogProvider>
         </ToastProvider>
       </NavigationTheme>
     </AppThemeProvider>

@@ -1,14 +1,16 @@
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { DialogName, NAME_MARK, aroundName, useDialog } from '@/components/Dialog';
 import { DhikrText } from '@/components/DhikrText';
 import { Icon } from '@/components/Icon';
 import { SortableList } from '@/components/SortableList';
+import { TextButton } from '@/components/TextButton';
 import { TextField } from '@/components/TextField';
 import { useRepositories } from '@/data/DataProvider';
 import type { Category, Dhikr } from '@/data/models';
@@ -78,6 +80,7 @@ function EditCategory({ id }: { id: number }) {
   const { t } = useTranslation();
   const router = useRouter();
   const { custom, favorites } = useRepositories();
+  const dialog = useDialog();
   const { colors, radii, spacing } = useAppTheme();
   const [category, setCategory] = useState<Category | null>(null);
   const [adhkar, setAdhkar] = useState<Dhikr[]>([]);
@@ -128,25 +131,39 @@ function EditCategory({ id }: { id: number }) {
 
   const confirmDelete = () => {
     if (!category) return;
-    Alert.alert(
-      t('custom.deleteCategoryConfirmTitle', { title: category.title }),
-      t('custom.deleteCategoryConfirmBody'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
+    // The chapter's name in bold teal, no «» (owner, 2026-11-26).
+    const [before, after] = aroundName(
+      t('custom.deleteCategoryConfirmTitle', { title: NAME_MARK }),
+    );
+    dialog.show({
+      icon: 'trash',
+      tone: 'danger',
+      title: (
+        <>
+          {before}
+          <DialogName>{category.title}</DialogName>
+          {after}
+        </>
+      ),
+      body: t('custom.deleteCategoryConfirmBody'),
+      actions: [
         {
-          text: t('custom.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            const { audioFiles } = await custom.deleteCategory(id);
-            deleteCustomAudio(...audioFiles);
-            await favorites.remove(id);
-            counterStore.resetMany(adhkar.map((d) => d.id));
-            allowLeave();
-            router.dismissTo('/');
+          label: t('custom.delete'),
+          kind: 'danger',
+          onPress: () => {
+            void (async () => {
+              const { audioFiles } = await custom.deleteCategory(id);
+              deleteCustomAudio(...audioFiles);
+              await favorites.remove(id);
+              counterStore.resetMany(adhkar.map((d) => d.id));
+              allowLeave();
+              router.dismissTo('/');
+            })();
           },
         },
+        { label: t('common.cancel'), cancel: true },
       ],
-    );
+    });
   };
 
   if (missing) {
@@ -304,7 +321,12 @@ function EditCategory({ id }: { id: number }) {
           </View>
         </View>
 
-        <Button title={t('custom.deleteCategory')} kind="danger" onPress={confirmDelete} />
+        <TextButton
+          title={t('custom.deleteCategory')}
+          icon="trash"
+          tone="danger"
+          onPress={confirmDelete}
+        />
       </ScrollView>
     </SafeAreaView>
   );

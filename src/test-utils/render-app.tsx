@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import { act, render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { DialogProvider } from '@/components/Dialog';
 import { ToastProvider } from '@/components/Toast';
 import { RepositoriesProvider, type Repositories } from '@/data/DataProvider';
 import { AdwamuhaRepository } from '@/data/repositories/adwamuha-repository';
@@ -84,7 +85,9 @@ export async function renderWithApp(
           <SettingsProvider>
             <AdwamuhaProvider now={options.now}>
               <AudioProvider>
-                <ToastProvider>{ui}</ToastProvider>
+                <ToastProvider>
+                  <DialogProvider>{ui}</DialogProvider>
+                </ToastProvider>
               </AudioProvider>
             </AdwamuhaProvider>
           </SettingsProvider>

@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { useDialog } from '@/components/Dialog';
 import { Icon } from '@/components/Icon';
 import { useToast } from '@/components/Toast';
 import { useAppTheme } from '@/theme/ThemeProvider';
@@ -33,6 +34,7 @@ export function ProgressScreen() {
   const { colors, radii, spacing } = useAppTheme();
   const router = useRouter();
   const toast = useToast();
+  const dialog = useDialog();
   const {
     ready,
     enabled,
@@ -74,27 +76,29 @@ export function ProgressScreen() {
   // A word of thanks after recording a ward (the owner's).
   const thanks = () => {
     const text = textFor('wardDone', '');
-    if (text) toast.show({ message: text });
+    if (text) toast.show({ message: text, icon: 'check', tone: 'gold' });
   };
   const selfRecorded = (date: DayKey, session: Session) =>
     (date === today || date === yesterday) &&
     records.some((r) => r.date === date && r.session === session && r.source === 'manual');
   const undo = (date: DayKey, session: Session) => {
-    Alert.alert(
-      t('adwamuha.masariHelp.undoTitle'),
-      t('adwamuha.masariHelp.undoText', {
+    dialog.show({
+      icon: 'undo',
+      tone: 'danger',
+      title: t('adwamuha.masariHelp.undoTitle'),
+      body: t('adwamuha.masariHelp.undoText', {
         ward: t(`adwamuha.sessionName.${session}`),
         when: t(date === today ? 'adwamuha.masari.todayWord' : 'adwamuha.masari.yesterdayWord'),
       }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
+      actions: [
         {
-          text: t('adwamuha.masariHelp.undo'),
-          style: 'destructive',
+          label: t('adwamuha.masariHelp.undo'),
+          kind: 'danger',
           onPress: () => void undoFromMemory(session, date),
         },
+        { label: t('common.cancel'), cancel: true },
       ],
-    );
+    });
   };
 
   const ordinals = t('adwamuha.masariHelp.ordinals', { returnObjects: true }) as string[];
@@ -237,7 +241,9 @@ export function ProgressScreen() {
           <Button
             title={t('adwamuha.masari.endBreak')}
             onPress={() =>
-              void endBreak().then(() => toast.show({ message: t('adwamuha.masari.breakEnded') }))
+              void endBreak().then(() =>
+                toast.show({ message: t('adwamuha.masari.breakEnded'), icon: 'check' }),
+              )
             }
           />
         ) : !nowDone ? (

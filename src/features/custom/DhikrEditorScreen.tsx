@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,7 +14,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { useDialog } from '@/components/Dialog';
 import { Icon } from '@/components/Icon';
+import { TextButton } from '@/components/TextButton';
 import { TextField } from '@/components/TextField';
 import { useRepositories } from '@/data/DataProvider';
 import type { Dhikr } from '@/data/models';
@@ -73,6 +74,7 @@ export function DhikrEditorScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { custom } = useRepositories();
+  const dialog = useDialog();
   const { settings } = useSettings();
   const { colors, radii, spacing } = useAppTheme();
   const { isRtl } = useDirection();
@@ -161,20 +163,28 @@ export function DhikrEditorScreen() {
 
   const remove = () => {
     if (dhikrId == null) return;
-    Alert.alert(t('custom.deleteDhikrConfirmTitle'), t('custom.deleteDhikrConfirmBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('custom.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          const { audioFile } = await custom.deleteDhikr(dhikrId);
-          deleteCustomAudio(audioFile, form.audioFile);
-          counterStore.reset(dhikrId);
-          allowLeave();
-          router.back();
+    dialog.show({
+      icon: 'trash',
+      tone: 'danger',
+      title: t('custom.deleteDhikrConfirmTitle'),
+      body: t('custom.deleteDhikrConfirmBody'),
+      actions: [
+        {
+          label: t('custom.delete'),
+          kind: 'danger',
+          onPress: () => {
+            void (async () => {
+              const { audioFile } = await custom.deleteDhikr(dhikrId);
+              deleteCustomAudio(audioFile, form.audioFile);
+              counterStore.reset(dhikrId);
+              allowLeave();
+              router.back();
+            })();
+          },
         },
-      },
-    ]);
+        { label: t('common.cancel'), cancel: true },
+      ],
+    });
   };
 
   const font = findDhikrFont(settings.dhikrFont);
@@ -293,7 +303,14 @@ export function DhikrEditorScreen() {
 
             <View style={{ gap: spacing.md }}>
               <Button title={t('custom.save')} onPress={() => void save()} disabled={saving} />
-              {!isNew && <Button title={t('custom.deleteDhikr')} kind="danger" onPress={remove} />}
+              {!isNew && (
+                <TextButton
+                  title={t('custom.deleteDhikr')}
+                  icon="trash"
+                  tone="danger"
+                  onPress={remove}
+                />
+              )}
             </View>
           </ScrollView>
         )}

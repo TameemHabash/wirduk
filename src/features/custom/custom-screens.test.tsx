@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { CategoryEditorScreen } from '@/features/custom/CategoryEditorScreen';
@@ -8,15 +8,9 @@ import { HomeScreen } from '@/features/home/HomeScreen';
 import { ReaderScreen } from '@/features/reader/ReaderScreen';
 import { SearchScreen } from '@/features/search/SearchScreen';
 import { mockCustomAudio, mockPermission, mockPicker } from '@/test-utils/audio-mock';
+import { dialogButtons, openDialog, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
-
-/** Confirms every Alert by pressing its destructive button. */
-function confirmAlerts() {
-  return jest.spyOn(Alert, 'alert').mockImplementation((_title, _body, buttons) => {
-    void buttons?.find((b) => b.style === 'destructive')?.onPress?.();
-  });
-}
 
 async function withCategory(title = 'أدعيتي') {
   const repos = await createTestRepositories();
@@ -109,15 +103,33 @@ describe('Edit category', () => {
     const { repos, category } = await withCategory();
     await repos.custom.createDhikr(category.id, { text: 'نص', count: 1, audioFile: 'a.m4a' });
     await repos.favorites.add(category.id);
-    const alert = confirmAlerts();
     setRouteParams({ id: String(category.id) });
     await renderWithApp(<CategoryEditorScreen />, repos);
     await fireEvent.press(await screen.findByText('حذف الباب'));
+    // The name with no «», in its own color (owner, 2026-11-26); the red button on top.
+    expect(openDialog().getByText(/^حذف أدعيتي؟$/)).toBeOnTheScreen();
+    expect(openDialog().queryByText(/«/)).toBeNull();
+    const name = openDialog().getByText('أدعيتي');
+    expect(StyleSheet.flatten(name.props.style).color).not.toBe(
+      StyleSheet.flatten(openDialog().getByText(/^حذف أدعيتي؟$/).props.style).color,
+    );
+    expect(dialogButtons()).toEqual(['حذف', 'إلغاء']);
+    await pressInDialog('حذف');
     await waitFor(() => expect(mockRouter.dismissTo).toHaveBeenCalledWith('/'));
     expect(await repos.custom.listCategories()).toEqual([]);
     expect(await repos.favorites.list()).toEqual([]);
     expect(mockCustomAudio.deleteCustomAudio).toHaveBeenCalledWith('a.m4a');
-    alert.mockRestore();
+  });
+
+  it('cancelling the delete keeps the category', async () => {
+    const { repos, category } = await withCategory();
+    setRouteParams({ id: String(category.id) });
+    await renderWithApp(<CategoryEditorScreen />, repos);
+    await fireEvent.press(await screen.findByText('حذف الباب'));
+    await pressInDialog('إلغاء');
+    expect(screen.queryByTestId('dialog')).toBeNull();
+    expect(await repos.custom.listCategories()).toHaveLength(1);
+    expect(mockRouter.dismissTo).not.toHaveBeenCalled();
   });
 });
 
@@ -213,13 +225,13 @@ describe('Dhikr editor', () => {
   it('deletes a dhikr after confirming', async () => {
     const { repos, category } = await withCategory();
     const d = await repos.custom.createDhikr(category.id, { text: 'نص', count: 1 });
-    const alert = confirmAlerts();
     setRouteParams({ id: String(category.id), dhikrId: String(d.id) });
     await renderWithApp(<DhikrEditorScreen />, repos);
     await fireEvent.press(await screen.findByText('حذف الذكر'));
+    expect(openDialog().getByText('حذف هذا الذكر؟')).toBeOnTheScreen();
+    await pressInDialog('حذف');
     await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
     expect(await repos.custom.getDhikr(d.id)).toBeNull();
-    alert.mockRestore();
   });
 });
 

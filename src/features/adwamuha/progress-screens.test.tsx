@@ -1,9 +1,9 @@
-import { Alert, type AlertButton } from 'react-native';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { afterMessages } from '@/test-utils/adwamuha-messages';
+import { dialogButtons, openDialog, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 import { mockRouter } from '@/test-utils/router-mock';
 
@@ -211,7 +211,6 @@ describe('«مساري»', () => {
   });
 
   it('«قرأتُ وردي بدون التطبيق»: only the wards not recorded; a tap records, a ✓ tapped undoes', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     const repos = await withPlan(3);
     await read(repos, addDays(DAY, -1), 'evening');
     await renderWithApp(<ProgressScreen />, repos, { now: at(7) });
@@ -231,12 +230,12 @@ describe('«مساري»', () => {
     await fireEvent.press(
       await screen.findByLabelText('اليوم، الصباح: سجّلتَه بنفسك، اضغط للإلغاء'),
     );
-    const buttons = alert.mock.calls[0]![2] as AlertButton[];
-    await act(async () => buttons[1]!.onPress!());
+    expect(openDialog().getByText('إلغاء التسجيل؟')).toBeOnTheScreen();
+    expect(dialogButtons()).toEqual(['ألغِ التسجيل', 'إلغاء']);
+    await pressInDialog('ألغِ التسجيل');
     await waitFor(async () =>
       expect((await repos.adwamuha.listRecords()).some((r) => r.date === DAY)).toBe(false),
     );
-    alert.mockRestore();
   });
 
   it("yesterday's empty dot records it after a yes; older days only say so", async () => {

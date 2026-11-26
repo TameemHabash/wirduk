@@ -60,6 +60,8 @@ function ReminderRow({ kind, name }: { kind: ReminderKind; name?: string }) {
     if (allowed) return save({ ...reminder, enabled });
     toast.show({
       message: t('settings.notificationsDenied'),
+      icon: 'bell',
+      tone: 'gold',
       onPress: () => void Linking.openSettings(),
     });
   };

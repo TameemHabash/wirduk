@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
+import { useDialog } from '@/components/Dialog';
 import { Icon } from '@/components/Icon';
 import { useToast } from '@/components/Toast';
 import { useSettings } from '@/data/settings/SettingsProvider';
@@ -32,6 +33,7 @@ export function AdwamuhaSettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const toast = useToast();
+  const dialog = useDialog();
   const { colors, spacing } = useAppTheme();
   const { enabled, stored, turnOff, resume } = useAdwamuha();
   const [stepBackOpen, setStepBackOpen] = useState(false);
@@ -48,11 +50,17 @@ export function AdwamuhaSettingsScreen() {
       return;
     }
     // Turned on again: continue, or start over (the history stays either way).
-    Alert.alert(t('adwamuha.continue.title'), t('adwamuha.continue.body'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('adwamuha.continue.restart'), onPress: () => router.push('/adwamuha/start') },
-      { text: t('adwamuha.continue.continue'), onPress: () => void resume() },
-    ]);
+    dialog.show({
+      icon: 'sprout',
+      tone: 'gold',
+      title: t('adwamuha.continue.title'),
+      body: t('adwamuha.continue.body'),
+      actions: [
+        { label: t('adwamuha.continue.continue'), onPress: () => void resume() },
+        { label: t('adwamuha.continue.restart'), onPress: () => router.push('/adwamuha/start') },
+        { label: t('common.cancel'), kind: 'plain', cancel: true },
+      ],
+    });
   };
 
   return (
@@ -176,7 +184,7 @@ function WardTimesSettings() {
       onValueChange: (_event, date) => {
         const next = { ...times, [key]: formatTime(date.getHours(), date.getMinutes()) };
         if (validWardTimes(next)) void update('wardTimes', next);
-        else toast.show({ message: t('adwamuha.settings.badTimes') });
+        else toast.show({ message: t('adwamuha.settings.badTimes'), icon: 'clock', tone: 'gold' });
       },
     });
   };

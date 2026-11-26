@@ -1,4 +1,4 @@
-import { Alert, type AlertButton, Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react-native';
 
 import type { Repositories } from '@/data/DataProvider';
@@ -11,6 +11,7 @@ import {
   responseFor,
   tapNotification,
 } from '@/test-utils/notifications-mock';
+import { dialogButtons, openDialog, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
 import { mockRouter } from '@/test-utils/router-mock';
 
@@ -176,29 +177,35 @@ describe('the «أدومها» settings screen', () => {
   });
 
   it('on again: continue where they stopped — the days off count like a break', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     const repos = await withPlan(false, addDays(DAY, -3));
     await renderWithApp(<AdwamuhaSettingsScreen />, repos, { now: at(9) });
     await fireEvent(await screen.findByLabelText(TOGGLE), 'valueChange', true);
-    const buttons = alert.mock.calls[0]![2] as AlertButton[];
-    expect(buttons.map((b) => b.text)).toEqual(['إلغاء', 'ابدأ من جديد', 'أكمل من حيث توقفت']);
-    await act(async () => buttons[2]!.onPress!());
+    expect(dialogButtons()).toEqual(['أكمل من حيث توقفت', 'ابدأ من جديد', 'إلغاء']);
+    await pressInDialog('أكمل من حيث توقفت');
     await waitFor(async () => expect((await repos.adwamuha.load())?.enabled).toBe(true));
     // Off 3 days ago: the days after it, to yesterday (the days it was turned off and on count).
     expect(await repos.adwamuha.listPauses()).toEqual([
       { id: expect.any(Number), from: addDays(DAY, -2), to: addDays(DAY, -1), kind: 'off' },
     ]);
     expect((await repos.adwamuha.load())?.state.step).toBe(2);
-    alert.mockRestore();
   });
 
   it('on again: «ابدأ من جديد» opens the setup where to start', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     await renderWithApp(<AdwamuhaSettingsScreen />, await withPlan(false, DAY), { now: at(9) });
     await fireEvent(await screen.findByLabelText(TOGGLE), 'valueChange', true);
-    (alert.mock.calls[0]![2] as AlertButton[])[1]!.onPress!();
+    await pressInDialog('ابدأ من جديد');
     expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/start');
-    alert.mockRestore();
+  });
+
+  it('on again: cancel leaves it off', async () => {
+    const repos = await withPlan(false, DAY);
+    await renderWithApp(<AdwamuhaSettingsScreen />, repos, { now: at(9) });
+    await fireEvent(await screen.findByLabelText(TOGGLE), 'valueChange', true);
+    expect(openDialog().getByText('متابعة «أدومها»')).toBeOnTheScreen();
+    await pressInDialog('إلغاء');
+    expect(screen.queryByTestId('dialog')).toBeNull();
+    expect((await repos.adwamuha.load())?.enabled).toBe(false);
+    expect(mockRouter.push).not.toHaveBeenCalled();
   });
 
   it('changes a ward time, and refuses a time out of order', async () => {

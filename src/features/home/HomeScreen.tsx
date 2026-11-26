@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, AppState, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { AppState, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import ReorderableList, {
@@ -9,6 +9,7 @@ import ReorderableList, {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
+import { useDialog } from '@/components/Dialog';
 import { APP_CONFIG } from '@/config/app-config';
 import type { HomeCategory } from '@/data/models';
 import { useAdwamuha } from '@/features/adwamuha/AdwamuhaProvider';
@@ -51,6 +52,7 @@ export function HomeScreen() {
   useNotificationTaps();
   useSessionRestore();
   const router = useRouter();
+  const dialog = useDialog();
   const { colors, radii, spacing } = useAppTheme();
   const period = useDayPeriod();
   const adwamuhaOn = useAdwamuha().enabled;
@@ -96,17 +98,21 @@ export function HomeScreen() {
   };
 
   const confirmRestore = () => {
-    Alert.alert(t('home.restoreConfirmTitle'), t('home.restoreConfirmBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('home.restore'),
-        style: 'destructive',
-        onPress: () => {
-          void resetOrder();
-          setEditing(false);
+    dialog.show({
+      icon: 'reset',
+      title: t('home.restoreConfirmTitle'),
+      body: t('home.restoreConfirmBody'),
+      actions: [
+        {
+          label: t('home.restore'),
+          onPress: () => {
+            void resetOrder();
+            setEditing(false);
+          },
         },
-      },
-    ]);
+        { label: t('common.cancel'), cancel: true },
+      ],
+    });
   };
 
   const sectionHeader = (

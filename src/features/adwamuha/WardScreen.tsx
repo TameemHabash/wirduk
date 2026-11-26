@@ -53,7 +53,11 @@ export function WardScreen() {
   useEffect(() => {
     if (windowDate !== null || leaving.current) return;
     leaving.current = true;
-    toast.show({ message: closedWardText(t, session, 'over', wardTimes) });
+    toast.show({
+      message: closedWardText(t, session, 'over', wardTimes),
+      icon: 'clock',
+      tone: 'gold',
+    });
     router.dismissTo('/');
   }, [router, session, t, toast, wardTimes, windowDate]);
   const keep = useMemo(

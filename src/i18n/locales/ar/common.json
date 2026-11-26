@@ -475,7 +475,7 @@
     "addDhikr": "إضافة ذكر",
     "noAdhkar": "لا أذكار في هذا الباب بعد.",
     "deleteCategory": "حذف الباب",
-    "deleteCategoryConfirmTitle": "حذف «{{title}}»؟",
+    "deleteCategoryConfirmTitle": "حذف {{title}}؟",
     "deleteCategoryConfirmBody": "سيُحذف الباب وكل أذكاره وتسجيلاتها، ولا يمكن التراجع.",
     "delete": "حذف",
     "editCategory": "تعديل الباب",

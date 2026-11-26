@@ -34,7 +34,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | — | Owner feedback 2026-11-21: no message repeats before all of its kind were shown (after a ward and on Home); a ward never opens outside its time (also from a reminder); Home's messages back as before | 🟢 Done | 4e6afd0, one commit 2026-11-21 |
 | — | Owner feedback 2026-11-22 («عدّل الخطة»): «قطعتها» marks a step as passed (saved after the warning); steps 4 and 5 by the owner's names | 🟢 Done | b106530, be45c3f |
 | — | Owner feedback 2026-11-22 (2) («طرأ عليّ ظرف»): «ارجع إلى الخطوة:», a step picked with − and + (design approved first) | 🟢 Done | one commit 2026-11-22 |
-| R1 | Redesign: the look (colors, icons, buttons, rows, the in-app dialog, the toast, the ring) | Not started | |
+| R1 | Redesign: the look (colors, icons, buttons, rows, the in-app dialog, the toast, the ring) | 🟢 Done | one commit 2026-11-26 |
 | R2 | Redesign: three tabs, Home, the Adhkar tab (search, reorder), own adhkar editors | Not started | |
 | R3 | Redesign: the reader (fadl, «المصدر», long text), the restore toast, the finish screen | Not started | |
 | R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | Not started | |
@@ -82,7 +82,7 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
     test build first (their own adhkar and settings are lost, unless a backup feature exists).
-- **Tests:** 775 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
+- **Tests:** 805 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
   `AdwamuhaMessagePicks`, the message each ward got, 2026-11-21).
 
@@ -143,6 +143,24 @@ Built step by step; after each step: `npm run verify`, commit, push, report.
    error.
 6. **R6 Checks**: contrast and dark-mode tests, the largest font, an emulator pass of every screen
    against the design page.
+
+R1, done (2026-11-26):
+
+- Colors (`colors.ts`): the design's values and new tokens (`primarySoft`, `primaryInk`,
+  `accentInk`, `toast`, `dangerSoft`, `onDanger`, the morning and evening card gradients, …). Two
+  light colors are one shade darker than the design so that every text pair passes AA
+  (`textFaint` #617074, `accentInk` #85611A). Radii 10 / 16 / 22 / 28, touch target 48.
+- The new icon set (`Icon.tsx`), the button kinds, `TextButton` (the red delete buttons on the
+  editors and the audio screen), `IconTile`, rows with icon tiles and notes (`SettingsParts`),
+  `Segmented` (the theme picker now has an icon per choice).
+- The app's own dialog in all 10 places that used Android's (and the plan's save notice, with
+  the hadith inside, «أبقِ الخطة كما كانت» first and «نعم، احفظ التعديل» the quietest). The
+  delete-chapter title has no «» and the name in teal.
+- The new toast: a light card with an icon tile (each toast has the design's icon), a chevron
+  when it can be pressed.
+- The reader's ring: teal on a quiet track (the design); clockwise in Arabic, counterclockwise
+  in left-to-right languages.
+- Tests: 805 (new: the dialog, the toast, the ring, the button kinds, more contrast pairs).
 
 ## Owner feedback 2026-11-14 («أدومها»)
 

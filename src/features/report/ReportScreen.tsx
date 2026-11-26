@@ -82,7 +82,7 @@ export function ReportScreen() {
     });
     setBusy(null);
     if (result.ok) {
-      toast.show({ message: t('report.sent') });
+      toast.show({ message: t('report.sent'), icon: 'check', tone: 'gold' });
       router.back();
     } else {
       setMessage(t(`report.errors.${result.error}`));

@@ -9,13 +9,17 @@ export const SPACING = {
   xxxl: 48,
 } as const;
 
-/** Corner radius scale (dp). */
+/**
+ * Corner radius scale (dp), the redesign: small chips and icon tiles (sm), buttons and
+ * fields (md), cards and groups (lg), the big card, sheets and dialogs (xl).
+ */
 export const RADII = {
-  sm: 8,
-  md: 14,
-  lg: 20,
+  sm: 10,
+  md: 16,
+  lg: 22,
+  xl: 28,
   pill: 999,
 } as const;
 
 /** Minimum touch target (dp). */
-export const TOUCH_TARGET = 44;
+export const TOUCH_TARGET = 48;

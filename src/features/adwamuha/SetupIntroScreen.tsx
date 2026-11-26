@@ -1,9 +1,10 @@
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { useDialog } from '@/components/Dialog';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { useAdwamuha } from './AdwamuhaProvider';
@@ -27,6 +28,7 @@ export function SetupIntroScreen() {
   const router = useRouter();
   const { colors, spacing } = useAppTheme();
   const { stored, resume } = useAdwamuha();
+  const dialog = useDialog();
 
   const enable = () => {
     if (!stored) {
@@ -34,14 +36,20 @@ export function SetupIntroScreen() {
       return;
     }
     // On before and turned off: continue, or start over (the history stays either way).
-    Alert.alert(t('adwamuha.continue.title'), t('adwamuha.continue.body'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('adwamuha.continue.restart'), onPress: () => router.push('/adwamuha/start') },
-      {
-        text: t('adwamuha.continue.continue'),
-        onPress: () => void resume().then(() => router.dismissTo('/')),
-      },
-    ]);
+    dialog.show({
+      icon: 'sprout',
+      tone: 'gold',
+      title: t('adwamuha.continue.title'),
+      body: t('adwamuha.continue.body'),
+      actions: [
+        {
+          label: t('adwamuha.continue.continue'),
+          onPress: () => void resume().then(() => router.dismissTo('/')),
+        },
+        { label: t('adwamuha.continue.restart'), onPress: () => router.push('/adwamuha/start') },
+        { label: t('common.cancel'), kind: 'plain', cancel: true },
+      ],
+    });
   };
 
   return (

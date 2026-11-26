@@ -363,7 +363,11 @@ export function Reader({
   const onDorarPress = useCallback(
     (url: string) => {
       onTap();
-      toast.show({ message: t('reader.dorarToast'), onPress: () => void Linking.openURL(url) });
+      toast.show({
+        message: t('reader.dorarToast'),
+        icon: 'external',
+        onPress: () => void Linking.openURL(url),
+      });
     },
     [onTap, t, toast],
   );
