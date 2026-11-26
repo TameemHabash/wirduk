@@ -112,7 +112,8 @@ export interface AdwamuhaValue {
    * (owner, 2026-11-22), already moved right after the steps done: the current step
    * moves on by as many. Otherwise the current step number stays.
    */
-  savePlan: (plan: UserPlan, passed?: number) => Promise<void>;
+  /** `passed`: steps marked «قطعتُها»; `unpassed`: steps done put back («لم أقطعها بعد»). */
+  savePlan: (plan: UserPlan, passed?: number, unpassed?: number) => Promise<void>;
   /** The gentle step-back suggestion is due (low commitment; at most once every 14 days). */
   suggestStepBack: boolean;
   /** The suggestion was shown (accepted or not): not again for 14 days. */
@@ -450,7 +451,7 @@ export function AdwamuhaProvider({
       await repo.save({ ...stored, state });
       await repo.logEvent(today, 'step-back', state.step, {
         from: stored.state.step,
-        kind: typeof kind === 'string' ? kind : 'chosen',
+        kind: 'chosen',
       });
       await reload();
     },
@@ -481,12 +482,20 @@ export function AdwamuhaProvider({
   }, [activeBreak, reload, repo, stored, today]);
 
   const savePlan = useCallback(
-    async (plan: UserPlan, passed = 0) => {
+    async (plan: UserPlan, passed = 0, unpassed = 0) => {
       if (!stored) return;
-      const state = passSteps(stored.state, stored.plan, plan, passed, today, slot().session);
+      const state = passSteps(
+        stored.state,
+        stored.plan,
+        plan,
+        passed,
+        today,
+        slot().session,
+        unpassed,
+      );
       if (
         state.step !== stored.state.step &&
-        keepsCurrent(stored.state, stored.plan, plan, passed)
+        keepsCurrent(stored.state, stored.plan, plan, passed - unpassed)
       ) {
         // Same step, new number: its last week's message, once seen, stays seen.
         const week = lastFinishedWeek(stored.state, records, pauses, today, weekStart);
@@ -499,7 +508,9 @@ export function AdwamuhaProvider({
         today,
         'plan-edit',
         state.step,
-        state.step !== stored.state.step ? { passed, from: stored.state.step } : undefined,
+        state.step !== stored.state.step || unpassed > 0
+          ? { passed, ...(unpassed > 0 ? { unpassed } : {}), from: stored.state.step }
+          : undefined,
       );
       await reload();
     },

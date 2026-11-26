@@ -37,7 +37,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | R1 | Redesign: the look (colors, icons, buttons, rows, the in-app dialog, the toast, the ring) | 🟢 Done | one commit 2026-11-26 |
 | R2 | Redesign: three tabs, Home, the Adhkar tab (search, reorder), own adhkar editors | 🟢 Done | one commit 2026-11-26 |
 | R3 | Redesign: the reader (fadl, «المصدر», long text), the restore toast, the finish screen | 🟢 Done | one commit 2026-11-26 |
-| R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | Not started | |
+| R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | 🟢 Done | one commit 2026-11-26 |
 | R5 | Redesign: Settings (notifications card) and the other screens | Not started | |
 | R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | Not started | |
 | 14 | Google Play (waits for the redesign) | Not started | |
@@ -204,6 +204,29 @@ tap on «المصدر» counting, the long-text fade):
   «أتممت» + the chapter's name bold in teal, no «».
 - Found on the emulator and fixed: the golden card's gradient missed its padding strip; a tab's
   pill was drawn square after it was selected (a new view per state now).
+
+R4, done (2026-11-26):
+
+- The hadith card: soft gold, no ornament anywhere (setup 1 bigger, «مساري», the save notice).
+- Setup 2: «الخطوة N من 24» in the middle between + and −, the step's words under it, the ward
+  as chips. Setup 3 and «أدومها» settings: «عرض أقل» with an up arrow (the owner's words).
+- After a ward (and on Home's message card): a hadith's Dorar data folds under «المصدر» (no
+  counting there); a verse stays as it is.
+- «مساري»: the bead path (`BeadPath.tsx`, 24 beads clockwise from a small star) instead of the
+  ring; no «افتح ورد…» button; «قرأتُ وردي بدون التطبيق» as a row; then two rows with notes
+  (`PlanRows.tsx`): «خفّف وردك أو خذ استراحة» (the owner's choice) and «عدّل الخطة». Finished:
+  «إيقاف أدومها» takes the first row. The same rows in «أدومها» settings under «الخطة».
+- The step-back sheet, from the bottom: the owner's title, «ارجع إلى الخطوة:» (− / the step and
+  its words / +), the two breaks side by side. «نصف الخطوة» and «الخطوات الأولى» are removed from
+  the app (`StepBack` is only `{ step }`); old event logs with them still load.
+- «عدّل الخطة»: the steps done folded in one row («الخطوات 1–N · قطعتَها»); open, each has «لم
+  أقطعها بعد» (the owner's word): the step goes right after the current one and its dhikr leaves
+  the ward, saved with «حفظ التعديل» after the warning, «تراجع» before (`withEdits` in
+  `logic/plan-edit.ts`; the same step goes on under a new number). The current step framed in
+  teal with «خطوتك الآن» and «قطعتُها»; the weeks with + and −; a save bar always in sight.
+- Claude's choices (for the owner to know): «لم أقطعها بعد» is not on the finished path;
+  «تغيير الترتيب» waits until a step put back is saved; a step put back needs its full weeks
+  when reached again (not the one week of a climb back).
 
 ## Owner feedback 2026-11-14 («أدومها»)
 

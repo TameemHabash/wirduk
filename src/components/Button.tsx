@@ -25,6 +25,8 @@ interface Props {
   destructive?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** What a screen reader says, when the title alone is not enough (e.g. «قطعتُها: الخطوة 5»). */
+  accessibilityLabel?: string;
 }
 
 export function Button({
@@ -35,6 +37,7 @@ export function Button({
   destructive = false,
   disabled = false,
   style,
+  accessibilityLabel,
 }: Props) {
   const { colors, radii, spacing } = useAppTheme();
   const look = {
@@ -49,6 +52,7 @@ export function Button({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}

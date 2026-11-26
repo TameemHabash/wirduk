@@ -3,9 +3,11 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { DhikrText } from '@/components/DhikrText';
 import { Icon } from '@/components/Icon';
 import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { type WardOrder, orderWard } from './logic/ward';
@@ -100,23 +102,27 @@ export function WardOrderPicker({
       {ward.length > 0 ? (
         <View
           style={{
-            backgroundColor: colors.surfaceMuted,
-            borderRadius: radii.md,
-            padding: spacing.md,
-            gap: spacing.xs,
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            borderWidth: 1,
+            borderRadius: radii.lg,
+            padding: spacing.lg,
+            gap: spacing.sm + 2,
           }}
         >
-          <AppText variant="caption" tone="muted">
+          <AppText variant="label" tone="muted">
             {t('adwamuha.settingsScreen.previewTitle')}
           </AppText>
           {shown.map((id, i) => (
-            <View key={id} style={[styles.row, { gap: spacing.sm }]}>
-              <View style={[styles.number, { backgroundColor: colors.surface }]}>
-                <AppText variant="label" tone="muted">
+            <View key={id} style={[styles.row, { gap: spacing.sm + 2 }]}>
+              <View style={[styles.number, { backgroundColor: colors.accentSoft }]}>
+                <AppText variant="label" tone="accentInk" style={styles.numberText}>
                   {i + 1}
                 </AppText>
               </View>
-              <AppText style={styles.fill}>{dhikrLabel(id, texts.get(id) ?? '', 4)}</AppText>
+              <DhikrText size={17} style={[styles.fill, styles.start]}>
+                {dhikrLabel(id, texts.get(id) ?? '', 4)}
+              </DhikrText>
             </View>
           ))}
           {ward.length > FIRST ? (
@@ -131,12 +137,17 @@ export function WardOrderPicker({
                 pressed && { opacity: 0.6 },
               ]}
             >
-              <AppText variant="label" tone="primary">
+              {/* «عرض أقل» with an up arrow (owner's words, 2026-11-25). */}
+              <AppText
+                key={String(showAll)}
+                roomy
+                style={[styles.toggleText, { color: colors.primaryInk }]}
+              >
                 {showAll
-                  ? t('adwamuha.orderHelp.showFirst')
+                  ? t('adwamuha.orderHelp.showLess')
                   : t('adwamuha.orderHelp.showAll', { count: ward.length })}
               </AppText>
-              <Icon name={showAll ? 'up' : 'down'} size={16} color={colors.primary} />
+              <Icon name={showAll ? 'up' : 'down'} size={16} color={colors.primaryInk} />
             </Pressable>
           ) : null}
         </View>
@@ -151,11 +162,14 @@ const styles = StyleSheet.create({
   nudge: { flexDirection: 'row', alignItems: 'flex-start' },
   // A rounded square (design: «.oi span»).
   number: {
-    width: 22,
-    height: 22,
-    borderRadius: 7,
+    width: 30,
+    height: 30,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  toggle: { justifyContent: 'center', minHeight: 44 },
+  numberText: { fontFamily: UI_FONTS.semibold, fontSize: 14, lineHeight: 20 },
+  start: { textAlign: 'auto' },
+  toggle: { justifyContent: 'flex-start', minHeight: 44 },
+  toggleText: { fontFamily: UI_FONTS.medium, fontSize: 14, lineHeight: 22 },
 });

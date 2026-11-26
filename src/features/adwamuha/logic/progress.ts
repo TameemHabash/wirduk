@@ -173,15 +173,15 @@ export function postpone(state: PlanState, today: DayKey): PlanState {
 }
 
 /**
- * A step back: half the current step, the first three, or a step the user
- * picked with − and + («ارجع إلى الخطوة:», owner, 2026-11-22).
+ * A step back to a step the user picked with − and + («ارجع إلى الخطوة:», owner,
+ * 2026-11-22). «نصف الخطوة» and «الخطوات الأولى» were removed (owner, 2026-11-25: the picked
+ * step covers both); old event logs that name them still load (they are only records).
  */
-export type StepBack = 'half' | 'firstThree' | { step: number };
+export type StepBack = { step: number };
 
 /** The step a step back goes to (never past the current one, never below 1). */
 export function stepBackTarget(step: number, kind: StepBack): number {
-  if (typeof kind === 'object') return Math.min(step, Math.max(1, Math.floor(kind.step)));
-  return kind === 'half' ? Math.max(1, Math.floor(step / 2)) : Math.min(step, 3);
+  return Math.min(step, Math.max(1, Math.floor(kind.step)));
 }
 
 /** The steps «ارجع إلى الخطوة:» offers: 1 up to the one before the current step (none on step 1). */

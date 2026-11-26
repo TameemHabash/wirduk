@@ -62,7 +62,7 @@ export function SetupIntroScreen() {
         </>
       }
     >
-      <HadithCard />
+      <HadithCard big />
       <AppText variant="title" accessibilityRole="header" style={styles.center}>
         {t('adwamuha.setup.title')}
       </AppText>

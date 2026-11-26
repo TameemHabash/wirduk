@@ -13,6 +13,7 @@ import {
   samePlan,
   setStepWeeks,
   stepKey,
+  withEdits,
   withPassed,
 } from './plan-edit';
 
@@ -132,5 +133,61 @@ describe('«قطعتها»: a step the user already keeps (owner, 2026-11-22)', 
     expect(passSteps(state, plan, plan, 0, '2026-04-20')).toBe(state);
     const done = { ...startPlan(5, '2026-04-01'), maintenance: true };
     expect(passSteps(done, plan, plan, 1, '2026-04-20')).toBe(done);
+  });
+});
+
+describe('«لم أقطعها بعد»: a step done goes back to the plan (owner, 2026-11-26)', () => {
+  it('leaves the steps done and comes right after the current step, the next one', () => {
+    // On step 4: steps 1–3 done. Step 2 put back: 1, 3 done, the current one, then 2.
+    expect(order(withEdits(plan, 4, [], [key(2)]))).toEqual([1001, 1003, 1004, 1002, 1005]);
+    // Two put back, in the order marked.
+    expect(order(withEdits(plan, 4, [], [key(3), key(1)]))).toEqual([1002, 1004, 1003, 1001, 1005]);
+    // Only steps done can be put back: the current step and later ones stay.
+    expect(order(withEdits(plan, 4, [], [key(4), key(5)]))).toEqual(order(plan));
+  });
+
+  it('its dhikr leaves the ward: the ward is the steps up to the current one', () => {
+    const after = withEdits(plan, 4, [], [key(2)]);
+    // The current step is now 3 (1, 3, then the one the user works on).
+    const ward = after.steps.slice(0, 3).map((s) => s.morningDhikrId);
+    expect(ward).toEqual([1001, 1003, 1004]);
+    expect(ward).not.toContain(1002);
+  });
+
+  it('the user goes on with the same step under a new number, its days kept', () => {
+    const state = { ...startPlan(4, '2026-04-01'), highestStep: 4 };
+    const after = withEdits(plan, 4, [], [key(2)]);
+    expect(keepsCurrent(state, plan, after, -1)).toBe(true);
+    expect(passSteps(state, plan, after, 0, '2026-04-20', 'morning', 1)).toEqual({
+      ...state,
+      step: 3,
+      highestStep: 3,
+    });
+  });
+
+  it('the step put back needs its full weeks when reached (not a week, as a climb back)', () => {
+    const state = { ...startPlan(4, '2026-04-01'), highestStep: 4 };
+    const after = withEdits(plan, 4, [], [key(2)]);
+    const saved = passSteps(state, plan, after, 0, '2026-04-20', 'morning', 1);
+    // Reaching step 4 (the step put back) is past the highest step reached: a new step.
+    expect(saved.highestStep).toBeLessThan(4);
+  });
+
+  it('with «قطعتها» in the same save: both moves apply', () => {
+    // On step 2 (step 1 done): step 1 put back, step 4 marked.
+    const after = withEdits(plan, 2, [key(4)], [key(1)]);
+    expect(order(after)).toEqual([1004, 1002, 1001, 1003, 1005]);
+    const state = startPlan(2, '2026-04-01');
+    expect(passSteps(state, plan, after, 1, '2026-04-20', 'morning', 1)).toMatchObject({
+      step: 2,
+      stepStartedOn: '2026-04-01',
+    });
+  });
+
+  it('nothing on the finished path', () => {
+    const done = { ...startPlan(5, '2026-04-01'), maintenance: true };
+    expect(
+      passSteps(done, plan, withEdits(plan, 5, [], [key(1)]), 0, '2026-04-20', 'morning', 1),
+    ).toBe(done);
   });
 });

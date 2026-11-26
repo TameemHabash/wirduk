@@ -191,10 +191,10 @@ describe('the user’s choices', () => {
     expect(s.app.readyToMoveOn).toBe(true);
   }, 60_000);
 
-  it('«طرأ عليّ ظرف» back to half: a word; the steps reached before are climbed again a week each', async () => {
+  it('«طرأ عليّ ظرف» back to a picked step (3 of 7): a word; the steps reached before are climbed again a week each', async () => {
     const s = await startScenario({ day: SAT, hour: 9, step: 7 });
     await readMessages(s);
-    await s.run((app) => app.stepBack('half'));
+    await s.run((app) => app.stepBack({ step: 3 }));
     expect(s.app.stored!.state).toMatchObject({ step: 3, reclimb: true, highestStep: 7 });
     expect(await readMessages(s)).toContain('afterStepBack');
     expect(s.view!.status.weeksNeeded).toBe(1);
@@ -206,9 +206,9 @@ describe('the user’s choices', () => {
     expect(s.view!.status.weeksNeeded).toBe(1);
   }, 60_000);
 
-  it('«طرأ عليّ ظرف» back to the first three', async () => {
+  it('«طرأ عليّ ظرف» back to step 3 from step 9', async () => {
     const s = await startScenario({ day: SAT, hour: 9, step: 9 });
-    await s.run((app) => app.stepBack('firstThree'));
+    await s.run((app) => app.stepBack({ step: 3 }));
     expect(s.app.stored!.state).toMatchObject({ step: 3, reclimb: true });
   }, 30_000);
 

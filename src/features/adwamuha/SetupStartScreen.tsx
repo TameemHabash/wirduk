@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { Icon } from '@/components/Icon';
+import { DhikrText } from '@/components/DhikrText';
 import { Button } from '@/components/Button';
-import { IconButton } from '@/components/IconButton';
 import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import type { UserPlan } from './logic/types';
 import { copyDefaultPlan, wardDhikrIds } from './logic/ward';
 import { OWNER_TEXTS } from './owner-texts';
-import { dhikrLabel } from './setup';
+import { dhikrLabel, stepLabel } from './setup';
 import { ChoiceCard, SetupLayout } from './SetupParts';
 
 /**
@@ -93,23 +95,35 @@ export function SetupStartScreen() {
             gap: spacing.md,
           }}
         >
-          <View style={[styles.row, { gap: spacing.md }]}>
-            <IconButton
-              icon="minus"
-              label={t('adwamuha.start.fewer')}
-              onPress={() => setStep((s) => Math.max(2, s - 1))}
-              disabled={step <= 2}
-            />
-            <AppText variant="heading" style={styles.stepText} accessibilityLiveRegion="polite">
-              {OWNER_TEXTS.labels.stepOf
-                .replace('{{step}}', String(step))
-                .replace('{{total}}', String(total))}
-            </AppText>
-            <IconButton
+          {/* The step in the middle, between + and − (owner, 2026-11-25), its words under it. */}
+          <View style={[styles.row, styles.stepper, { backgroundColor: colors.surfaceMuted }]}>
+            <StepperButton
               icon="plus"
               label={t('adwamuha.start.more')}
               onPress={() => setStep((s) => Math.min(total, s + 1))}
               disabled={step >= total}
+            />
+            <View style={styles.mid} accessibilityLiveRegion="polite">
+              <AppText style={styles.stepText}>
+                {OWNER_TEXTS.labels.stepOf
+                  .replace('{{step}}', String(step))
+                  .replace('{{total}}', String(total))}
+              </AppText>
+              {plan?.steps[step - 1] ? (
+                <DhikrText
+                  size={15}
+                  numberOfLines={2}
+                  style={[styles.center, { color: colors.textMuted }]}
+                >
+                  {stepLabel(plan.steps[step - 1]!, texts)}
+                </DhikrText>
+              ) : null}
+            </View>
+            <StepperButton
+              icon="minus"
+              label={t('adwamuha.start.fewer')}
+              onPress={() => setStep((s) => Math.max(2, s - 1))}
+              disabled={step <= 2}
             />
           </View>
           <View
@@ -122,12 +136,12 @@ export function SetupStartScreen() {
                 key={i}
                 style={{
                   backgroundColor: colors.surfaceMuted,
-                  borderRadius: radii.md,
-                  paddingHorizontal: spacing.sm,
-                  paddingVertical: spacing.xs,
+                  borderRadius: 10,
+                  paddingHorizontal: 10,
+                  paddingVertical: 2,
                 }}
               >
-                <AppText variant="caption">{words}</AppText>
+                <DhikrText size={15}>{words}</DhikrText>
               </View>
             ))}
           </View>
@@ -140,8 +154,45 @@ export function SetupStartScreen() {
   );
 }
 
+/** A + or − in the step picker (design `.stepper .sb`). */
+function StepperButton({
+  icon,
+  label,
+  onPress,
+  disabled,
+}: {
+  icon: 'plus' | 'minus';
+  label: string;
+  onPress: () => void;
+  disabled: boolean;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={[styles.stepButton, { backgroundColor: colors.surface }, disabled && { opacity: 0.4 }]}
+    >
+      <Icon name={icon} size={18} color={colors.primaryInk} />
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
-  stepText: { flex: 1, textAlign: 'center' },
+  stepper: { gap: 8, borderRadius: 14, padding: 5 },
+  stepButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mid: { flex: 1, alignItems: 'center' },
+  center: { textAlign: 'center', alignSelf: 'stretch' },
+  stepText: { fontFamily: UI_FONTS.semibold, fontSize: 16, lineHeight: 24, textAlign: 'center' },
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
 });

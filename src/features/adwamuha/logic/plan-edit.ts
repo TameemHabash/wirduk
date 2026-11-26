@@ -7,7 +7,9 @@
  * - reset copies the default plan again for the steps not done yet (the current
  *   step number and the steps done are kept);
  * - «قطعتها» (owner, 2026-11-22): a step the user already keeps, the current one
- *   or a later one, joins the steps done (`withPassed`, `passSteps`).
+ *   or a later one, joins the steps done (`withPassed`, `passSteps`);
+ * - «لم أقطعها بعد» (owner, 2026-11-26): a step done goes back to the plan, right after
+ *   the current step, so its dhikr leaves the ward (`withEdits`).
  * The screen warns before saving any change and recommends the default plan.
  */
 import type { DayKey } from './days';
@@ -86,14 +88,36 @@ export function withPassed(
   currentStep: number,
   passed: readonly string[],
 ): UserPlan {
+  return withEdits(plan, currentStep, passed, []);
+}
+
+/**
+ * The plan as it would be saved, with the steps marked «قطعتها» (`passed`) moved right
+ * after the steps done, and the steps done marked «لم أقطعها بعد» (`unpassed`, owner,
+ * 2026-11-26) moved out of them, right after the step the user will work on (they become
+ * the next steps, in the order marked). The other steps keep their order.
+ */
+export function withEdits(
+  plan: UserPlan,
+  currentStep: number,
+  passed: readonly string[],
+  unpassed: readonly string[],
+): UserPlan {
   const done = plan.steps.slice(0, currentStep - 1);
   const rest = plan.steps.slice(currentStep - 1);
+  const back = unpassed.flatMap((key) => done.filter((s) => stepKey(s) === key));
+  const kept = done.filter((s) => !unpassed.includes(stepKey(s)));
   const marked = passed.flatMap((key) => rest.filter((s) => stepKey(s) === key));
+  const [now, ...later] = rest.filter((s) => !passed.includes(stepKey(s)));
   return {
     ...plan,
-    steps: [...done, ...marked, ...rest.filter((s) => !passed.includes(stepKey(s)))],
+    steps: [...kept, ...marked, ...(now ? [now] : []), ...back, ...later],
   };
 }
+
+/** The step the user works on once saved, after these marks. */
+export const editedCurrent = (currentStep: number, passed: number, unpassed: number): number =>
+  currentStep + passed - unpassed;
 
 /**
  * Can one more step be marked «قطعتها»? One step at least stays to work on (the
@@ -131,18 +155,20 @@ export function keepsCurrent(
   state: PlanState,
   before: UserPlan,
   after: UserPlan,
-  passed: number,
+  moved: number,
 ): boolean {
   const was = before.steps[state.step - 1];
-  const now = after.steps[Math.min(state.step + passed, after.steps.length) - 1];
+  const now = after.steps[Math.max(1, Math.min(state.step + moved, after.steps.length)) - 1];
   return Boolean(was && now && stepKey(was) === stepKey(now));
 }
 
 /**
  * The state after saving a plan with `passed` steps marked «قطعتها» (owner,
- * 2026-11-22): the current step moves on by as many. The step the user works on
- * keeps its days and weeks when only later steps were marked; when it was marked
- * too, the new current step begins today, as after «أضِف الذكر التالي».
+ * 2026-11-22) and `unpassed` steps done put back («لم أقطعها بعد», owner, 2026-11-26):
+ * the current step's number moves by as many. The step the user works on keeps its days
+ * and weeks when it is still the same; when it was marked too, the new current step begins
+ * today, as after «أضِف الذكر التالي». A step put back is a new step when reached again
+ * (not a climb back after a step back), so the highest step reached moves down with it.
  */
 export function passSteps(
   state: PlanState,
@@ -151,11 +177,13 @@ export function passSteps(
   passed: number,
   today: DayKey,
   startedIn: Session = 'morning',
+  unpassed = 0,
 ): PlanState {
-  if (passed <= 0 || state.maintenance) return state;
-  const step = Math.min(state.step + passed, after.steps.length);
-  const highestStep = Math.max(state.highestStep, step);
-  if (keepsCurrent(state, before, after, passed)) return { ...state, step, highestStep };
+  if ((passed <= 0 && unpassed <= 0) || state.maintenance) return state;
+  const moved = passed - unpassed;
+  const step = Math.max(1, Math.min(state.step + moved, after.steps.length));
+  const highestStep = Math.max(state.highestStep - unpassed, step);
+  if (keepsCurrent(state, before, after, moved)) return { ...state, step, highestStep };
   return {
     ...state,
     step,

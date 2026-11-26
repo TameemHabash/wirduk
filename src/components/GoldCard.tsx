@@ -5,6 +5,8 @@ import Svg, { Circle, Defs, G, LinearGradient, Path, Pattern, Rect, Stop } from 
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 export type Period = 'morning' | 'evening';
+/** The morning or evening card of Home, or the hadith card of «أدومها» (gold soft to surface). */
+export type GoldTone = Period | 'hadith';
 
 /**
  * The golden card of Home (redesign): the morning or evening gradient, a faint khatam
@@ -16,15 +18,18 @@ export function GoldCard({
   children,
   style,
 }: {
-  period: Period;
+  period: GoldTone;
   sky?: boolean;
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
   const { colors } = useAppTheme();
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const from = period === 'morning' ? colors.morningFrom : colors.eveningFrom;
-  const to = period === 'morning' ? colors.morningTo : colors.eveningTo;
+  const [from, to, end] = {
+    morning: [colors.morningFrom, colors.morningTo, '0.72'],
+    evening: [colors.eveningFrom, colors.eveningTo, '0.72'],
+    hadith: [colors.accentSoft, colors.surface, '0.85'],
+  }[period];
   return (
     <View style={[styles.card, { borderColor: colors.accentLine, backgroundColor: to }, style]}>
       {/* In its own layer: a size of 100% on the card itself would leave out its padding. */}
@@ -33,7 +38,7 @@ export function GoldCard({
           <Defs>
             <LinearGradient id={`g${id}`} x1="0.3" y1="0" x2="0.7" y2="1">
               <Stop offset="0" stopColor={from} />
-              <Stop offset="0.72" stopColor={to} />
+              <Stop offset={end} stopColor={to} />
             </LinearGradient>
             <Pattern id={`p${id}`} width="44" height="44" patternUnits="userSpaceOnUse">
               <G fill="none" stroke={colors.accent} strokeWidth="1.1" opacity="0.13">
@@ -50,7 +55,7 @@ export function GoldCard({
           <Rect width="100%" height="100%" fill={`url(#p${id})`} />
         </Svg>
       </View>
-      {sky ? <Sky period={period} /> : null}
+      {sky && period !== 'hadith' ? <Sky period={period} /> : null}
       {children}
     </View>
   );

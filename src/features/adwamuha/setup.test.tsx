@@ -198,7 +198,7 @@ describe('setup 3: the ward order (owner, 2026-10-30)', () => {
     // All of it first, with the owner's names.
     expect(await screen.findByText(KURSI)).toBeOnTheScreen();
     expect(screen.getByText(QULS)).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText('عرض أول أربعة'));
+    await fireEvent.press(screen.getByText('عرض أقل'));
     expect(screen.queryByText(KURSI)).toBeNull();
     await fireEvent.press(screen.getByText('عرض الورد كله (7)'));
     expect(screen.getByText(KURSI)).toBeOnTheScreen();

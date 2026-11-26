@@ -20,7 +20,8 @@ import { stepLabel } from './setup';
 
 const DAY = '2026-04-20';
 const at = (hh: number) => () => new Date(2026, 3, 20, hh, 0);
-const LIFE_LINK = 'طرأ عليّ ظرف';
+/** «مساري»'s row (owner's choice, 2026-11-26). */
+const LIFE_LINK = resources.ar.common.adwamuha.rows.easeTitle;
 const PASSED = OWNER_TEXTS.labels.stepPassed;
 const KURSI = OWNER_TEXTS.wardNames['1001'];
 const QULS = OWNER_TEXTS.wardNames['1002'];
@@ -56,37 +57,42 @@ afterEach(async () => {
 });
 
 describe('«طرأ عليّ ظرف أو مستجد في حياتي»', () => {
-  it('back to half the step: climbing again is faster, history kept, a kind word', async () => {
+  it('back to a picked step: climbing again is faster, history kept, a kind word', async () => {
     const repos = await withPlan(10);
     await openStepBack(repos);
-    await fireEvent.press(screen.getByText('ارجع إلى نصف خطوتك: الخطوة 5'));
+    // «نصف الخطوة» and «الخطوات الأولى» are gone (owner, 2026-11-25).
+    expect(screen.queryByText(/نصف خطوتك/)).toBeNull();
+    expect(screen.queryByText(/الخطوات الأولى/)).toBeNull();
+    for (let i = 0; i < 4; i++) await fireEvent.press(screen.getByLabelText(STEP_BACK.earlier));
+    await fireEvent.press(screen.getByText(STEP_BACK.toStep.replace('{{step}}', '5')));
     await waitFor(async () => expect((await repos.adwamuha.load())?.state.step).toBe(5));
     expect((await repos.adwamuha.load())?.state).toMatchObject({
       stepStartedOn: DAY,
       reclimb: true,
       highestStep: 10,
     });
-    expect((await repos.adwamuha.listEvents()).map((e) => [e.kind, e.data])).toEqual([
-      ['step-back', { from: 10, kind: 'half' }],
-    ]);
     // The kind word shows on Home (one-time messages are there only).
     await renderWithApp(<HomeScreen />, repos, { now: at(9) });
     await expectMomentMessage(repos, 'afterStepBack');
   });
 
-  it('back to the first three steps', async () => {
-    const repos = await withPlan(10);
-    await openStepBack(repos);
-    await fireEvent.press(screen.getByText('ارجع إلى الخطوات الأولى: الخطوة 3'));
-    await waitFor(async () => expect((await repos.adwamuha.load())?.state.step).toBe(3));
+  it('an old event log with the removed kinds still loads, with its kind word', async () => {
+    const repos = await withPlan(5);
+    await repos.adwamuha.logEvent(DAY, 'step-back', 5, { from: 10, kind: 'half' });
+    await repos.adwamuha.logEvent(DAY, 'step-back', 3, { from: 5, kind: 'firstThree' });
+    await renderWithApp(<HomeScreen />, repos, { now: at(9) });
+    await expectMomentMessage(repos, 'afterStepBack');
+    expect((await repos.adwamuha.listEvents()).map((e) => e.data)).toEqual([
+      { from: 10, kind: 'half' },
+      { from: 5, kind: 'firstThree' },
+    ]);
   });
 
-  it('cannot go back from step 1', async () => {
+  it('on step 1: only the breaks', async () => {
     await openStepBack(await withPlan(1));
-    expect(screen.getByText('ارجع إلى نصف خطوتك: الخطوة 1')).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'ارجع إلى نصف خطوتك: الخطوة 1' })).toBeDisabled();
-    // Nothing to pick either.
     expect(screen.queryByText(OWNER_TEXTS.labels.stepBackTo)).toBeNull();
+    expect(screen.getByText(STEP_BACK.break1)).toBeOnTheScreen();
+    expect(screen.getByText(STEP_BACK.break2)).toBeOnTheScreen();
   });
 
   it('«ارجع إلى الخطوة:» (owner, 2026-11-22): − and + pick a step, shown by its first words or the owner’s name', async () => {
@@ -357,5 +363,52 @@ describe('«عدّل الخطة»', () => {
     expect(screen.queryByLabelText('اسحب لتغيير مكان الخطوة 2')).toBeNull();
     expect(screen.queryByLabelText('اسحب لتغيير مكان الخطوة 1')).toBeNull();
     await settleLists();
+  });
+});
+
+describe('«عدّل الخطة» (redesign)', () => {
+  it('the steps done are folded in one row; open, each has «لم أقطعها بعد»', async () => {
+    await renderWithApp(<PlanEditorScreen />, await withPlan(4), { now: at(9) });
+    const fold = await screen.findByText(
+      PLAN.doneSteps.replace('{{from}}', '1').replace('{{to}}', '3'),
+    );
+    expect(screen.queryByLabelText(`${PLAN.notPassed}: الخطوة 2`)).toBeNull();
+    await fireEvent.press(fold);
+    expect(screen.getByLabelText(`${PLAN.notPassed}: الخطوة 2`)).toBeOnTheScreen();
+    // Not on the current step.
+    expect(screen.queryByLabelText(`${PLAN.notPassed}: الخطوة 4`)).toBeNull();
+  });
+
+  it('«لم أقطعها بعد»: back right after the current step, its dhikr leaves the ward; saved after the warning', async () => {
+    const repos = await withPlan(4);
+    const before = (await repos.adwamuha.load())!;
+    const putBack = before.plan.steps[1]!; // step 2
+    await renderWithApp(<PlanEditorScreen />, repos, { now: at(9) });
+    await fireEvent.press(
+      await screen.findByText(PLAN.doneSteps.replace('{{from}}', '1').replace('{{to}}', '3')),
+    );
+    await fireEvent.press(screen.getByLabelText(`${PLAN.notPassed}: الخطوة 2`));
+    // It is now step 4, after the current step (now 3), with «تراجع».
+    expect(screen.getByLabelText('تراجع: الخطوة 4')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText('حفظ التعديل'));
+    expect(await screen.findByText(PLAN_WARNING)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText('نعم، احفظ التعديل'));
+    await waitFor(async () => expect((await repos.adwamuha.load())?.state.step).toBe(3));
+    const saved = (await repos.adwamuha.load())!;
+    expect(saved.plan.steps[3]).toEqual(putBack);
+    // The ward (steps 1–3) no longer has its dhikr.
+    expect(saved.plan.steps.slice(0, 3)).not.toContainEqual(putBack);
+    // The same step goes on: its start day is kept.
+    expect(saved.state.stepStartedOn).toBe(before.state.stepStartedOn);
+  });
+
+  it('«تراجع» undoes «لم أقطعها بعد» before saving: nothing left to save', async () => {
+    await renderWithApp(<PlanEditorScreen />, await withPlan(4), { now: at(9) });
+    await fireEvent.press(
+      await screen.findByText(PLAN.doneSteps.replace('{{from}}', '1').replace('{{to}}', '3')),
+    );
+    await fireEvent.press(screen.getByLabelText(`${PLAN.notPassed}: الخطوة 2`));
+    await fireEvent.press(screen.getByLabelText('تراجع: الخطوة 4'));
+    expect(screen.getByRole('button', { name: 'حفظ التعديل' })).toBeDisabled();
   });
 });

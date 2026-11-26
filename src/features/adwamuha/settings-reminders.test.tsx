@@ -81,7 +81,11 @@ describe('the «أدومها» settings screen', () => {
     expect(screen.getByText('التذكير')).toBeOnTheScreen();
     expect(screen.getByLabelText('ورد الصباح')).toBeOnTheScreen();
     expect(screen.getByText('أوقات الورد')).toBeOnTheScreen();
-    await fireEvent.press(screen.getByLabelText('عدّل الخطة. الترتيب ومدة كل خطوة'));
+    // The two rows of «مساري», with their notes (owner, 2026-11-25).
+    expect(screen.getByText('خفّف وردك أو خذ استراحة')).toBeOnTheScreen();
+    expect(screen.getByText(/^ارجع إلى خطوة سابقة/)).toBeOnTheScreen();
+    expect(screen.getByText(/^غيّر ترتيبها ومدة كل خطوة/)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText('عدّل الخطة'));
     expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/plan');
   });
 
@@ -106,7 +110,7 @@ describe('the «أدومها» settings screen', () => {
     await fireEvent.press(screen.getByText('عرض الورد كله (7)'));
     expect(screen.getByText(kursi)).toBeOnTheScreen();
     expect(screen.getByText(quls)).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText('عرض أول أربعة'));
+    await fireEvent.press(screen.getByText('عرض أقل'));
     expect(screen.queryByText(kursi)).toBeNull();
     // The category's order puts them right after the opening.
     await fireEvent.press(screen.getByRole('radio', { name: /^ترتيب الأبواب/ }));

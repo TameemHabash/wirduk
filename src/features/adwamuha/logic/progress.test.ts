@@ -49,7 +49,7 @@ describe('starting', () => {
     const next = advance(s, plan, day(14));
     expect(next.startWeeks).toBeUndefined();
     expect(weeksNeeded(next, plan)).toBe(1); // step 3: 1 week
-    expect(stepBack(s, 'half', day(5)).startWeeks).toBeUndefined();
+    expect(stepBack(s, { step: 1 }, day(5)).startWeeks).toBeUndefined();
   });
 });
 
@@ -76,7 +76,7 @@ describe('begun in the evening: that first morning counts for nothing', () => {
     const next = advance(started, plan, day(28), 'evening');
     expect(stepSkipped(next)).toEqual({ day: day(28), session: 'morning' });
     expect(planSkipped(next, day(0))).toBeNull();
-    expect(stepSkipped(stepBack(next, 'half', day(30)))).toBeNull();
+    expect(stepSkipped(stepBack(next, { step: 1 }, day(30)))).toBeNull();
   });
 
   it('its week can still count with 4 and 4 on the days left; otherwise the next week decides', () => {
@@ -186,19 +186,7 @@ describe('«أضِف الذكر التالي»', () => {
 });
 
 describe('step back («طرأ عليّ ظرف»)', () => {
-  it.each([
-    [1, 'half', 1],
-    [2, 'half', 1],
-    [5, 'half', 2],
-    [10, 'half', 5],
-    [24, 'half', 12],
-    [2, 'firstThree', 2],
-    [3, 'firstThree', 3],
-    [10, 'firstThree', 3],
-  ] as const)('step %i, %s → step %i', (step, kind, target) => {
-    expect(stepBackTarget(step, kind)).toBe(target);
-  });
-
+  // «نصف الخطوة» and «الخطوات الأولى» were removed (owner, 2026-11-25): a picked step covers both.
   it('a step the user picked («ارجع إلى الخطوة:»): never past the current one, never below 1', () => {
     expect(stepBackTarget(10, { step: 4 })).toBe(4);
     expect(stepBackTarget(10, { step: 9 })).toBe(9);
@@ -216,7 +204,7 @@ describe('step back («طرأ عليّ ظرف»)', () => {
   });
 
   it('climbs back faster: a step reached before takes 1 week', () => {
-    const backed = stepBack(stateAt(3, day(0), { highestStep: 3 }), 'half', day(50));
+    const backed = stepBack(stateAt(3, day(0), { highestStep: 3 }), { step: 1 }, day(50));
     expect(backed).toMatchObject({
       step: 1,
       stepStartedOn: day(50),

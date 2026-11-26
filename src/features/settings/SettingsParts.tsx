@@ -33,7 +33,8 @@ export function SettingsGroup({
           styles.group,
           {
             backgroundColor: colors.surface,
-            borderColor: highlight ? colors.primary : colors.border,
+            // «أدومها» stands out in gold (redesign).
+            borderColor: highlight ? colors.accentLine : colors.border,
             borderWidth: highlight ? 1.5 : 1,
           },
         ]}

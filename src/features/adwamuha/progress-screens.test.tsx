@@ -269,3 +269,17 @@ describe('«مساري»', () => {
     expect(await screen.findByText('«أدومها» غير مفعّلة.')).toBeOnTheScreen();
   });
 });
+
+describe('«مساري» (redesign)', () => {
+  it('the bead path; no «افتح ورد…» button; the two rows open the sheet and the plan', async () => {
+    const repos = await withPlan(10);
+    await renderWithApp(<ProgressScreen />, repos, { now: at(7) });
+    expect(await screen.findByTestId('bead-path')).toBeOnTheScreen();
+    // The ward opens from Home only (owner, 2026-11-26).
+    expect(screen.queryByText(/^افتح ورد/)).toBeNull();
+    await fireEvent.press(screen.getByText(OWNER_TEXTS.labels.editPlan));
+    expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/plan');
+    await fireEvent.press(screen.getByText('خفّف وردك أو خذ استراحة'));
+    expect(await screen.findByText(OWNER_TEXTS.labels.lifeChange)).toBeOnTheScreen();
+  });
+});

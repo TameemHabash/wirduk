@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
 import { useDialog } from '@/components/Dialog';
-import { Icon } from '@/components/Icon';
 import { useToast } from '@/components/Toast';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { autoBackupKnown, lastAutoBackupAt } from '@/features/backup/auto-backup';
@@ -20,6 +19,7 @@ import { useAppTheme } from '@/theme/ThemeProvider';
 import { useAdwamuha } from './AdwamuhaProvider';
 import { type WardTimes, validWardTimes } from './logic/sessions';
 import { OWNER_TEXTS } from './owner-texts';
+import { PlanRows } from './PlanRows';
 import { StepBackSheet } from './StepBackSheet';
 import { WardOrderPicker } from './WardOrderPicker';
 
@@ -68,6 +68,8 @@ export function AdwamuhaSettingsScreen() {
       <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.xl }}>
         <SettingsGroup title={OWNER_TEXTS.featureName} highlight>
           <ToggleRow
+            icon="sprout"
+            iconTone={enabled ? 'gold' : 'plain'}
             label={t('adwamuha.settingsScreen.enabled')}
             hint={t('adwamuha.settingsScreen.enabledNote')}
             value={enabled}
@@ -85,18 +87,9 @@ export function AdwamuhaSettingsScreen() {
             />
             <WardTimesSettings />
             <WeekStartSettings />
+            {/* The same two rows as «مساري», with their notes (owner, 2026-11-25). */}
             <SettingsGroup title={t('adwamuha.settingsScreen.planTitle')}>
-              <NoteRow
-                label={OWNER_TEXTS.labels.editPlan}
-                note={t('adwamuha.settingsScreen.editPlanNote')}
-                onPress={() => router.push('/adwamuha/plan')}
-              />
-              <RowDivider />
-              <NoteRow
-                label={OWNER_TEXTS.labels.lifeChange}
-                note={t('adwamuha.settingsScreen.lifeChangeNote')}
-                onPress={() => setStepBackOpen(true)}
-              />
+              <PlanRows bare onEase={() => setStepBackOpen(true)} />
             </SettingsGroup>
             {/* Under «الخطة», above «احفظ مسارك» (owner, 2026-10-30). */}
             <WardOrderSettings />
@@ -117,31 +110,6 @@ export function AdwamuhaSettingsScreen() {
       </ScrollView>
       <StepBackSheet visible={stepBackOpen} onClose={() => setStepBackOpen(false)} />
     </SafeAreaView>
-  );
-}
-
-/** A row with a second line and a chevron (design). */
-function NoteRow({ label, note, onPress }: { label: string; note: string; onPress: () => void }) {
-  const { colors, spacing } = useAppTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${label}. ${note}`}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.row,
-        { paddingHorizontal: spacing.lg, gap: spacing.md, paddingVertical: spacing.sm },
-        pressed && { backgroundColor: colors.surfaceMuted },
-      ]}
-    >
-      <View style={styles.fill}>
-        <AppText>{label}</AppText>
-        <AppText variant="caption" tone="muted">
-          {note}
-        </AppText>
-      </View>
-      <Icon name="forward" size={18} color={colors.textFaint} />
-    </Pressable>
   );
 }
 

@@ -179,9 +179,12 @@ README.md is long: read only the section you need.
   Settings has one row to it (`AdwamuhaSettings.tsx`). «عدّل الخطة»: `PlanEditorScreen.tsx` +
   `logic/plan-edit.ts` (later steps reordered, weeks, reset keeps the steps done, «قطعتها» marks
   the current or a later step as passed: owner, 2026-11-22; `passSteps` moves the step on).
-  «طرأ عليّ ظرف»: `StepBackSheet.tsx` (half, the first three, «ارجع إلى الخطوة:» a step picked
-  with − and +: owner, 2026-11-22; `stepBackTarget`). Step labels (first 6 words or the owner's
-  name): `stepLabel` in `setup.ts` + `useDhikrTexts`.
+  «طرأ عليّ ظرف»: `StepBackSheet.tsx` (a bottom sheet: «ارجع إلى الخطوة:» a step picked with −
+  and +, owner 2026-11-22, and the breaks; «نصف الخطوة» / «الخطوات الأولى» removed in the
+  redesign, old logs still load; `stepBackTarget`). «لم أقطعها بعد» (owner, 2026-11-26): a step
+  done goes back right after the current one (`withEdits`, `passSteps(…, unpassed)`). «مساري»:
+  `BeadPath.tsx`, the two rows `PlanRows.tsx` (also in «أدومها» settings). Step labels (first 6
+  words or the owner's name): `stepLabel` in `setup.ts` + `useDhikrTexts`.
 - Backup (milestone 12): `src/data/backup/backup-db.ts` (the backup file is a SQLite database;
   save, check, restore), `BackupRepository`, `src/features/backup/` (files and share sheet,
   Settings section, the note on Home), `useRestartApp()` in `DataProvider` (the app starts again

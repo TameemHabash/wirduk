@@ -8,10 +8,13 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { useDialog } from '@/components/Dialog';
 import { Icon } from '@/components/Icon';
+import { IconTile } from '@/components/IconTile';
 import { useToast } from '@/components/Toast';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { useAdwamuha } from './AdwamuhaProvider';
+import { BeadPath } from './BeadPath';
+import { PlanRows } from './PlanRows';
 import { HadithCard } from './HadithCard';
 import { type DayKey, addDays } from './logic/days';
 import { SESSIONS, type Session } from './logic/sessions';
@@ -19,7 +22,6 @@ import { WEEK_TARGET } from './logic/commitment';
 import { OWNER_TEXTS } from './owner-texts';
 import { ReadOutsideSheet, YesterdaySheet } from './RecordSheets';
 import { StepBackSheet } from './StepBackSheet';
-import { StepRing } from './StepRing';
 import { useProgress } from './useProgress';
 import { WeekGrid } from './WeekGrid';
 
@@ -118,7 +120,6 @@ export function ProgressScreen() {
           total: progress.status.weeksNeeded,
         });
   const tip = textFor('tip', finished ? 'maintenance' : `stage:${progress.stage}`);
-  const nowDone = records.some((r) => r.date === today && r.session === now.session);
   const dayNames = t('adwamuha.masariHelp.dayNames', { returnObjects: true }) as string[];
   const breakDate = (date: DayKey) => {
     const [y, m, d] = date.split('-').map(Number) as [number, number, number];
@@ -140,7 +141,7 @@ export function ProgressScreen() {
     <SafeAreaView edges={['bottom']} style={[styles.fill, { backgroundColor: colors.background }]}>
       <ScrollView ref={scroll} contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
         <View style={{ gap: spacing.xs, paddingTop: spacing.sm }}>
-          <StepRing step={progress.step} total={progress.total} finished={finished} />
+          <BeadPath step={progress.step} total={progress.total} finished={finished} />
           <AppText tone="muted" style={[styles.centerText, { marginTop: spacing.sm }]}>
             {stageLine}
           </AppText>
@@ -153,7 +154,7 @@ export function ProgressScreen() {
 
         {readyToMoveOn ? (
           // The move-on question stays here until answered (owner, 2026-10-29).
-          <View style={[box, { borderColor: colors.accent }]}>
+          <View style={[box, { borderColor: colors.accent, borderWidth: 1.5 }]}>
             <AppText variant="heading" accessibilityRole="header">
               {OWNER_TEXTS.labels.readyQuestion}
             </AppText>
@@ -226,13 +227,15 @@ export function ProgressScreen() {
               styles.row,
               {
                 gap: spacing.md,
-                padding: spacing.lg,
-                borderRadius: radii.lg,
-                backgroundColor: colors.accentSoft,
+                paddingVertical: 14,
+                paddingHorizontal: spacing.lg,
+                borderRadius: 20,
+                backgroundColor: colors.primarySoft,
+                alignItems: 'flex-start',
               },
             ]}
           >
-            <Icon name="bulb" color={colors.accent} />
+            <Icon name="bulb" color={colors.primaryInk} />
             <AppText style={styles.fill}>{tip}</AppText>
           </View>
         ) : null}
@@ -246,17 +249,8 @@ export function ProgressScreen() {
               )
             }
           />
-        ) : !nowDone ? (
-          <Button
-            title={t(`adwamuha.openWard.${now.session}`)}
-            onPress={() =>
-              router.push({
-                pathname: '/adwamuha/ward/[session]',
-                params: { session: now.session },
-              })
-            }
-          />
         ) : null}
+        {/* No «افتح ورد…» button here (owner, 2026-11-26): the ward opens from Home. */}
 
         {onBreak ? null : (
           <Pressable
@@ -264,39 +258,30 @@ export function ProgressScreen() {
             onPress={() => setReadOpen(true)}
             style={({ pressed }) => [
               styles.row,
-              box,
-              { gap: spacing.md, opacity: pressed ? 0.8 : 1 },
+              styles.mini,
+              {
+                borderColor: colors.border,
+                backgroundColor: pressed ? colors.surfaceMuted : colors.surface,
+              },
             ]}
           >
-            <View style={[styles.mark, { backgroundColor: colors.surfaceMuted }]}>
-              <Icon name="check" size={18} color={colors.primary} />
-            </View>
+            <IconTile icon="check" />
             <View style={styles.fill}>
               <AppText variant="bodyStrong">{t('adwamuha.masari.readOutside')}</AppText>
               <AppText variant="caption" tone="muted">
                 {t('adwamuha.masari.readOutsideNote')}
               </AppText>
             </View>
+            <Icon name="forward" size={18} color={colors.textFaint} />
           </Pressable>
         )}
 
-        <View style={[styles.row, styles.links, { gap: spacing.lg }]}>
-          {finished ? (
-            <LinkText
-              title={t('adwamuha.masari.turnOff')}
-              onPress={() => void turnOff().then(() => router.back())}
-            />
-          ) : (
-            <LinkText
-              title={t('adwamuha.masari.lifeChange')}
-              onPress={() => setStepBackOpen(true)}
-            />
-          )}
-          <LinkText
-            title={OWNER_TEXTS.labels.editPlan}
-            onPress={() => router.push('/adwamuha/plan')}
-          />
-        </View>
+        {/* Two rows with a note each (owner, 2026-11-25), as in «أدومها» settings. */}
+        <PlanRows
+          finished={finished}
+          onEase={() => setStepBackOpen(true)}
+          onTurnOff={() => void turnOff().then(() => router.back())}
+        />
       </ScrollView>
       <ReadOutsideSheet visible={readOpen} onClose={() => setReadOpen(false)} onRecorded={thanks} />
       <YesterdaySheet
@@ -341,16 +326,6 @@ function GoalBar({ session, count }: { session: Session; count: number }) {
   );
 }
 
-function LinkText({ title, onPress }: { title: string; onPress: () => void }) {
-  return (
-    <Pressable accessibilityRole="button" onPress={onPress} hitSlop={8} style={styles.link}>
-      <AppText variant="label" tone="primary">
-        {title}
-      </AppText>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   center: { alignItems: 'center', justifyContent: 'center' },
@@ -358,10 +333,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   dim: { opacity: 0.45 },
   divider: { height: StyleSheet.hairlineWidth, marginTop: 4 },
-  mark: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  mini: { gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 18, borderWidth: 1 },
   barName: { width: 64 },
   segment: { flex: 1, height: 8, borderRadius: 4 },
   barText: { minWidth: 64, textAlign: 'right' },
-  links: { justifyContent: 'center', flexWrap: 'wrap' },
-  link: { minHeight: 44, justifyContent: 'center' },
 });

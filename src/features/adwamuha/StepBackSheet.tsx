@@ -5,21 +5,24 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
-import { IconButton } from '@/components/IconButton';
+import { DhikrText } from '@/components/DhikrText';
+import { Icon } from '@/components/Icon';
+import { IconTile } from '@/components/IconTile';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { useAdwamuha } from './AdwamuhaProvider';
-import { type StepBack, lastStepBackChoice, stepBackTarget } from './logic/progress';
+import { lastStepBackChoice } from './logic/progress';
 import { OWNER_TEXTS } from './owner-texts';
 import { stepLabel, stepSession } from './setup';
 import { useDhikrTexts } from './useDhikrTexts';
 
 /**
- * «طرأ عليّ ظرف أو مستجد في حياتي» (prompt §7): no list of reasons, only the
- * choices — half the step, the first three steps, a step picked with − and +
- * («ارجع إلى الخطوة:», owner, 2026-11-22), a break of 1 or 2 weeks, or cancel.
- * `suggestion`: shown once as a gentle suggestion (low commitment).
- * Afterwards the message card (Home, «مساري») shows the word for a step back.
+ * «طرأ عليّ ظرف أو مستجد في حياتي» (prompt §7), a sheet from the bottom (redesign): no list
+ * of reasons, only the choices — a step picked with − and + («ارجع إلى الخطوة:», owner,
+ * 2026-11-22; «نصف الخطوة» and «الخطوات الأولى» were removed, owner 2026-11-25), a break of
+ * 1 or 2 weeks, or cancel. On step 1 only the breaks. `suggestion`: shown once as a gentle
+ * suggestion (low commitment). Afterwards the message card (Home, «مساري») shows the word.
  */
 export function StepBackSheet({
   visible,
@@ -34,8 +37,7 @@ export function StepBackSheet({
   suggestion?: boolean;
 }) {
   const { t } = useTranslation();
-  const { colors, radii, spacing } = useAppTheme();
-  // The modal draws under the status bar: keep the sheet clear of it when it is tall.
+  const { colors, spacing } = useAppTheme();
   const insets = useSafeAreaInsets();
   const { stored, activeBreak, stepBack, takeBreak, endBreak } = useAdwamuha();
   const step = stored?.state.step ?? 1;
@@ -56,105 +58,94 @@ export function StepBackSheet({
     await action();
     onDone?.();
   };
-  const back = (kind: StepBack) => () => void run(() => stepBack(kind));
-  const half = stepBackTarget(step, 'half');
-  const firstThree = stepBackTarget(step, 'firstThree');
+
+  const option = { borderColor: colors.border, backgroundColor: colors.surface };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Pressable
-        style={[
-          styles.backdrop,
-          { paddingTop: GAP + insets.top, paddingBottom: GAP + insets.bottom },
-        ]}
-        onPress={close}
-      >
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      statusBarTranslucent
+      navigationBarTranslucent
+      onRequestClose={close}
+    >
+      <View style={styles.layer}>
         <Pressable
-          style={[styles.sheet, { backgroundColor: colors.surface, borderRadius: radii.lg }]}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={[StyleSheet.absoluteFill, { backgroundColor: colors.scrim }]}
+          onPress={close}
+        />
+        <View
+          accessibilityViewIsModal
+          style={[styles.sheet, { backgroundColor: colors.surface, marginTop: insets.top + 24 }]}
         >
-          {/* Taller with the step picker: it scrolls on a small screen or with a big font. */}
+          {/* It scrolls on a small screen or with a big font. */}
           <ScrollView
             style={styles.scroll}
-            contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
+            contentContainerStyle={{
+              paddingHorizontal: spacing.lg,
+              paddingTop: 10,
+              paddingBottom: insets.bottom + spacing.md,
+              gap: spacing.md,
+            }}
           >
-            <AppText variant="heading" accessibilityRole="header">
+            <View style={[styles.grab, { backgroundColor: colors.borderStrong }]} />
+            <AppText accessibilityRole="header" style={styles.title}>
               {OWNER_TEXTS.labels.lifeChange}
             </AppText>
-            <AppText tone="muted">
+            <AppText tone="muted" style={styles.intro}>
               {suggestion ? t('adwamuha.stepBack.suggestion') : t('adwamuha.stepBack.intro')}
             </AppText>
-            <Button
-              title={t('adwamuha.stepBack.half', { step: half })}
-              kind="secondary"
-              onPress={back('half')}
-              disabled={half >= step}
-            />
-            <Button
-              title={t('adwamuha.stepBack.firstThree', { step: firstThree })}
-              kind="secondary"
-              onPress={back('firstThree')}
-              disabled={firstThree >= step}
-            />
+
             {last >= 1 ? (
-              <View
-                style={{
-                  borderColor: colors.border,
-                  borderWidth: 1,
-                  borderRadius: radii.md,
-                  padding: spacing.md,
-                  gap: spacing.sm,
-                }}
-              >
-                <View style={[styles.row, { gap: spacing.xs }]}>
-                  <AppText variant="bodyStrong" style={styles.fill}>
-                    {OWNER_TEXTS.labels.stepBackTo}
-                  </AppText>
-                  <IconButton
-                    icon="minus"
-                    label={t('adwamuha.stepBack.earlier')}
-                    onPress={() => setPicked(to - 1)}
-                    disabled={to <= 1}
-                  />
-                  <AppText
-                    variant="title"
-                    tone="primary"
-                    style={styles.number}
-                    accessibilityLiveRegion="polite"
-                  >
-                    {to}
-                  </AppText>
-                  <IconButton
+              <View style={[styles.option, option, { gap: spacing.sm + 2 }]}>
+                <AppText style={styles.strong}>{OWNER_TEXTS.labels.stepBackTo}</AppText>
+                <View style={[styles.stepper, { backgroundColor: colors.surfaceMuted }]}>
+                  <StepButton
                     icon="plus"
                     label={t('adwamuha.stepBack.later')}
                     onPress={() => setPicked(to + 1)}
                     disabled={to >= last}
                   />
-                </View>
-                {toStep ? (
-                  <View
-                    style={{
-                      backgroundColor: colors.surfaceMuted,
-                      borderRadius: radii.sm,
-                      paddingVertical: spacing.sm,
-                      paddingHorizontal: spacing.md,
-                    }}
-                  >
-                    <AppText tone="muted">{stepLabel(toStep, texts)}</AppText>
-                    <AppText variant="caption" tone="muted">
-                      {t(`adwamuha.plan.${stepSession(toStep)}`)}
+                  <View style={styles.mid} accessibilityLiveRegion="polite">
+                    <AppText style={styles.stepTitle}>
+                      {t('adwamuha.plan.step', { step: to })}
                     </AppText>
+                    {toStep ? (
+                      <>
+                        <DhikrText
+                          size={15}
+                          numberOfLines={2}
+                          style={[styles.center, { color: colors.textMuted }]}
+                        >
+                          {stepLabel(toStep, texts)}
+                        </DhikrText>
+                        <AppText variant="caption" tone="muted" style={styles.center}>
+                          {t(`adwamuha.plan.${stepSession(toStep)}`)}
+                        </AppText>
+                      </>
+                    ) : null}
                   </View>
-                ) : null}
+                  <StepButton
+                    icon="minus"
+                    label={t('adwamuha.stepBack.earlier')}
+                    onPress={() => setPicked(to - 1)}
+                    disabled={to <= 1}
+                  />
+                </View>
                 <Button
                   title={t('adwamuha.stepBack.toStep', { step: to })}
-                  kind="secondary"
-                  onPress={back({ step: to })}
+                  kind="soft"
+                  onPress={() => void run(() => stepBack({ step: to }))}
                 />
+                <AppText variant="caption" tone="faint">
+                  {t('adwamuha.stepBack.climbHint')}
+                </AppText>
               </View>
             ) : null}
-            <AppText variant="caption" tone="muted">
-              {t('adwamuha.stepBack.climbHint')}
-            </AppText>
+
             {activeBreak ? (
               <>
                 <AppText>
@@ -174,47 +165,96 @@ export function StepBackSheet({
               </>
             ) : (
               <>
-                <Button
-                  title={t('adwamuha.stepBack.break1')}
-                  kind="secondary"
-                  onPress={() => void run(() => takeBreak(1))}
-                />
-                <Button
-                  title={t('adwamuha.stepBack.break2')}
-                  kind="secondary"
-                  onPress={() => void run(() => takeBreak(2))}
-                />
-                <AppText variant="caption" tone="muted">
+                <View style={[styles.row, { gap: spacing.sm + 2 }]}>
+                  {([1, 2] as const).map((weeks) => (
+                    <Pressable
+                      key={weeks}
+                      accessibilityRole="button"
+                      onPress={() => void run(() => takeBreak(weeks))}
+                      style={({ pressed }) => [
+                        styles.option,
+                        styles.breakOption,
+                        option,
+                        pressed && { backgroundColor: colors.surfaceMuted },
+                      ]}
+                    >
+                      <IconTile icon="pauseCup" tone="gold" />
+                      <AppText style={[styles.strong, styles.fill]}>
+                        {t(`adwamuha.stepBack.break${weeks}`)}
+                      </AppText>
+                    </Pressable>
+                  ))}
+                </View>
+                <AppText variant="caption" tone="faint">
                   {t('adwamuha.stepBack.breakHint')}
                 </AppText>
               </>
             )}
             <Button
               title={suggestion ? t('adwamuha.stepBack.suggestionNo') : t('common.cancel')}
+              kind="plain"
               onPress={close}
             />
           </ScrollView>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
 
-/** Space around the sheet (plus the status and navigation bars above and below). */
-const GAP = 24;
+function StepButton({
+  icon,
+  label,
+  onPress,
+  disabled,
+}: {
+  icon: 'plus' | 'minus';
+  label: string;
+  onPress: () => void;
+  disabled: boolean;
+}) {
+  const { colors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={[styles.stepButton, { backgroundColor: colors.surface }, disabled && { opacity: 0.4 }]}
+    >
+      <Icon name={icon} size={18} color={colors.primaryInk} />
+    </Pressable>
+  );
+}
 
 const styles = StyleSheet.create({
-  // The screen behind, dimmed (same in light and dark).
-  backdrop: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: GAP,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  layer: { flex: 1, justifyContent: 'flex-end' },
+  sheet: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: '100%',
+    overflow: 'hidden',
   },
-  sheet: { width: '100%', maxWidth: 420, maxHeight: '100%', alignSelf: 'center' },
-  // As tall as its content, up to the sheet's height.
+  // As tall as its content, up to the screen's height.
   scroll: { flexGrow: 0 },
+  grab: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center' },
+  title: { fontFamily: UI_FONTS.semibold, fontSize: 18, lineHeight: 28 },
+  intro: { fontSize: 14, lineHeight: 23 },
+  strong: { fontFamily: UI_FONTS.semibold, fontSize: 15, lineHeight: 22 },
+  option: { borderWidth: 1.5, borderRadius: 16, paddingVertical: 13, paddingHorizontal: 14 },
+  breakOption: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 14, padding: 5 },
+  stepButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mid: { flex: 1, alignItems: 'center' },
+  stepTitle: { fontFamily: UI_FONTS.semibold, fontSize: 16, lineHeight: 24, textAlign: 'center' },
+  center: { textAlign: 'center', alignSelf: 'stretch' },
   fill: { flex: 1 },
-  row: { flexDirection: 'row', alignItems: 'center' },
-  number: { minWidth: 32, textAlign: 'center' },
+  row: { flexDirection: 'row', alignItems: 'stretch' },
 });
