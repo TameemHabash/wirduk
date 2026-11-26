@@ -75,9 +75,10 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     `scripts/dev/phone-apk.ps1` (CLAUDE.md, "Phone"): the APKs are in `.local/apk/`, and the
     latest is always at https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk
     (public pre-release `test-build`, owner's choice 2026-11-01).
-  - On the link since 2026-11-22: the APK of f477969 (the owner feedback of 2026-11-21 and both
-    of 2026-11-22; kept as `.local/apk/wirduk-f477969-phone-arm64.apk`). Before it, the APK of
-    385b255 (2026-11-21), with which the owner tested the 2026-11-14 changes.
+  - On the link since 2026-11-26: the APK of e3b69e2 (the whole redesign, R1–R6; kept as
+    `.local/apk/wirduk-e3b69e2-phone-arm64.apk`), built at the owner's request. Before it, the
+    APK of f477969 (2026-11-22, the owner feedback of 2026-11-21 and both of 2026-11-22), and
+    before that 385b255 (2026-11-21).
   - A second phone (Samsung): the same APK (eecb345), installed by the owner from the link (no USB).
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
@@ -89,7 +90,7 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
 ## Waiting for the owner
 
 - **The redesign (R1–R6, 2026-11-26)**: built and checked on the emulator; the owner checks it
-  all together (owner, 2026-11-26). A phone APK only when the owner asks. Claude's choices to
+  all together (owner, 2026-11-26), on the phone with the APK of e3b69e2 (on the link). Claude's choices to
   confirm: in R4 above (the rules around «لم أقطعها بعد»), and the reader ring is teal as in
   the design (it was gold).
 - **The owner feedback of 2026-11-21** (below): to check on the phone with the APK of f477969
