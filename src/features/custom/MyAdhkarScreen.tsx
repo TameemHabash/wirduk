@@ -4,8 +4,12 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppBar } from '@/components/AppBar';
 import { AppText } from '@/components/AppText';
 import { Icon } from '@/components/Icon';
+import { IconButton } from '@/components/IconButton';
+import { IconTile } from '@/components/IconTile';
+import { TextButton } from '@/components/TextButton';
 import { SortableList } from '@/components/SortableList';
 import { useRepositories } from '@/data/DataProvider';
 import type { Category } from '@/data/models';
@@ -17,7 +21,7 @@ export function MyAdhkarScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { custom } = useRepositories();
-  const { colors, radii, spacing } = useAppTheme();
+  const { colors, spacing } = useAppTheme();
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [sorting, setSorting] = useState(false);
 
@@ -37,9 +41,10 @@ export function MyAdhkarScreen() {
   if (sorting) {
     return (
       <SafeAreaView
-        edges={['bottom']}
+        edges={['top', 'bottom']}
         style={[styles.fill, { backgroundColor: colors.background }]}
       >
+        <AppBar title={t('custom.manageTitle')} />
         <SortableList
           items={categories}
           keyOf={(c) => String(c.id)}
@@ -59,7 +64,21 @@ export function MyAdhkarScreen() {
   }
 
   return (
-    <SafeAreaView edges={['bottom']} style={[styles.fill, { backgroundColor: colors.background }]}>
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={[styles.fill, { backgroundColor: colors.background }]}
+    >
+      <AppBar
+        title={t('custom.manageTitle')}
+        end={
+          <IconButton
+            icon="plus"
+            label={t('custom.addCategory')}
+            color={colors.text}
+            onPress={() => router.push('/custom/new')}
+          />
+        }
+      />
       <ScrollView
         contentContainerStyle={{
           padding: spacing.lg,
@@ -67,25 +86,19 @@ export function MyAdhkarScreen() {
           paddingBottom: spacing.xxxl,
         }}
       >
-        {categories.length > 1 && (
-          <View style={styles.header}>
-            <View style={styles.fill} />
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setSorting(true)}
-              style={styles.textButton}
-            >
-              <AppText variant="label" tone="primary">
-                {t('home.editOrder')}
-              </AppText>
-            </Pressable>
-          </View>
-        )}
+        <View style={styles.header}>
+          <AppText variant="caption" tone="muted" style={styles.fill}>
+            {t('custom.manageHint')}
+          </AppText>
+          {categories.length > 1 && (
+            <TextButton title={t('home.editOrder')} onPress={() => setSorting(true)} />
+          )}
+        </View>
         <View
           style={{
             borderWidth: 1,
             borderColor: colors.customBorder,
-            borderRadius: radii.lg,
+            borderRadius: 20,
             backgroundColor: colors.customSurface,
             overflow: 'hidden',
           }}
@@ -113,7 +126,7 @@ export function MyAdhkarScreen() {
                   {countText(c.adhkarCount)}
                 </AppText>
               </View>
-              <Icon name="edit" size={18} color={colors.customAccent} />
+              <Icon name="forward" size={18} color={colors.textFaint} />
             </Pressable>
           ))}
           <Pressable
@@ -125,7 +138,7 @@ export function MyAdhkarScreen() {
               pressed && { opacity: 0.7 },
             ]}
           >
-            <Icon name="plus" size={18} color={colors.customAccent} />
+            <IconTile icon="plus" tone="sand" />
             <AppText variant="bodyStrong" style={{ color: colors.customAccent }}>
               {t('custom.addCategory')}
             </AppText>

@@ -35,7 +35,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | — | Owner feedback 2026-11-22 («عدّل الخطة»): «قطعتها» marks a step as passed (saved after the warning); steps 4 and 5 by the owner's names | 🟢 Done | b106530, be45c3f |
 | — | Owner feedback 2026-11-22 (2) («طرأ عليّ ظرف»): «ارجع إلى الخطوة:», a step picked with − and + (design approved first) | 🟢 Done | one commit 2026-11-22 |
 | R1 | Redesign: the look (colors, icons, buttons, rows, the in-app dialog, the toast, the ring) | 🟢 Done | one commit 2026-11-26 |
-| R2 | Redesign: three tabs, Home, the Adhkar tab (search, reorder), own adhkar editors | Not started | |
+| R2 | Redesign: three tabs, Home, the Adhkar tab (search, reorder), own adhkar editors | 🟢 Done | one commit 2026-11-26 |
 | R3 | Redesign: the reader (fadl, «المصدر», long text), the restore toast, the finish screen | Not started | |
 | R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | Not started | |
 | R5 | Redesign: Settings (notifications card) and the other screens | Not started | |
@@ -161,6 +161,28 @@ R1, done (2026-11-26):
 - The reader's ring: teal on a quiet track (the design); clockwise in Arabic, counterclockwise
   in left-to-right languages.
 - Tests: 805 (new: the dialog, the toast, the ring, the button kinds, more contrast pairs).
+
+R2, done (2026-11-26):
+
+- Three tabs (`src/app/(tabs)/`, our own tab bar): «الرئيسية» (the owner's word, cut from their
+  message by script), «الأذكار», «الإعدادات». Toasts sit above the tab bar on the tabs, lower
+  elsewhere. `wirduk://search` opens the adhkar tab with the keyboard up.
+- Home: the logo, «ابنِ وردك خطوةً خطوة ›» while «أدومها» is off, the search button; the golden
+  card of the current period (sun or moon, «الآن», «ابدأ»), the other period as a small row;
+  with «أدومها» on, «وردك اليوم» is that golden card, then the quiet morning and evening cards;
+  the favorites as tiles, or a dashed card with the new hint. The chapter list left Home.
+- The adhkar tab: a large title, a real search box (results in place of the lists; no «» around
+  the word when nothing is found, the word in teal: the owner's answer to 5.3), «أذكاري» first in
+  the sand color (every chapter in full, then «إضافة باب»), then every chapter (the book number
+  small and faint, the star at the end).
+- «تعديل الترتيب» is its own screen with close, the title and «حفظ»: the order is saved only
+  with «حفظ»; leaving with changes asks «تجاهل التغييرات؟»; the restore uses the new dialog.
+- The own-adhkar editors and «أذكاري» manage screen: a top bar with close and «حفظ» / «إنشاء»
+  (no save button at the bottom); the count is + / the number (tap and type) / −; the audio:
+  «تسجيل بصوتي» and «اختيار ملف صوتي» only while there is no audio, a red card while recording,
+  then only the player (play, «الصوت جاهز» with a progress line, delete).
+- The owner's redesign words are in `docs/adwamuha/owner-edits.json` (`redesign`), checked
+  against the app's strings by `src/i18n/owner-words.test.ts`.
 
 ## Owner feedback 2026-11-14 («أدومها»)
 

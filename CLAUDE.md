@@ -110,7 +110,16 @@ README.md is long: read only the section you need.
 ## Map
 
 - `src/app/` thin routes. Deep links: `wirduk://category/<id>?dhikr=<dhikrId>`, `wirduk://custom`,
-  `wirduk://custom/<-id>/dhikr/new`, `wirduk://settings`, `search`, `audio`, `about`.
+  `wirduk://custom/<-id>/dhikr/new`, `wirduk://settings`, `adhkar`, `search`, `audio`, `about`.
+  Three tabs (redesign R2): `src/app/(tabs)/` = Home (`index`), `adhkar`, `settings`
+  (`features/tabs/TabsLayout.tsx`, our own `TabBar.tsx`, which lifts toasts above it with
+  `useToastOffset`). Every other route is pushed above the tabs (no tab bar). `/search`
+  redirects to `/adhkar?focus=search` (keyboard up). `/reorder` = the chapters' order, saved only
+  with «حفظ». The editors and `/reorder` draw their own top bar (`components/AppBar.tsx`).
+- `src/features/adhkar/` the «الأذكار» tab: `AdhkarScreen.tsx` (search box on top, results in
+  place of the lists, «أذكاري» first, every chapter), `SearchResults.tsx`, `ReorderScreen.tsx`.
+  Home (`features/home/`) has the golden card of now (`TimeOfDayCards`, `components/GoldCard.tsx`)
+  or «وردك اليوم», and the favorites as tiles; no chapter list.
 - `src/features/reader/` the reader: `ReaderScreen.tsx` (tap zone, auto-advance, "إتمام",
   reset on leaving), `DhikrPage.tsx`, `CompletionScreen.tsx`, `navigation.ts`.
 - `src/features/counter/counter-store.ts` in-memory counts.

@@ -39,6 +39,8 @@ interface ToastApi {
 }
 
 const ToastContext = createContext<ToastApi | null>(null);
+/** Sets how high the toast sits above the bottom (the tab bar's height while it shows; 0: none). */
+const ToastOffsetContext = createContext<(offset: number) => void>(() => undefined);
 
 /**
  * A short message near the bottom of the screen, over every screen: a light floating card
@@ -46,6 +48,7 @@ const ToastContext = createContext<ToastApi | null>(null);
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<(ToastOptions & { key: number }) | null>(null);
+  const [offset, setOffset] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearTimer = () => {
     if (timer.current) clearTimeout(timer.current);
@@ -69,15 +72,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   return (
     <ToastContext.Provider value={api}>
-      <View style={styles.fill}>
-        {children}
-        {toast && <ToastView key={toast.key} toast={toast} onClose={hide} />}
-      </View>
+      <ToastOffsetContext.Provider value={setOffset}>
+        <View style={styles.fill}>
+          {children}
+          {toast && <ToastView key={toast.key} toast={toast} offset={offset} onClose={hide} />}
+        </View>
+      </ToastOffsetContext.Provider>
     </ToastContext.Provider>
   );
 }
 
-function ToastView({ toast, onClose }: { toast: ToastOptions; onClose: () => void }) {
+function ToastView({
+  toast,
+  offset,
+  onClose,
+}: {
+  toast: ToastOptions;
+  offset: number;
+  onClose: () => void;
+}) {
   const { colors, spacing } = useAppTheme();
   const insets = useSafeAreaInsets();
   const { onPress } = toast;
@@ -89,7 +102,12 @@ function ToastView({ toast, onClose }: { toast: ToastOptions; onClose: () => voi
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.layer, { paddingBottom: insets.bottom + spacing.lg }]}
+      testID="toast-layer"
+      // Above the tab bar on its screens; lower on screens with no tab bar (design).
+      style={[
+        styles.layer,
+        { paddingBottom: offset > 0 ? offset + spacing.md : insets.bottom + spacing.lg },
+      ]}
     >
       <Animated.View entering={FadeInDown.duration(200)} exiting={FadeOut.duration(200)}>
         <Pressable
@@ -122,6 +140,18 @@ function ToastView({ toast, onClose }: { toast: ToastOptions; onClose: () => voi
       </Animated.View>
     </View>
   );
+}
+
+/**
+ * Lifts the toast above a bar at the bottom of the screen while offset > 0 (the tab bar,
+ * with the navigation bar under it). Put back on unmount.
+ */
+export function useToastOffset(offset: number): void {
+  const setOffset = useContext(ToastOffsetContext);
+  useEffect(() => {
+    setOffset(offset);
+    return () => setOffset(0);
+  }, [offset, setOffset]);
 }
 
 export function useToast(): ToastApi {

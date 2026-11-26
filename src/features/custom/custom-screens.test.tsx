@@ -1,12 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
+import { AdhkarScreen } from '@/features/adhkar/AdhkarScreen';
 import { CategoryEditorScreen } from '@/features/custom/CategoryEditorScreen';
 import { DhikrEditorScreen } from '@/features/custom/DhikrEditorScreen';
 import { MyAdhkarScreen } from '@/features/custom/MyAdhkarScreen';
-import { HomeScreen } from '@/features/home/HomeScreen';
 import { ReaderScreen } from '@/features/reader/ReaderScreen';
-import { SearchScreen } from '@/features/search/SearchScreen';
 import { mockCustomAudio, mockPermission, mockPicker } from '@/test-utils/audio-mock';
 import { dialogButtons, openDialog, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
@@ -18,17 +17,18 @@ async function withCategory(title = 'أدعيتي') {
   return { repos, category };
 }
 
-describe('Home — أذكاري section', () => {
+describe('The adhkar tab — أذكاري section', () => {
   it('invites the user to add their own adhkar when there are none', async () => {
-    await renderWithApp(<HomeScreen />);
-    await fireEvent.press(await screen.findByLabelText('أضف أذكارك الخاصة'));
+    await renderWithApp(<AdhkarScreen />);
+    expect(await screen.findByText('أضف أذكارك الخاصة')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: 'إضافة باب' }));
     expect(mockRouter.push).toHaveBeenCalledWith('/custom/new');
   });
 
-  it('lists own categories below the favorites, opens them, and links to manage', async () => {
+  it('lists own categories first, opens them, and links to manage', async () => {
     const { repos, category } = await withCategory();
     await repos.custom.createDhikr(category.id, { text: 'سبحان الله', count: 33 });
-    await renderWithApp(<HomeScreen />, repos);
+    await renderWithApp(<AdhkarScreen />, repos);
     await fireEvent.press(await screen.findByLabelText('أدعيتي، ذكر واحد'));
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: '/category/[id]',
@@ -39,10 +39,11 @@ describe('Home — أذكاري section', () => {
   });
 
   it('lets an own category be a favorite', async () => {
-    const { repos } = await withCategory();
-    await renderWithApp(<HomeScreen />, repos);
+    const { repos, category } = await withCategory();
+    await renderWithApp(<AdhkarScreen />, repos);
     await fireEvent.press(await screen.findByLabelText('إضافة «أدعيتي» إلى المفضلة'));
-    expect(await screen.findByText('المفضلة')).toBeOnTheScreen();
+    expect(await screen.findByLabelText('إزالة «أدعيتي» من المفضلة')).toBeOnTheScreen();
+    expect(await repos.favorites.list()).toEqual([category.id]);
     await settleLists();
   });
 });
@@ -115,7 +116,7 @@ describe('Edit category', () => {
     );
     expect(dialogButtons()).toEqual(['حذف', 'إلغاء']);
     await pressInDialog('حذف');
-    await waitFor(() => expect(mockRouter.dismissTo).toHaveBeenCalledWith('/'));
+    await waitFor(() => expect(mockRouter.dismissTo).toHaveBeenCalledWith('/adhkar'));
     expect(await repos.custom.listCategories()).toEqual([]);
     expect(await repos.favorites.list()).toEqual([]);
     expect(mockCustomAudio.deleteCustomAudio).toHaveBeenCalledWith('a.m4a');
@@ -167,6 +168,49 @@ describe('Dhikr editor', () => {
     await fireEvent.press(screen.getByText('حفظ'));
     expect(await screen.findByText('عدد المرات رقم صحيح من 1 إلى 100000.')).toBeOnTheScreen();
     expect(mockRouter.back).not.toHaveBeenCalled();
+  });
+
+  it('the count: + and −, or the number typed (owner, 2026-11-26)', async () => {
+    const { repos, category } = await openNew();
+    await fireEvent.changeText(screen.getByLabelText('نص الذكر'), 'نص');
+    await fireEvent.changeText(screen.getByLabelText('عدد المرات'), '1000');
+    await fireEvent.press(screen.getByLabelText('زيادة العدد'));
+    expect(screen.getByLabelText('عدد المرات').props.value).toBe('1001');
+    await fireEvent.press(screen.getByLabelText('إنقاص العدد'));
+    await fireEvent.press(screen.getByLabelText('إنقاص العدد'));
+    expect(screen.getByLabelText('عدد المرات').props.value).toBe('999');
+    // Only digits are kept.
+    await fireEvent.changeText(screen.getByLabelText('عدد المرات'), '12x');
+    expect(screen.getByLabelText('عدد المرات').props.value).toBe('12');
+    await fireEvent.press(screen.getByText('حفظ'));
+    await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
+    expect((await repos.custom.listAdhkar(category.id))[0]?.count).toBe(12);
+  });
+
+  it('refuses a count above 100000', async () => {
+    await openNew();
+    await fireEvent.changeText(screen.getByLabelText('نص الذكر'), 'نص');
+    await fireEvent.changeText(screen.getByLabelText('عدد المرات'), '100001');
+    await fireEvent.press(screen.getByText('حفظ'));
+    expect(await screen.findByText('عدد المرات رقم صحيح من 1 إلى 100000.')).toBeOnTheScreen();
+    expect(mockRouter.back).not.toHaveBeenCalled();
+  });
+
+  it('hides the two audio buttons once there is audio; removing it brings them back', async () => {
+    const { repos, category } = await withCategory();
+    const d = await repos.custom.createDhikr(category.id, {
+      text: 'نص',
+      count: 1,
+      audioFile: 'old.m4a',
+    });
+    setRouteParams({ id: String(category.id), dhikrId: String(d.id) });
+    await renderWithApp(<DhikrEditorScreen />, repos);
+    expect(await screen.findByLabelText('حذف الصوت')).toBeOnTheScreen();
+    expect(screen.queryByLabelText('تسجيل بصوتي')).toBeNull();
+    expect(screen.queryByLabelText('اختيار ملف صوتي')).toBeNull();
+    await fireEvent.press(screen.getByLabelText('حذف الصوت'));
+    expect(screen.getByLabelText('تسجيل بصوتي')).toBeOnTheScreen();
+    expect(screen.getByLabelText('اختيار ملف صوتي')).toBeOnTheScreen();
   });
 
   it('adds an audio file picked from the phone', async () => {
@@ -267,7 +311,7 @@ describe('Reading own adhkar', () => {
   it('finds own adhkar in search, first and labelled', async () => {
     const { repos, category } = await withCategory();
     await repos.custom.createDhikr(category.id, { text: 'رَضِيتُ بِاللَّهِ رَبًّا', count: 1 });
-    await renderWithApp(<SearchScreen />, repos);
+    await renderWithApp(<AdhkarScreen />, repos);
     await fireEvent.changeText(
       screen.getByPlaceholderText('ابحث بكلمة من الذكر أو اسم الباب'),
       'رضيت بالله',

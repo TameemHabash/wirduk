@@ -8,12 +8,12 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppBar, AppBarAction } from '@/components/AppBar';
 import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
 import { useDialog } from '@/components/Dialog';
 import { Icon } from '@/components/Icon';
 import { TextButton } from '@/components/TextButton';
@@ -26,7 +26,6 @@ import { counterStore } from '@/features/counter/counter-store';
 import { useDirection } from '@/i18n/direction';
 import { UI_FONTS, dhikrLineHeight, findDhikrFont } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
-import { TOUCH_TARGET } from '@/theme/tokens';
 
 import { AudioField } from './AudioField';
 import { deleteCustomAudio } from './custom-audio';
@@ -191,9 +190,16 @@ export function DhikrEditorScreen() {
   const fieldError = (field: ErrorField) => (error?.field === field ? error.message : null);
 
   return (
-    <SafeAreaView edges={['bottom']} style={[styles.fill, { backgroundColor: colors.background }]}>
-      <Stack.Screen
-        options={{ title: t(isNew ? 'custom.newDhikrTitle' : 'custom.editDhikrTitle') }}
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={[styles.fill, { backgroundColor: colors.background }]}
+    >
+      <AppBar
+        title={t(isNew ? 'custom.newDhikrTitle' : 'custom.editDhikrTitle')}
+        start="close"
+        end={
+          <AppBarAction title={t('custom.save')} onPress={() => void save()} disabled={saving} />
+        }
       />
       <KeyboardAvoidingView
         style={styles.fill}
@@ -225,48 +231,51 @@ export function DhikrEditorScreen() {
             />
 
             <View style={{ gap: spacing.xs }}>
-              <AppText variant="label" tone="muted">
-                {t('custom.count')}
-              </AppText>
-              <View style={[styles.row, { gap: spacing.sm }]}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('custom.decreaseCount')}
-                  onPress={() => stepCount(-1)}
+              {/* + and −, or tap the number and type it (owner, 2026-11-26), 1–100000. */}
+              <View style={[styles.row, { gap: spacing.md }]}>
+                <AppText variant="label" tone="muted" style={styles.fill}>
+                  {t('custom.count')}
+                </AppText>
+                <View
                   style={[
-                    styles.step,
-                    { backgroundColor: colors.surfaceMuted, borderRadius: radii.sm },
+                    styles.row,
+                    styles.stepper,
+                    { backgroundColor: colors.surfaceMuted, gap: spacing.xs + 2 },
                   ]}
                 >
-                  <Icon name="minus" />
-                </Pressable>
-                <TextInput
-                  value={form.count}
-                  onChangeText={(v) => set('count', v.replace(/[^0-9]/g, ''))}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  accessibilityLabel={t('custom.count')}
-                  style={[
-                    styles.countInput,
-                    {
-                      color: colors.text,
-                      backgroundColor: colors.surface,
-                      borderColor: fieldError('count') ? colors.danger : colors.border,
-                      borderRadius: radii.md,
-                    },
-                  ]}
-                />
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('custom.increaseCount')}
-                  onPress={() => stepCount(1)}
-                  style={[
-                    styles.step,
-                    { backgroundColor: colors.surfaceMuted, borderRadius: radii.sm },
-                  ]}
-                >
-                  <Icon name="plus" />
-                </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('custom.increaseCount')}
+                    onPress={() => stepCount(1)}
+                    style={[styles.step, { backgroundColor: colors.surface }]}
+                  >
+                    <Icon name="plus" size={18} color={colors.primaryInk} />
+                  </Pressable>
+                  <TextInput
+                    value={form.count}
+                    onChangeText={(v) => set('count', v.replace(/[^0-9]/g, ''))}
+                    keyboardType="number-pad"
+                    maxLength={6}
+                    accessibilityLabel={t('custom.count')}
+                    style={[
+                      styles.countInput,
+                      {
+                        color: colors.text,
+                        backgroundColor: colors.surface,
+                        borderColor: fieldError('count') ? colors.danger : colors.borderStrong,
+                        borderRadius: radii.sm,
+                      },
+                    ]}
+                  />
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('custom.decreaseCount')}
+                    onPress={() => stepCount(-1)}
+                    style={[styles.step, { backgroundColor: colors.surface }]}
+                  >
+                    <Icon name="minus" size={18} color={colors.primaryInk} />
+                  </Pressable>
+                </View>
               </View>
               {fieldError('count') ? (
                 <AppText variant="caption" tone="danger">
@@ -301,17 +310,14 @@ export function DhikrEditorScreen() {
               </AppText>
             ) : null}
 
-            <View style={{ gap: spacing.md }}>
-              <Button title={t('custom.save')} onPress={() => void save()} disabled={saving} />
-              {!isNew && (
-                <TextButton
-                  title={t('custom.deleteDhikr')}
-                  icon="trash"
-                  tone="danger"
-                  onPress={remove}
-                />
-              )}
-            </View>
+            {!isNew && (
+              <TextButton
+                title={t('custom.deleteDhikr')}
+                icon="trash"
+                tone="danger"
+                onPress={remove}
+              />
+            )}
           </ScrollView>
         )}
       </KeyboardAvoidingView>
@@ -322,19 +328,15 @@ export function DhikrEditorScreen() {
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },
-  step: {
-    width: TOUCH_TARGET,
-    height: TOUCH_TARGET,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  stepper: { borderRadius: 11, padding: 3 },
+  step: { width: 40, height: 40, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   // No inner padding: Android's default padding plus the tall UI font cut the
   // digits at the top in a 44-point box. Centered both ways, and it grows with
   // a large system font size instead of cutting.
   countInput: {
-    width: 110,
-    minHeight: TOUCH_TARGET,
-    borderWidth: 1,
+    width: 84,
+    minHeight: 40,
+    borderWidth: 1.5,
     paddingVertical: 0,
     paddingHorizontal: 0,
     textAlign: 'center',

@@ -26,10 +26,12 @@ export function MessageCard() {
     <View
       accessibilityLiveRegion="polite"
       style={{
-        backgroundColor: colors.surfaceMuted,
+        // A light box inside the golden «وردك اليوم» (redesign).
+        backgroundColor: colors.heroBox,
         borderRadius: radii.md,
-        padding: spacing.md,
-        gap: spacing.sm,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg - 2,
+        gap: spacing.sm + 2,
       }}
     >
       {message.content.kind === 'owner' ? (
@@ -54,6 +56,7 @@ export function MessageCard() {
         <Button
           title={t('adwamuha.message.ok')}
           kind="secondary"
+          size="small"
           onPress={() => void dismissMessage(message)}
         />
       )}

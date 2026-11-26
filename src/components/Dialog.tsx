@@ -182,17 +182,7 @@ export function DialogName({ children }: { children: string }) {
   );
 }
 
-/**
- * Splits a translated sentence around a name (e.g. «حذف {{title}}؟»), so the name can be
- * drawn in its own style. `t` must be called with `{ [key]: NAME_MARK }`.
- */
-export const NAME_MARK = '⁣';
-
-export function aroundName(sentence: string): [string, string] {
-  const at = sentence.indexOf(NAME_MARK);
-  if (at < 0) return [sentence, ''];
-  return [sentence.slice(0, at), sentence.slice(at + NAME_MARK.length)];
-}
+export { NAME_MARK, aroundName } from '@/i18n/around-name';
 
 export function useDialog(): DialogApi {
   const api = useContext(DialogContext);

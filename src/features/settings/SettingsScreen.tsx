@@ -1,8 +1,9 @@
-import { Linking, ScrollView } from 'react-native';
+import { Linking, ScrollView, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppText } from '@/components/AppText';
 import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
 import { useSettings } from '@/data/settings/SettingsProvider';
@@ -11,6 +12,7 @@ import { AdwamuhaSettings } from '@/features/adwamuha/AdwamuhaSettings';
 import { toMegabytes } from '@/features/audio/audio-plan';
 import { useAudioStatus } from '@/features/audio/useAudioStatus';
 import { BackupSettings } from '@/features/backup/BackupSettings';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { ReadingSettings } from './ReadingSettings';
@@ -29,8 +31,12 @@ export function SettingsScreen() {
   const adwamuhaOn = useAdwamuha().enabled;
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.xl }}>
+    // A tab (redesign): its own large title, no header.
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingTop: 0, gap: spacing.xl }}>
+        <AppText accessibilityRole="header" style={styles.largeTitle}>
+          {t('settings.title')}
+        </AppText>
         {/* «أدومها» first and highlighted (owner); with it on, the reminders move into it. */}
         <AdwamuhaSettings />
 
@@ -142,3 +148,7 @@ export function SettingsScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  largeTitle: { fontFamily: UI_FONTS.semibold, fontSize: 28, lineHeight: 40, paddingTop: 8 },
+});

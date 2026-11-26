@@ -194,7 +194,7 @@ describe('Reminders — a tap opens the adhkar', () => {
 
   it('opens the evening adhkar on a tap while the app runs', async () => {
     await renderWithApp(<HomeScreen />);
-    await screen.findByText('كل الأذكار');
+    await screen.findByText('المفضلة');
     tapNotification(133);
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: '/category/[id]',
@@ -205,7 +205,7 @@ describe('Reminders — a tap opens the adhkar', () => {
   it('ignores a notification that is not a reminder', async () => {
     notificationState.lastResponse = responseFor(null);
     await renderWithApp(<HomeScreen />);
-    await screen.findByText('كل الأذكار');
+    await screen.findByText('المفضلة');
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 });

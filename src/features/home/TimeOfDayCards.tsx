@@ -2,9 +2,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { GoldCard } from '@/components/GoldCard';
 import { Icon } from '@/components/Icon';
+import { IconTile } from '@/components/IconTile';
 import { APP_CONFIG } from '@/config/app-config';
 import type { Category } from '@/data/models';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { timeOfDayCategoryIds, type DayPeriod } from './time-of-day';
@@ -20,100 +23,129 @@ interface Props {
   quiet?: boolean;
 }
 
-/** Morning and evening cards; the one for the current time comes first, marked "الآن". */
+/**
+ * The current period as one big golden card (sun or moon, «الآن», «ابدأ»), the other
+ * period as a small row under it (redesign; the time rule is the same as before).
+ */
 export function TimeOfDayCards({ period, categories, onOpen, quiet = false }: Props) {
   const { t } = useTranslation();
-  const { colors, radii, spacing } = useAppTheme();
+  const { spacing } = useAppTheme();
   if (quiet) return <QuietCards categories={categories} onOpen={onOpen} />;
-  const ids = timeOfDayCategoryIds(period);
+  const [nowId, otherId] = timeOfDayCategoryIds(period);
+  const now = categories.find((c) => c.id === nowId);
+  const other = categories.find((c) => c.id === otherId);
+  const countText = (c: Category) => t('home.adhkarCount', { count: c.adhkarCount });
 
   return (
-    <View style={[styles.row, { gap: spacing.sm }]}>
-      {ids.map((id, i) => {
-        const category = categories.find((c) => c.id === id);
-        if (!category) return null;
-        const isNow = i === 0;
-        const isMorning = id === APP_CONFIG.content.morningCategoryId;
-        const badge = isNow
-          ? t('home.now')
-          : t(isMorning ? 'home.morningBadge' : 'home.eveningBadge');
-        return (
-          <Pressable
-            key={id}
-            accessibilityRole="button"
-            accessibilityLabel={t(isNow ? 'home.categoryLabelNow' : 'home.categoryLabel', {
-              title: category.title,
-              countText: t('home.adhkarCount', { count: category.adhkarCount }),
-            })}
-            onPress={() => onOpen(id)}
-            style={({ pressed }) => [
-              styles.card,
-              {
-                borderRadius: radii.lg,
-                padding: spacing.md,
-                backgroundColor: isNow ? colors.primary : colors.surface,
-                borderColor: isNow ? colors.primary : colors.border,
-              },
-              pressed && { opacity: 0.9 },
-            ]}
-          >
-            <View style={styles.top}>
-              <Icon
-                name={isMorning ? 'sun' : 'moon'}
-                color={isNow ? colors.onPrimary : colors.accent}
-              />
-              <View
-                style={[
-                  styles.badge,
-                  {
-                    borderRadius: radii.pill,
-                    backgroundColor: isNow ? 'rgba(255,255,255,0.18)' : colors.accentSoft,
-                  },
-                ]}
-              >
-                <AppText
-                  variant="label"
-                  style={{ color: isNow ? colors.onPrimary : colors.accent }}
-                >
-                  {badge}
-                </AppText>
-              </View>
-            </View>
-            <AppText
-              variant="bodyStrong"
-              tone={isNow ? 'onPrimary' : 'default'}
-              style={{ marginTop: spacing.md }}
-            >
-              {category.title}
-            </AppText>
-            <AppText
-              variant="caption"
-              tone={isNow ? 'onPrimary' : 'muted'}
-              style={isNow && styles.soft}
-            >
-              {t('home.adhkarCount', { count: category.adhkarCount })}
-            </AppText>
-          </Pressable>
-        );
-      })}
+    <View style={{ gap: spacing.md }}>
+      {now ? <HeroCard category={now} onOpen={onOpen} countText={countText(now)} /> : null}
+      {other ? <MiniRow category={other} onOpen={onOpen} countText={countText(other)} /> : null}
     </View>
+  );
+}
+
+const isMorning = (id: number) => id === APP_CONFIG.content.morningCategoryId;
+
+function HeroCard({
+  category,
+  onOpen,
+  countText,
+}: {
+  category: Category;
+  onOpen: (id: number) => void;
+  countText: string;
+}) {
+  const { t } = useTranslation();
+  const { colors } = useAppTheme();
+  const morning = isMorning(category.id);
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('home.categoryLabelNow', { title: category.title, countText })}
+      onPress={() => onOpen(category.id)}
+      style={({ pressed }) => pressed && { opacity: 0.92 }}
+    >
+      <GoldCard period={morning ? 'morning' : 'evening'} sky>
+        <View style={styles.row}>
+          <View style={[styles.heroTile, { backgroundColor: colors.heroBox }]}>
+            <Icon
+              name={morning ? 'sun' : 'moon'}
+              size={24}
+              color={morning ? colors.sun : colors.accentInk}
+            />
+          </View>
+          <View style={styles.fill} />
+          <View style={[styles.now, { backgroundColor: colors.primary }]}>
+            <AppText style={[styles.nowText, { color: colors.onPrimary }]}>{t('home.now')}</AppText>
+          </View>
+        </View>
+        <View>
+          <AppText style={styles.title}>{category.title}</AppText>
+          <AppText tone="muted" style={styles.count}>
+            {countText}
+          </AppText>
+        </View>
+        <View style={[styles.go, { backgroundColor: colors.primary }]}>
+          <AppText roomy style={[styles.goText, { color: colors.onPrimary }]}>
+            {t('home.start')}
+          </AppText>
+          <Icon name="forward" size={18} color={colors.onPrimary} />
+        </View>
+      </GoldCard>
+    </Pressable>
+  );
+}
+
+function MiniRow({
+  category,
+  onOpen,
+  countText,
+}: {
+  category: Category;
+  onOpen: (id: number) => void;
+  countText: string;
+}) {
+  const { t } = useTranslation();
+  const { colors } = useAppTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('home.categoryLabel', { title: category.title, countText })}
+      onPress={() => onOpen(category.id)}
+      style={({ pressed }) => [
+        styles.mini,
+        {
+          backgroundColor: pressed ? colors.surfaceMuted : colors.surface,
+          borderColor: colors.border,
+        },
+      ]}
+    >
+      <IconTile icon={isMorning(category.id) ? 'sun' : 'moon'} />
+      <View style={styles.fill}>
+        <AppText variant="bodyStrong">{category.title}</AppText>
+        <AppText variant="caption" tone="muted">
+          {countText}
+        </AppText>
+      </View>
+      <Icon name="forward" size={18} color={colors.textFaint} />
+    </Pressable>
   );
 }
 
 function QuietCards({ categories, onOpen }: Omit<Props, 'period' | 'quiet'>) {
   const { t } = useTranslation();
-  const { colors, radii, spacing } = useAppTheme();
+  const { colors, spacing } = useAppTheme();
   const ids = [APP_CONFIG.content.morningCategoryId, APP_CONFIG.content.eveningCategoryId];
   return (
     <View style={{ gap: spacing.sm }}>
-      <AppText variant="heading" accessibilityRole="header">
+      <AppText style={styles.section} accessibilityRole="header">
         {t('adwamuha.home.fullAdhkar')}
       </AppText>
-      <View style={[styles.row, { gap: spacing.sm }]}>
+      <View style={[styles.row, { gap: 10 }]}>
         {ids.map((id) => {
           const category = categories.find((c) => c.id === id);
           if (!category) return null;
-          const isMorning = id === APP_CONFIG.content.morningCategoryId;
+          const morning = isMorning(id);
           const countText = t('home.adhkarCount', { count: category.adhkarCount });
           return (
             <Pressable
@@ -124,21 +156,17 @@ function QuietCards({ categories, onOpen }: Omit<Props, 'period' | 'quiet'>) {
               style={({ pressed }) => [
                 styles.quiet,
                 {
-                  gap: spacing.sm,
-                  padding: spacing.md,
-                  borderRadius: radii.lg,
-                  backgroundColor: colors.surface,
+                  backgroundColor: pressed ? colors.surfaceMuted : colors.surface,
                   borderColor: colors.border,
                 },
-                pressed && { opacity: 0.8 },
               ]}
             >
               <Icon
-                name={isMorning ? 'sun' : 'moon'}
-                color={isMorning ? colors.accent : colors.primary}
+                name={morning ? 'sun' : 'moon'}
+                color={morning ? colors.accent : colors.primaryInk}
               />
               <View style={styles.fill}>
-                <AppText variant="bodyStrong">{category.title}</AppText>
+                <AppText style={styles.quietTitle}>{category.title}</AppText>
                 <AppText variant="caption" tone="muted">
                   {countText}
                 </AppText>
@@ -152,11 +180,47 @@ function QuietCards({ categories, onOpen }: Omit<Props, 'period' | 'quiet'>) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row' },
+  row: { flexDirection: 'row', alignItems: 'center' },
   fill: { flex: 1 },
-  quiet: { flex: 1, flexDirection: 'row', alignItems: 'center', borderWidth: 1 },
-  card: { flex: 1, minHeight: 116, borderWidth: 1 },
-  top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  badge: { paddingHorizontal: 10, paddingVertical: 2 },
-  soft: { opacity: 0.85 },
+  heroTile: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  now: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  nowText: { fontFamily: UI_FONTS.semibold, fontSize: 12, lineHeight: 17 },
+  title: { fontFamily: UI_FONTS.semibold, fontSize: 24, lineHeight: 34 },
+  count: { fontSize: 14, lineHeight: 22 },
+  go: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 6,
+    minHeight: 42,
+    paddingHorizontal: 16,
+    borderRadius: 21,
+  },
+  goText: { fontFamily: UI_FONTS.semibold, fontSize: 15, lineHeight: 22 },
+  mini: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+  },
+  section: { fontFamily: UI_FONTS.semibold, fontSize: 17, lineHeight: 26 },
+  quiet: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  quietTitle: { fontFamily: UI_FONTS.medium, fontSize: 14, lineHeight: 22 },
 });

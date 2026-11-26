@@ -1,40 +1,40 @@
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useReorderableDrag } from 'react-native-reorderable-list';
+import { useIsActive, useReorderableDrag } from 'react-native-reorderable-list';
 
 import { AppText } from '@/components/AppText';
 import { Icon } from '@/components/Icon';
 import type { HomeCategory } from '@/data/models';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 import { TOUCH_TARGET } from '@/theme/tokens';
 
 /**
- * A row in "تعديل الترتيب" mode. Dragging starts only from the handle,
- * so scrolling the list never moves an item by mistake.
+ * A row in «تعديل الترتيب». Dragging starts only from the handle, so scrolling the list
+ * never moves an item by mistake. The row being moved lifts with a teal tint (design).
  */
 export const ReorderRow = memo(function ReorderRow({ category }: { category: HomeCategory }) {
   const { t } = useTranslation();
-  const { colors, radii, spacing } = useAppTheme();
+  const { colors } = useAppTheme();
   const drag = useReorderableDrag();
+  const active = useIsActive();
 
   return (
     <View
       style={[
         styles.row,
         {
-          backgroundColor: colors.surface,
+          backgroundColor: active ? colors.primarySoft : colors.surface,
           borderBottomColor: colors.border,
-          paddingStart: spacing.md,
         },
+        active && styles.lifted,
       ]}
     >
-      <View style={[styles.num, { borderRadius: radii.sm, backgroundColor: colors.surfaceMuted }]}>
-        <AppText variant="label" tone="muted">
-          {String(category.defaultOrder)}
-        </AppText>
-      </View>
-      <AppText style={[styles.title, { marginHorizontal: spacing.md }]} numberOfLines={2}>
+      <AppText tone="faint" style={styles.num}>
+        {String(category.defaultOrder)}
+      </AppText>
+      <AppText style={styles.title} numberOfLines={2}>
         {category.title}
       </AppText>
       <Pressable
@@ -44,7 +44,7 @@ export const ReorderRow = memo(function ReorderRow({ category }: { category: Hom
         hitSlop={8}
         style={styles.handle}
       >
-        <Icon name="grip" color={colors.textMuted} />
+        <Icon name="grip" color={active ? colors.primaryInk : colors.textFaint} />
       </Pressable>
     </View>
   );
@@ -54,11 +54,21 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
     minHeight: 60,
+    paddingStart: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  num: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
-  title: { flex: 1 },
+  lifted: {
+    borderRadius: 14,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  num: { width: 24, textAlign: 'center', fontSize: 13, lineHeight: 20 },
+  title: { flex: 1, fontFamily: UI_FONTS.medium, fontSize: 16, lineHeight: 24 },
   handle: {
     width: TOUCH_TARGET,
     height: TOUCH_TARGET,

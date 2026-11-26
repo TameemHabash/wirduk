@@ -58,5 +58,36 @@
     "date": "2026-11-22",
     "note": "The step-back sheet's choice of a step to go back to, with − and + (owner, 2026-11-22: before the break; the design approved the same day). Cut from their message by script.",
     "text": "ارجع إلى الخطوة:"
+  },
+  "redesign": {
+    "date": "2026-11-26",
+    "note": "The owner's words for the redesign (approved 2026-11-26), cut from their chat messages by script. They are interface strings in common.json; src/i18n/owner-words.test.ts checks they match.",
+    "words": [
+      {
+        "key": "tabs.home",
+        "text": "الرئيسية",
+        "note": "The first tab (owner, message 3, 2026-11-25)."
+      },
+      {
+        "key": "adwamuha.orderHelp.showLess",
+        "text": "عرض أقل",
+        "note": "Shortens the ward list, with an up arrow (owner, message 3)."
+      },
+      {
+        "key": "adwamuha.rows.easeTitle",
+        "text": "خفّف وردك أو خذ استراحة",
+        "note": "The step-back row in «مساري» and «أدومها» settings (owner chose it, message 4)."
+      },
+      {
+        "key": "adwamuha.plan.notPassed",
+        "text": "لم أقطعها بعد",
+        "note": "Puts a step done back in the plan (owner chose it, message 4)."
+      },
+      {
+        "key": "about.audio",
+        "text": "التسجيلات الصوتية بصوت حمد الدريهم، وأذكار الصباح والمساء بصوت أخٍ متطوّع، جزاه الله خيرًا.",
+        "note": "The owner's sentence (message 3) and their choice of the thanks (message 4), with Claude's words for «سري» in the middle (approved in the design)."
+      }
+    ]
   }
 }

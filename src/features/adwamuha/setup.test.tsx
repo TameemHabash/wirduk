@@ -1,6 +1,7 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { APP_CONFIG } from '@/config/app-config';
+import { resources } from '@/i18n/resources';
 import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { notificationState, pickTime } from '@/test-utils/notifications-mock';
@@ -18,6 +19,8 @@ import { SetupIntroScreen } from './SetupIntroScreen';
 import { SetupOrderScreen } from './SetupOrderScreen';
 import { SetupRemindersScreen } from './SetupRemindersScreen';
 import { SetupStartScreen } from './SetupStartScreen';
+
+const BADGE = resources.ar.common.adwamuha.setup.title;
 
 const KURSI = OWNER_TEXTS.wardNames['1001'];
 const QULS = OWNER_TEXTS.wardNames['1002'];
@@ -55,7 +58,7 @@ describe('when the setup shows', () => {
     const repos = await createTestRepositories();
     await repos.adwamuha.markShown(setupShownKey());
     await renderWithApp(<HomeScreen />, repos, { now: at(9) });
-    await screen.findByText('كل الأذكار');
+    await screen.findByText('المفضلة');
     expect(mockRouter.push).not.toHaveBeenCalledWith('/adwamuha/intro');
   });
 
@@ -80,20 +83,20 @@ describe('the «أدومها» badge next to the settings button (owner, 2026-11
     const repos = await createTestRepositories();
     await repos.adwamuha.markShown(setupShownKey()); // «لاحقًا» on the first launch
     await renderWithApp(<HomeScreen />, repos, { now: at(9) });
-    await fireEvent.press(await screen.findByLabelText('تعرّف على «أدومها»'));
+    await fireEvent.press(await screen.findByRole('button', { name: BADGE }));
     expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/intro');
-    expect(screen.getByLabelText('الإعدادات')).toBeOnTheScreen();
+    expect(screen.getByLabelText('ابحث في الأذكار')).toBeOnTheScreen();
   });
 
   it('also when it was turned off', async () => {
     await renderWithApp(<HomeScreen />, await withPlan(false), { now: at(9) });
-    expect(await screen.findByLabelText('تعرّف على «أدومها»')).toBeOnTheScreen();
+    expect(await screen.findByRole('button', { name: BADGE })).toBeOnTheScreen();
   });
 
   it('gone while it is on', async () => {
     await renderWithApp(<HomeScreen />, await withPlan(true), { now: at(9) });
     await screen.findByText(OWNER_TEXTS.labels.todayWard);
-    expect(screen.queryByLabelText('تعرّف على «أدومها»')).toBeNull();
+    expect(screen.queryByRole('button', { name: BADGE })).toBeNull();
   });
 });
 

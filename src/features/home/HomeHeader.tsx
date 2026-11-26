@@ -7,96 +7,83 @@ import { Icon } from '@/components/Icon';
 import { IconButton } from '@/components/IconButton';
 import { Logo } from '@/components/Logo';
 import { useAdwamuhaOptional } from '@/features/adwamuha/AdwamuhaProvider';
-import { OWNER_TEXTS } from '@/features/adwamuha/owner-texts';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 /**
- * Logo + settings (and, while «أدومها» is off, its badge), then the search
- * entry. The logo already shows the app name.
+ * The logo (it already shows the app name), «أدومها»'s gold badge while it is off, and
+ * the search button (it opens the adhkar tab with the keyboard up). Settings is a tab.
  */
 export function HomeHeader() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { colors, radii, spacing } = useAppTheme();
+  const { colors, spacing } = useAppTheme();
 
   return (
-    <View style={{ gap: spacing.md }}>
-      <View style={styles.row}>
-        {/* Screen readers still hear the app name as the page heading. */}
-        <View accessible accessibilityRole="header" accessibilityLabel={t('home.title')}>
-          <Logo size={44} />
-        </View>
-        <View style={[styles.row, { gap: spacing.xs }]}>
-          <AdwamuhaBadge />
-          <IconButton
-            icon="settings"
-            label={t('home.openSettings')}
-            onPress={() => router.push('/settings')}
-          />
-        </View>
+    <View style={[styles.row, { gap: spacing.sm + 2 }]}>
+      {/* Screen readers still hear the app name as the page heading. */}
+      <View accessible accessibilityRole="header" accessibilityLabel={t('home.title')}>
+        <Logo size={44} />
       </View>
-
-      <Pressable
-        accessibilityRole="search"
-        accessibilityLabel={t('home.searchPlaceholder')}
-        onPress={() => router.push('/search')}
-        style={[
-          styles.search,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            borderRadius: radii.md,
-            paddingHorizontal: spacing.md,
-            gap: spacing.sm,
-          },
-        ]}
-      >
-        <Icon name="search" size={18} color={colors.textFaint} />
-        <AppText tone="faint">{t('home.searchPlaceholder')}</AppText>
-      </Pressable>
+      <View style={styles.fill} />
+      <AdwamuhaBadge />
+      <IconButton
+        icon="search"
+        label={t('home.searchPlaceholder')}
+        color={colors.text}
+        onPress={() => router.navigate({ pathname: '/adhkar', params: { focus: 'search' } })}
+      />
     </View>
   );
 }
 
 /**
- * While «أدومها» is off: a small badge next to the settings button that opens its
- * welcome screens (owner, 2026-11-14: for whoever skipped them when the app was
- * installed or updated). Gone once it is on.
+ * While «أدومها» is off: «ابنِ وردك خطوةً خطوة ›» (owner, 2026-11-26), which opens its
+ * setup (owner, 2026-11-14: for whoever skipped it when the app was installed or updated).
+ * Gone once it is on.
  */
 function AdwamuhaBadge() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { colors, radii, spacing } = useAppTheme();
+  const { colors } = useAppTheme();
   const adwamuha = useAdwamuhaOptional();
   if (!adwamuha?.ready || adwamuha.enabled) return null;
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t('home.adwamuhaBadge')}
+      accessibilityLabel={t('adwamuha.setup.title')}
       onPress={() => router.push('/adwamuha/intro')}
       hitSlop={6}
       style={({ pressed }) => [
         styles.badge,
         {
-          gap: spacing.xs,
-          paddingHorizontal: spacing.md,
-          borderRadius: radii.pill,
-          backgroundColor: colors.surfaceMuted,
+          backgroundColor: colors.accentSoft,
+          borderColor: colors.accentLine,
           opacity: pressed ? 0.7 : 1,
         },
       ]}
     >
-      <View style={[styles.dot, { backgroundColor: colors.accent }]} />
-      <AppText variant="label" tone="primary">
-        {OWNER_TEXTS.featureName}
+      <Icon name="sprout" size={15} color={colors.accent} />
+      <AppText roomy style={[styles.badgeText, { color: colors.accentInk }]}>
+        {t('adwamuha.setup.title')}
       </AppText>
+      <Icon name="forward" size={15} color={colors.accentInk} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  search: { height: 48, flexDirection: 'row', alignItems: 'center', borderWidth: 1 },
-  badge: { minHeight: 34, flexDirection: 'row', alignItems: 'center' },
-  dot: { width: 8, height: 8, borderRadius: 4 },
+  row: { flexDirection: 'row', alignItems: 'center', minHeight: 52, paddingTop: 6 },
+  fill: { flex: 1 },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 34,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    flexShrink: 1,
+  },
+  badgeText: { fontFamily: UI_FONTS.semibold, fontSize: 13, lineHeight: 20, flexShrink: 1 },
 });

@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { IconButton } from '@/components/IconButton';
+import { IconTile } from '@/components/IconTile';
 import type { HomeCategory } from '@/data/models';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 interface Props {
@@ -13,26 +15,21 @@ interface Props {
   onToggleFavorite: (id: number) => void;
 }
 
-/** One category in the home list: chapter number, title, count, star. */
+/**
+ * One chapter (design `.crow`): the book's number small and faint (no box), the title, the
+ * count, the star at the end. The user's own chapters start with a tile instead.
+ */
 export const CategoryRow = memo(function CategoryRow({
   category,
   onOpen,
   onToggleFavorite,
 }: Props) {
   const { t } = useTranslation();
-  const { colors, radii, spacing } = useAppTheme();
+  const { colors } = useAppTheme();
   const { id, title, adhkarCount, defaultOrder, isFavorite, custom } = category;
 
   return (
-    <View
-      style={[
-        styles.row,
-        {
-          backgroundColor: custom ? colors.customSurface : colors.surface,
-          paddingStart: spacing.md,
-        },
-      ]}
-    >
+    <View style={styles.row}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('home.categoryLabel', {
@@ -40,28 +37,18 @@ export const CategoryRow = memo(function CategoryRow({
           countText: t('home.adhkarCount', { count: adhkarCount }),
         })}
         onPress={() => onOpen(id)}
-        style={({ pressed }) => [styles.main, { gap: spacing.md }, pressed && { opacity: 0.7 }]}
+        style={({ pressed }) => [styles.main, pressed && { opacity: 0.7 }]}
       >
-        <View
-          style={[
-            styles.num,
-            {
-              borderRadius: radii.sm,
-              backgroundColor: custom ? colors.customBorder : colors.surfaceMuted,
-            },
-          ]}
-        >
-          <AppText
-            variant="label"
-            tone="muted"
-            style={custom ? { color: colors.customAccent } : undefined}
-          >
+        {custom ? (
+          <IconTile icon="beads" tone="sand" />
+        ) : (
+          <AppText tone="faint" style={styles.num}>
             {String(defaultOrder)}
           </AppText>
-        </View>
+        )}
         <View style={styles.text}>
-          <AppText>{title}</AppText>
-          <AppText variant="caption" tone="faint">
+          <AppText style={styles.title}>{title}</AppText>
+          <AppText variant="caption" tone="muted">
             {t('home.adhkarCount', { count: adhkarCount })}
           </AppText>
         </View>
@@ -79,8 +66,15 @@ export const CategoryRow = memo(function CategoryRow({
 });
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', minHeight: 64 },
-  main: { flex: 1, flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
-  num: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 60,
+    paddingStart: 14,
+    paddingEnd: 4,
+  },
+  main: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
+  num: { width: 24, textAlign: 'center', fontSize: 13, lineHeight: 20 },
   text: { flex: 1 },
+  title: { fontFamily: UI_FONTS.medium, fontSize: 16, lineHeight: 24 },
 });

@@ -65,7 +65,7 @@ afterEach(async () => {
 describe('Home: «وردك اليوم»', () => {
   it('is not there while the feature is off', async () => {
     await renderWithApp(<HomeScreen />, await withPlan(0, false), { now: at(7) });
-    await screen.findByText('كل الأذكار');
+    await screen.findByText('المفضلة');
     expect(screen.queryByText(OWNER_TEXTS.labels.todayWard)).toBeNull();
   });
 

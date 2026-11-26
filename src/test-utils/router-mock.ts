@@ -8,6 +8,7 @@ export const mockRouter = {
   back: jest.fn(),
   dismissTo: jest.fn(),
   navigate: jest.fn(),
+  setParams: jest.fn(),
 };
 
 /** Navigation object for "leave with unsaved changes?" guards. */

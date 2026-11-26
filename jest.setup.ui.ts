@@ -73,6 +73,7 @@ jest.mock('react-native-reorderable-list', () => {
     __esModule: true,
     default: (props: object) => React.createElement(FlatList, props),
     useReorderableDrag: () => () => undefined,
+    useIsActive: () => false,
     reorderItems: <T>(data: T[], from: number, to: number): T[] => {
       const next = [...data];
       const [moved] = next.splice(from, 1);

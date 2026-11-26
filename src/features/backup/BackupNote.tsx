@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { Icon } from '@/components/Icon';
+import { TextButton } from '@/components/TextButton';
 import { useToast } from '@/components/Toast';
 import { useRepositories } from '@/data/DataProvider';
 import { useAppTheme } from '@/theme/ThemeProvider';
@@ -20,7 +22,7 @@ import { takeRestoredNotice, useBackup } from './useBackup';
 export function BackupNote({ now = Date.now }: { now?: () => number }) {
   const { t } = useTranslation();
   const toast = useToast();
-  const { colors, radii, spacing } = useAppTheme();
+  const { colors, spacing } = useAppTheme();
   const { backup } = useRepositories();
   const { save, busy } = useBackup();
   const [show, setShow] = useState(false);
@@ -56,22 +58,31 @@ export function BackupNote({ now = Date.now }: { now?: () => number }) {
   return (
     <View
       accessibilityLiveRegion="polite"
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border,
-        borderWidth: 1,
-        borderRadius: radii.lg,
-        padding: spacing.lg,
-        gap: spacing.sm,
-      }}
+      style={[styles.card, { backgroundColor: colors.accentSoft, borderColor: colors.accentLine }]}
     >
-      <AppText>{t('backup.note.text')}</AppText>
-      <Button
-        title={busy === 'save' ? t('backup.saving') : t('backup.note.save')}
-        disabled={busy !== null}
-        onPress={() => void save().then((saved) => saved && setShow(false))}
-      />
-      <Button title={t('backup.note.later')} kind="secondary" onPress={() => setShow(false)} />
+      <View style={[styles.row, styles.top]}>
+        <View style={[styles.tile, { backgroundColor: colors.surface }]}>
+          <Icon name="shield" size={19} color={colors.accentInk} />
+        </View>
+        <AppText style={styles.text}>{t('backup.note.text')}</AppText>
+      </View>
+      <View style={[styles.row, { gap: spacing.sm }]}>
+        <Button
+          title={busy === 'save' ? t('backup.saving') : t('backup.note.save')}
+          size="small"
+          disabled={busy !== null}
+          onPress={() => void save().then((saved) => saved && setShow(false))}
+        />
+        <TextButton title={t('backup.note.later')} onPress={() => setShow(false)} />
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: { borderWidth: 1, borderRadius: 22, padding: 16, gap: 12 },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  top: { alignItems: 'flex-start', gap: 10 },
+  tile: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  text: { flex: 1, fontSize: 14, lineHeight: 24 },
+});

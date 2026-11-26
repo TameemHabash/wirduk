@@ -20,13 +20,16 @@ import { SetupIntroScreen } from '@/features/adwamuha/SetupIntroScreen';
 import { SetupOrderScreen } from '@/features/adwamuha/SetupOrderScreen';
 import { SetupRemindersScreen } from '@/features/adwamuha/SetupRemindersScreen';
 import { SetupStartScreen } from '@/features/adwamuha/SetupStartScreen';
+import { AdhkarScreen } from '@/features/adhkar/AdhkarScreen';
+import { ReorderScreen } from '@/features/adhkar/ReorderScreen';
 import { AudioDownloadsScreen } from '@/features/audio/AudioDownloadsScreen';
 import { counterStore } from '@/features/counter/counter-store';
+import { CategoryEditorScreen } from '@/features/custom/CategoryEditorScreen';
+import { DhikrEditorScreen } from '@/features/custom/DhikrEditorScreen';
 import { MyAdhkarScreen } from '@/features/custom/MyAdhkarScreen';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { ReaderScreen } from '@/features/reader/ReaderScreen';
 import { ReportScreen } from '@/features/report/ReportScreen';
-import { SearchScreen } from '@/features/search/SearchScreen';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { openShippedContentDb } from '@/test-utils/databases';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
@@ -127,7 +130,10 @@ const SCREENS: [
   ['setup 3', () => <SetupOrderScreen />, undefined, { step: '6' }],
   ['setup 4', () => <SetupRemindersScreen />, undefined, { step: '1' }],
   ['Settings', () => <SettingsScreen />],
-  ['search', () => <SearchScreen />],
+  ['the adhkar tab', () => <AdhkarScreen />],
+  ['reorder', () => <ReorderScreen />],
+  ['a new own chapter', () => <CategoryEditorScreen />, undefined, { id: 'new' }],
+  ['a new own dhikr', () => <DhikrEditorScreen />, undefined, { id: '-1', dhikrId: 'new' }],
   ['audio downloads', () => <AudioDownloadsScreen />],
   ['my adhkar', () => <MyAdhkarScreen />],
   ['report a problem', () => <ReportScreen />],

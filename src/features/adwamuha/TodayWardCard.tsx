@@ -5,11 +5,11 @@ import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
-import { DhikrText } from '@/components/DhikrText';
+import { GoldCard } from '@/components/GoldCard';
 import { Icon } from '@/components/Icon';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { displayTime } from '@/features/reminders/reminder-time';
-import { DISPLAY_FONT } from '@/theme/fonts';
+import { DISPLAY_FONT, UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { useAdwamuha } from './AdwamuhaProvider';
@@ -94,20 +94,10 @@ export function TodayWardCard() {
   const wardSize = wardIds(show.session).length;
 
   return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.primary,
-          borderRadius: radii.lg,
-          padding: spacing.lg,
-          gap: spacing.md,
-        },
-      ]}
-    >
+    // Golden as the morning or evening card it replaces (owner, 2026-11-25).
+    <GoldCard period={now.session}>
       <View style={[styles.row, { gap: spacing.sm }]}>
-        <AppText variant="heading" accessibilityRole="header" style={styles.fill}>
+        <AppText accessibilityRole="header" style={[styles.fill, styles.title]}>
           {OWNER_TEXTS.labels.todayWard}
         </AppText>
         <Pressable
@@ -122,25 +112,25 @@ export function TodayWardCard() {
               paddingHorizontal: spacing.sm,
               paddingVertical: spacing.xs,
               borderRadius: radii.pill,
-              backgroundColor: colors.surfaceMuted,
+              backgroundColor: colors.heroBox,
               opacity: pressed ? 0.7 : 1,
             },
           ]}
         >
-          <AppText variant="label" tone="primary">
+          <AppText roomy style={[styles.chip, { color: colors.primaryInk }]}>
             {progress.maintenance
               ? t('adwamuha.home.maintenance')
               : OWNER_TEXTS.labels.stepOf
                   .replace('{{step}}', String(progress.step))
                   .replace('{{total}}', String(progress.total))}
           </AppText>
-          <Icon name="forward" size={14} color={colors.primary} />
+          <Icon name="forward" size={14} color={colors.primaryInk} />
         </Pressable>
       </View>
 
-      <DhikrText size={17} style={{ color: colors.accent }}>
+      <AppText style={[styles.hadith, { color: colors.accentInk, fontFamily: DISPLAY_FONT }]}>
         {OWNER_TEXTS.hadith.text}
-      </DhikrText>
+      </AppText>
 
       {/*
         The one-time place: a message due (once, tied to what just happened), then the
@@ -216,7 +206,7 @@ export function TodayWardCard() {
           })}
         </AppText>
       )}
-    </View>
+    </GoldCard>
   );
 }
 
@@ -226,10 +216,11 @@ function OnceBox({ children }: { children: ReactNode }) {
     <View
       accessibilityLiveRegion="polite"
       style={{
-        backgroundColor: colors.surfaceMuted,
+        backgroundColor: colors.heroBox,
         borderRadius: radii.md,
-        padding: spacing.md,
-        gap: spacing.sm,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.lg - 2,
+        gap: spacing.sm + 2,
       }}
     >
       {children}
@@ -251,15 +242,19 @@ function WardBox({ session, state }: { session: Session; state: WardState }) {
       style={[
         styles.box,
         {
-          gap: spacing.sm,
-          padding: spacing.sm,
+          gap: spacing.sm + 2,
+          padding: 10,
           borderRadius: radii.md,
-          borderWidth: state === 'now' ? 2 : 1,
-          borderColor: state === 'now' ? colors.primary : colors.border,
+          borderWidth: 1.5,
+          borderColor: state === 'now' ? colors.primary : 'transparent',
+          backgroundColor: colors.heroBox,
         },
       ]}
     >
       <View
+        // A new view for each state: the Galaxy S21+ drew a round view square after it
+        // changed in place from a border to a fill (2026-11-01).
+        key={state}
         style={[
           styles.mark,
           filled
@@ -272,12 +267,17 @@ function WardBox({ session, state }: { session: Session; state: WardState }) {
         ]}
       >
         {filled ? (
-          <Icon name={state === 'late' ? 'clock' : 'check'} size={14} color={colors.onPrimary} />
+          <Icon
+            name={state === 'late' ? 'clock' : 'check'}
+            size={15}
+            strokeWidth={2.2}
+            color={colors.onPrimary}
+          />
         ) : null}
       </View>
       <View style={styles.fill}>
-        <AppText variant="bodyStrong">{name}</AppText>
-        <AppText variant="caption" tone={filled ? 'primary' : 'muted'}>
+        <AppText style={styles.wardName}>{name}</AppText>
+        <AppText variant="caption" tone={filled ? 'primaryInk' : 'muted'}>
           {word}
         </AppText>
       </View>
@@ -286,11 +286,14 @@ function WardBox({ session, state }: { session: Session; state: WardState }) {
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1.5 },
+  title: { fontFamily: UI_FONTS.semibold, fontSize: 19, lineHeight: 28 },
+  chip: { fontFamily: UI_FONTS.semibold, fontSize: 13, lineHeight: 20 },
+  hadith: { fontSize: 18, lineHeight: 31 },
+  wardName: { fontFamily: UI_FONTS.semibold, fontSize: 15, lineHeight: 21 },
   row: { flexDirection: 'row', alignItems: 'center' },
   fill: { flex: 1 },
   center: { textAlign: 'center', alignSelf: 'stretch' },
-  prayer: { fontSize: 20, lineHeight: 36, textAlign: 'center', alignSelf: 'stretch' },
+  prayer: { fontSize: 21, lineHeight: 38, textAlign: 'center', alignSelf: 'stretch' },
   box: { flex: 1, flexDirection: 'row', alignItems: 'center' },
-  mark: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  mark: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
 });

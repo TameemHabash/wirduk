@@ -1,14 +1,14 @@
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppBar, AppBarAction } from '@/components/AppBar';
 import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
 import { DialogName, NAME_MARK, aroundName, useDialog } from '@/components/Dialog';
 import { DhikrText } from '@/components/DhikrText';
-import { Icon } from '@/components/Icon';
+import { IconTile } from '@/components/IconTile';
 import { SortableList } from '@/components/SortableList';
 import { TextButton } from '@/components/TextButton';
 import { TextField } from '@/components/TextField';
@@ -17,7 +17,6 @@ import type { Category, Dhikr } from '@/data/models';
 import { CUSTOM_LIMITS } from '@/data/repositories/custom-repository';
 import { counterStore } from '@/features/counter/counter-store';
 import { useAppTheme } from '@/theme/ThemeProvider';
-import { TOUCH_TARGET } from '@/theme/tokens';
 
 import { deleteCustomAudio } from './custom-audio';
 import { customErrorMessage } from './errors';
@@ -53,8 +52,15 @@ function NewCategory() {
   };
 
   return (
-    <SafeAreaView edges={['bottom']} style={[styles.fill, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: t('custom.newCategoryTitle') }} />
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={[styles.fill, { backgroundColor: colors.background }]}
+    >
+      <AppBar
+        title={t('custom.newCategoryTitle')}
+        start="close"
+        end={<AppBarAction title={t('custom.create')} onPress={() => void create()} />}
+      />
       <View style={{ padding: spacing.lg, gap: spacing.lg }}>
         <TextField
           label={t('custom.categoryName')}
@@ -70,7 +76,9 @@ function NewCategory() {
           onSubmitEditing={() => void create()}
           error={error}
         />
-        <Button title={t('custom.create')} onPress={() => void create()} />
+        <AppText variant="caption" tone="muted">
+          {t('custom.noAdhkar')}
+        </AppText>
       </View>
     </SafeAreaView>
   );
@@ -157,7 +165,8 @@ function EditCategory({ id }: { id: number }) {
               await favorites.remove(id);
               counterStore.resetMany(adhkar.map((d) => d.id));
               allowLeave();
-              router.dismissTo('/');
+              // Back to the adhkar tab, where «أذكاري» is.
+              router.dismissTo('/adhkar');
             })();
           },
         },
@@ -178,10 +187,10 @@ function EditCategory({ id }: { id: number }) {
   if (sorting) {
     return (
       <SafeAreaView
-        edges={['bottom']}
+        edges={['top', 'bottom']}
         style={[styles.fill, { backgroundColor: colors.background }]}
       >
-        <Stack.Screen options={{ title: t('custom.editCategoryTitle') }} />
+        <AppBar title={t('custom.editCategoryTitle')} />
         <SortableList
           items={adhkar}
           keyOf={(d) => String(d.id)}
@@ -211,8 +220,20 @@ function EditCategory({ id }: { id: number }) {
   }
 
   return (
-    <SafeAreaView edges={['bottom']} style={[styles.fill, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: t('custom.editCategoryTitle') }} />
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={[styles.fill, { backgroundColor: colors.background }]}
+    >
+      <AppBar
+        title={t('custom.editCategoryTitle')}
+        end={
+          <AppBarAction
+            title={t('custom.save')}
+            onPress={() => void saveTitle()}
+            disabled={!titleChanged}
+          />
+        }
+      />
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -232,9 +253,6 @@ function EditCategory({ id }: { id: number }) {
             maxLength={CUSTOM_LIMITS.titleMax}
             error={error}
           />
-          {titleChanged && (
-            <Button title={t('custom.save')} kind="secondary" onPress={() => void saveTitle()} />
-          )}
         </View>
 
         <View style={{ gap: spacing.sm }}>
@@ -243,15 +261,7 @@ function EditCategory({ id }: { id: number }) {
               {t('custom.adhkarList')}
             </AppText>
             {adhkar.length > 1 && (
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => setSorting(true)}
-                style={styles.textButton}
-              >
-                <AppText variant="label" tone="primary">
-                  {t('home.editOrder')}
-                </AppText>
-              </Pressable>
+              <TextButton title={t('home.editOrder')} onPress={() => setSorting(true)} />
             )}
           </View>
 
@@ -259,7 +269,7 @@ function EditCategory({ id }: { id: number }) {
             style={{
               borderWidth: 1,
               borderColor: colors.customBorder,
-              borderRadius: radii.lg,
+              borderRadius: 20,
               backgroundColor: colors.customSurface,
               overflow: 'hidden',
             }}
@@ -299,9 +309,16 @@ function EditCategory({ id }: { id: number }) {
                     {d.text}
                   </DhikrText>
                 </View>
-                <AppText variant="caption" tone="muted">
-                  {t('custom.times', { n: d.count })}
-                </AppText>
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: colors.surface, borderColor: colors.customBorder },
+                  ]}
+                >
+                  <AppText variant="label" style={{ color: colors.customAccent }}>
+                    {t('custom.times', { n: d.count })}
+                  </AppText>
+                </View>
               </Pressable>
             ))}
             <Pressable
@@ -313,7 +330,7 @@ function EditCategory({ id }: { id: number }) {
                 pressed && { opacity: 0.7 },
               ]}
             >
-              <Icon name="plus" size={18} color={colors.customAccent} />
+              <IconTile icon="plus" tone="sand" />
               <AppText variant="bodyStrong" style={{ color: colors.customAccent }}>
                 {t('custom.addDhikr')}
               </AppText>
@@ -336,13 +353,13 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   center: { alignItems: 'center', justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  textButton: { minHeight: TOUCH_TARGET, justifyContent: 'center', paddingHorizontal: 8 },
+  badge: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 2 },
   dhikrRow: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   num: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
-  addRow: { flexDirection: 'row', alignItems: 'center', minHeight: 52 },
+  addRow: { flexDirection: 'row', alignItems: 'center', minHeight: 56 },
   start: { textAlign: 'auto' },
 });
