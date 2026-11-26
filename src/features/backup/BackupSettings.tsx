@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
-import { RowDivider, SettingsGroup } from '@/features/settings/SettingsParts';
+import { SettingsGroup } from '@/features/settings/SettingsParts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { autoBackupKnown } from './auto-backup';
-import { AutoBackupStatus } from './AutoBackupStatus';
+import { AutoBackupStatus, StatusLine } from './AutoBackupStatus';
 import { formatBackupDate, useBackup } from './useBackup';
 
 /**
@@ -23,11 +23,15 @@ export function BackupSettings() {
     <SettingsGroup title={t('backup.title')}>
       <View style={{ padding: spacing.lg, gap: spacing.md }}>
         <AppText tone="muted">{t('backup.about')}</AppText>
-        <AppText variant="caption" tone="muted">
-          {fileSavedAt
-            ? t('backup.lastFile', { date: formatBackupDate(t, fileSavedAt) })
-            : t('backup.lastFileNever')}
-        </AppText>
+        <StatusLine
+          ok={fileSavedAt !== null}
+          text={
+            fileSavedAt
+              ? t('backup.lastFile', { date: formatBackupDate(t, fileSavedAt) })
+              : t('backup.lastFileNever')
+          }
+        />
+        {autoBackupKnown ? <AutoBackupStatus at={autoBackupAt} /> : null}
         <Button
           title={busy === 'save' ? t('backup.saving') : t('backup.save')}
           onPress={() => void save()}
@@ -40,14 +44,6 @@ export function BackupSettings() {
           disabled={busy !== null}
         />
       </View>
-      {autoBackupKnown ? (
-        <>
-          <RowDivider />
-          <View style={{ padding: spacing.lg }}>
-            <AutoBackupStatus at={autoBackupAt} />
-          </View>
-        </>
-      ) : null}
     </SettingsGroup>
   );
 }

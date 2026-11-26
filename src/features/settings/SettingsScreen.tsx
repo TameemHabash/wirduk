@@ -69,12 +69,14 @@ export function SettingsScreen() {
         <View onLayout={(e) => (readingY.current = e.nativeEvent.layout.y)}>
           <SettingsGroup title={t('settings.whileReading')}>
             <ToggleRow
+              icon="screen"
               label={t('settings.keepScreenOn')}
               value={settings.keepScreenOn}
               onChange={(v) => void update('keepScreenOn', v)}
             />
             <RowDivider />
             <ToggleRow
+              icon="history"
               label={t('settings.restoreSession')}
               hint={t('settings.restoreSessionHint')}
               value={settings.restoreSession}
@@ -90,30 +92,34 @@ export function SettingsScreen() {
 
         {adwamuhaOn ? null : <ReminderSettings />}
 
-        <SettingsGroup title={t('settings.theme.title')}>
+        <SettingsGroup title={t('settings.theme.title')} boxless>
           <ThemePicker />
         </SettingsGroup>
 
         <SettingsGroup title={t('settings.feedback')}>
           <ToggleRow
+            icon="vibrate"
             label={t('settings.haptics')}
             value={settings.hapticsEnabled}
             onChange={(v) => void update('hapticsEnabled', v)}
           />
           <RowDivider />
           <ToggleRow
+            icon="vibrate"
             label={t('settings.nextDhikrVibration')}
             value={settings.nextDhikrVibration}
             onChange={(v) => void update('nextDhikrVibration', v)}
           />
           <RowDivider />
           <ToggleRow
+            icon="vibrate"
             label={t('settings.completionVibration')}
             value={settings.completionVibration}
             onChange={(v) => void update('completionVibration', v)}
           />
           <RowDivider />
           <ToggleRow
+            icon="sound"
             label={t('settings.tickSound')}
             value={settings.tickSound}
             onChange={(v) => void update('tickSound', v)}
@@ -122,6 +128,7 @@ export function SettingsScreen() {
 
         <SettingsGroup title={t('settings.audio')}>
           <LinkRow
+            icon="download"
             label={t('settings.downloadAudio')}
             value={
               !audio
@@ -134,18 +141,21 @@ export function SettingsScreen() {
           />
           <RowDivider />
           <ToggleRow
+            icon="head"
             label={t('settings.backgroundPlayback')}
             value={settings.backgroundPlayback}
             onChange={(v) => void update('backgroundPlayback', v)}
           />
           <RowDivider />
           <ToggleRow
+            icon="play"
             label={t('settings.autoplayNext')}
             value={settings.autoplayNext}
             onChange={(v) => void update('autoplayNext', v)}
           />
           <RowDivider />
           <ToggleRow
+            icon="beads"
             label={t('settings.audioCounts')}
             hint={t('settings.audioCountsHint')}
             value={settings.audioCounts}
@@ -157,9 +167,17 @@ export function SettingsScreen() {
         <BackupSettings />
 
         <SettingsGroup title={t('settings.support')}>
-          <LinkRow label={t('about.title')} onPress={() => router.push('/about')} />
+          <LinkRow
+            icon="info"
+            iconTone="plain"
+            label={t('about.title')}
+            onPress={() => router.push('/about')}
+          />
           <RowDivider />
           <LinkRow
+            icon="lock"
+            iconTone="plain"
+            external
             label={t('settings.privacy')}
             onPress={() => void Linking.openURL(APP_CONFIG.privacyPolicyUrl)}
           />
@@ -167,7 +185,12 @@ export function SettingsScreen() {
           {APP_CONFIG.report.endpoint ? (
             <>
               <RowDivider />
-              <LinkRow label={t('report.title')} onPress={() => router.push('/report')} />
+              <LinkRow
+                icon="flag"
+                iconTone="plain"
+                label={t('report.title')}
+                onPress={() => router.push('/report')}
+              />
             </>
           ) : null}
         </SettingsGroup>

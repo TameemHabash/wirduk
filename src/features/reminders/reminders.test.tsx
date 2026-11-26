@@ -169,9 +169,36 @@ describe('Reminders — settings', () => {
 
     // "Never ask again": no question, the same message.
     await fireEvent(screen.getByLabelText(EVENING), 'valueChange', true);
-    await waitFor(() => expect(mockNotifications.getPermissionsAsync).toHaveBeenCalledTimes(2));
+    // (The notifications card checks the permission too.)
+    await waitFor(() =>
+      expect(mockNotifications.getPermissionsAsync.mock.calls.length).toBeGreaterThanOrEqual(2),
+    );
     expect(notificationState.asked).toBe(1);
     openSettings.mockRestore();
+  });
+});
+
+describe('Reminders — notifications not allowed (owner, 2026-11-25)', () => {
+  it('a lasting card above the reminders while they are not allowed; a tap opens the phone settings', async () => {
+    notificationState.permission = {
+      granted: false,
+      canAskAgain: false,
+      status: 'denied',
+    } as never;
+    const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
+    await renderWithApp(<SettingsWithSync />);
+    const card = await screen.findByTestId('notifications-denied');
+    expect(card).toBeOnTheScreen();
+    await fireEvent.press(card);
+    expect(openSettings).toHaveBeenCalled();
+    openSettings.mockRestore();
+  });
+
+  it('no card once they are allowed, or before the app ever asked', async () => {
+    notificationState.permission = { granted: true, canAskAgain: true };
+    await renderWithApp(<SettingsWithSync />);
+    await screen.findByLabelText(MORNING);
+    expect(screen.queryByTestId('notifications-denied')).toBeNull();
   });
 });
 

@@ -4,8 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
+import { Icon } from '@/components/Icon';
 import { Logo } from '@/components/Logo';
 import { APP_CONFIG } from '@/config/app-config';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 const TANZIL_URL = 'https://tanzil.net';
@@ -28,9 +30,11 @@ export function AboutScreen() {
     <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
         <View style={[styles.center, { gap: spacing.sm, paddingVertical: spacing.lg }]}>
-          <Logo size={140} />
+          <Logo size={96} />
           <AppText variant="title">{t('appName')}</AppText>
-          <AppText tone="muted">{t('about.tagline')}</AppText>
+          <AppText tone="muted" style={styles.tagline}>
+            {t('about.tagline')}
+          </AppText>
           <AppText variant="caption" tone="faint">
             {t('about.version', {
               version: Constants.expoConfig?.version ?? '',
@@ -39,8 +43,11 @@ export function AboutScreen() {
           </AppText>
         </View>
 
-        <View style={box}>
-          <AppText>{t('about.promise')}</AppText>
+        {/* The promise in a band under the logo (redesign). */}
+        <View style={[styles.band, { backgroundColor: colors.primarySoft }]}>
+          <AppText style={[styles.promise, { color: colors.primaryInk }]}>
+            {t('about.promise')}
+          </AppText>
         </View>
 
         <View style={box}>
@@ -55,9 +62,10 @@ export function AboutScreen() {
             hitSlop={8}
             style={styles.link}
           >
-            <AppText variant="label" tone="primary">
+            <AppText style={[styles.linkText, { color: colors.primaryInk }]}>
               {t('about.quranLink')}
             </AppText>
+            <Icon name="external" size={15} color={colors.primaryInk} />
           </Pressable>
           <AppText tone="muted">{t('about.audio')}</AppText>
         </View>
@@ -73,5 +81,15 @@ export function AboutScreen() {
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center' },
-  link: { alignSelf: 'flex-start' },
+  tagline: { fontSize: 14, lineHeight: 22, textAlign: 'center' },
+  band: { borderRadius: 16, paddingVertical: 12, paddingHorizontal: 14 },
+  promise: { fontFamily: UI_FONTS.medium, fontSize: 14, lineHeight: 22, textAlign: 'center' },
+  link: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    minHeight: 32,
+  },
+  linkText: { fontFamily: UI_FONTS.medium, fontSize: 13, lineHeight: 20 },
 });

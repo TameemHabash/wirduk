@@ -50,7 +50,8 @@ describe('Settings → «أدومها»', () => {
     await renderWithApp(<SettingsScreen />, undefined, { now: at(9) });
     const off = await screen.findByText('غير مفعّلة');
     // More room than measured, so its last word is not cut on a Galaxy S21+ (owner, 2026-10-30).
-    expect(StyleSheet.flatten(off.props.style)).toMatchObject({ flexGrow: 0.25, flexShrink: 0 });
+    await fireEvent(off, 'layout', { nativeEvent: { layout: { width: 70, height: 20 } } });
+    expect(StyleSheet.flatten(screen.getByText('غير مفعّلة').props.style).minWidth).toBe(76);
     await fireEvent.press(off);
     expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/settings');
     // The reminders stay in Settings while «أدومها» is off.

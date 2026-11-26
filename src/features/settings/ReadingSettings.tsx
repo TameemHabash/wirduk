@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { DhikrText } from '@/components/DhikrText';
-import { Icon } from '@/components/Icon';
+import { IconTile } from '@/components/IconTile';
 import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
 import { DHIKR_FONT_SIZE, stepFontSize } from '@/data/settings/settings';
 import { useSettings } from '@/data/settings/SettingsProvider';
-import { DHIKR_FONTS } from '@/theme/fonts';
+import { DHIKR_FONTS, UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 import { TOUCH_TARGET } from '@/theme/tokens';
 
@@ -37,7 +37,7 @@ function usePreviewText(): string | null {
 export function ReadingSettings() {
   const { t } = useTranslation();
   const { settings, update } = useSettings();
-  const { colors, radii, spacing } = useAppTheme();
+  const { colors, spacing } = useAppTheme();
   const preview = usePreviewText();
   const size = settings.dhikrFontSize;
 
@@ -52,7 +52,7 @@ export function ReadingSettings() {
         onPress={() => void update('dhikrFontSize', stepFontSize(size, direction))}
         style={[
           styles.step,
-          { borderRadius: radii.sm, backgroundColor: colors.surfaceMuted },
+          { borderRadius: 12, backgroundColor: colors.surfaceMuted },
           disabled && { opacity: 0.4 },
         ]}
       >
@@ -66,11 +66,14 @@ export function ReadingSettings() {
   return (
     <SettingsGroup title={t('settings.reading')}>
       <View style={{ padding: spacing.md, gap: spacing.sm }}>
-        <View style={styles.sizeHeader}>
-          <AppText>{t('settings.textSize')}</AppText>
-          <AppText variant="caption" tone="muted">
-            {String(size)}
-          </AppText>
+        <View style={[styles.sizeHeader, { gap: spacing.sm + 2 }]}>
+          <IconTile icon="size" />
+          <AppText style={styles.fill}>{t('settings.textSize')}</AppText>
+          <View style={[styles.badge, { backgroundColor: colors.primarySoft }]}>
+            <AppText style={[styles.badgeText, { color: colors.primaryInk }]}>
+              {String(size)}
+            </AppText>
+          </View>
         </View>
         <View style={[styles.sizeRow, { gap: spacing.sm }]}>
           {stepButton(1)}
@@ -82,7 +85,10 @@ export function ReadingSettings() {
       <RowDivider />
 
       <View style={{ paddingTop: spacing.md }}>
-        <AppText style={{ paddingHorizontal: spacing.md }}>{t('settings.font')}</AppText>
+        <View style={[styles.sizeHeader, { paddingHorizontal: spacing.md, gap: spacing.sm + 2 }]}>
+          <IconTile icon="nib" />
+          <AppText style={styles.fill}>{t('settings.font')}</AppText>
+        </View>
         <View accessibilityRole="radiogroup" style={{ paddingVertical: spacing.xs }}>
           {DHIKR_FONTS.map((font) => {
             const selected = font.id === settings.dhikrFont;
@@ -100,12 +106,16 @@ export function ReadingSettings() {
                 ]}
               >
                 <View
-                  style={[styles.radio, { borderColor: selected ? colors.primary : colors.border }]}
-                >
-                  {selected ? (
-                    <Icon name="check" size={14} color={colors.primary} strokeWidth={3} />
-                  ) : null}
-                </View>
+                  // A new view per state: the Galaxy S21+ drew a round view square after its
+                  // border changed in place (2026-11-01).
+                  key={selected ? 'on' : 'off'}
+                  style={[
+                    styles.radio,
+                    selected
+                      ? { borderColor: colors.primary, borderWidth: 7 }
+                      : { borderColor: colors.borderStrong, borderWidth: 2 },
+                  ]}
+                />
                 <AppText
                   variant="caption"
                   tone={selected ? 'primary' : 'muted'}
@@ -135,7 +145,10 @@ export function ReadingSettings() {
 }
 
 const styles = StyleSheet.create({
-  sizeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sizeHeader: { flexDirection: 'row', alignItems: 'center' },
+  fill: { flex: 1 },
+  badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 2 },
+  badgeText: { fontFamily: UI_FONTS.semibold, fontSize: 12, lineHeight: 18 },
   sizeRow: { flexDirection: 'row', alignItems: 'center' },
   step: {
     width: TOUCH_TARGET,
@@ -149,9 +162,6 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   fontName: { width: 72 },
   fontSample: { flex: 1, overflow: 'hidden' },

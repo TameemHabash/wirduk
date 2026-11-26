@@ -12,10 +12,16 @@ export function SettingsGroup({
   title,
   children,
   highlight = false,
+  before,
+  boxless = false,
 }: {
   title: string;
   children: ReactNode;
   highlight?: boolean;
+  /** Between the title and the box (e.g. the notifications card). */
+  before?: ReactNode;
+  /** The children with no box around them (e.g. the theme's segmented control). */
+  boxless?: boolean;
 }) {
   const { colors, spacing } = useAppTheme();
   return (
@@ -28,19 +34,24 @@ export function SettingsGroup({
       >
         {title}
       </AppText>
-      <View
-        style={[
-          styles.group,
-          {
-            backgroundColor: colors.surface,
-            // «أدومها» stands out in gold (redesign).
-            borderColor: highlight ? colors.accentLine : colors.border,
-            borderWidth: highlight ? 1.5 : 1,
-          },
-        ]}
-      >
-        {children}
-      </View>
+      {before}
+      {boxless ? (
+        children
+      ) : (
+        <View
+          style={[
+            styles.group,
+            {
+              backgroundColor: colors.surface,
+              // «أدومها» stands out in gold (redesign).
+              borderColor: highlight ? colors.accentLine : colors.border,
+              borderWidth: highlight ? 1.5 : 1,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      )}
     </View>
   );
 }
@@ -85,6 +96,7 @@ export function LinkRow({
   hint,
   icon,
   iconTone,
+  external = false,
   onPress,
 }: {
   label: string;
@@ -93,6 +105,8 @@ export function LinkRow({
   hint?: string;
   icon?: IconName;
   iconTone?: TileTone;
+  /** Opens outside the app (a web page): an "external" icon instead of the chevron. */
+  external?: boolean;
   onPress: () => void;
 }) {
   const { colors, spacing } = useAppTheme();
@@ -113,7 +127,7 @@ export function LinkRow({
           {value}
         </AppText>
       ) : null}
-      <Icon name="forward" size={18} color={colors.textFaint} />
+      <Icon name={external ? 'external' : 'forward'} size={18} color={colors.textFaint} />
     </Pressable>
   );
 }

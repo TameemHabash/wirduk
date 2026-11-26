@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react-native';
 
 import { APP_CONFIG } from '@/config/app-config';
+import { resources } from '@/i18n/resources';
 import { renderWithApp } from '@/test-utils/render-app';
 
 import { AboutScreen } from './AboutScreen';
@@ -10,7 +11,10 @@ describe('AboutScreen', () => {
     await renderWithApp(<AboutScreen />);
     expect(await screen.findByText(/حصن المسلم/)).toBeOnTheScreen();
     expect(screen.getByText('مصادر الأحاديث وفضلها من موقع الدرر السنية.')).toBeOnTheScreen();
+    // The owner's sentence for the audio (2026-11-25/26), with the volunteer's thanks.
+    expect(screen.getByText(resources.ar.common.about.audio)).toBeOnTheScreen();
     expect(screen.getByText(/حمد الدريهم/)).toBeOnTheScreen();
+    expect(screen.getByText(/جزاه الله خيرًا/)).toBeOnTheScreen();
     expect(screen.getByText(/SIL Open Font License/)).toBeOnTheScreen();
   });
 

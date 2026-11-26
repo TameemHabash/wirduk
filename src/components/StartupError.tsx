@@ -1,17 +1,18 @@
 import { useEffect } from 'react';
-import { Pressable } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { useTranslation } from 'react-i18next';
 
-import { useAppTheme } from '@/theme/ThemeProvider';
+import { UI_FONTS } from '@/theme/fonts';
 
 import { AppText } from './AppText';
+import { Button } from './Button';
+import { IconTile } from './IconTile';
 import { Screen } from './Screen';
 
-/** Shown when the databases cannot be opened at start (very rare). */
+/** Shown when the databases cannot be opened at start (very rare). Centered (redesign). */
 export function StartupError({ error, onRetry }: { error: Error; onRetry: () => void }) {
   const { t } = useTranslation();
-  const { colors, radii, spacing } = useAppTheme();
 
   useEffect(() => {
     void SplashScreen.hideAsync();
@@ -19,25 +20,26 @@ export function StartupError({ error, onRetry }: { error: Error; onRetry: () => 
 
   return (
     <Screen edges={['top', 'bottom']}>
-      <AppText variant="heading">{t('startupError.title')}</AppText>
-      <AppText tone="muted">{t('startupError.body')}</AppText>
-      <AppText tone="faint" variant="caption">
-        {error.message}
-      </AppText>
-      <Pressable
-        accessibilityRole="button"
-        onPress={onRetry}
-        style={{
-          backgroundColor: colors.primary,
-          borderRadius: radii.md,
-          padding: spacing.md,
-          alignItems: 'center',
-        }}
-      >
-        <AppText tone="onPrimary" variant="bodyStrong">
-          {t('common.retry')}
+      <View style={styles.center}>
+        <IconTile icon="info" tone="gold" size={56} />
+        <AppText accessibilityRole="header" style={styles.title}>
+          {t('startupError.title')}
         </AppText>
-      </Pressable>
+        <AppText tone="muted" style={styles.text}>
+          {t('startupError.body')}
+        </AppText>
+        <AppText tone="faint" variant="caption" style={styles.text}>
+          {error.message}
+        </AppText>
+        <Button title={t('common.retry')} size="small" onPress={onRetry} style={styles.button} />
+      </View>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
+  title: { fontFamily: UI_FONTS.semibold, fontSize: 19, lineHeight: 28, textAlign: 'center' },
+  text: { textAlign: 'center', alignSelf: 'stretch' },
+  button: { alignSelf: 'center' },
+});

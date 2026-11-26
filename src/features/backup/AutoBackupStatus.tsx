@@ -1,9 +1,12 @@
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { Icon } from '@/components/Icon';
+import { TextButton } from '@/components/TextButton';
 import { useToast } from '@/components/Toast';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { autoBackupKnown, autoBackupLooksOff, openBackupSettings } from './auto-backup';
@@ -38,16 +41,38 @@ export function AutoBackupStatus({
 
   return (
     <View style={{ gap: spacing.sm }}>
-      <AppText variant="caption" tone="muted">
-        {at ? t('backup.lastAuto', { date: formatBackupDate(t, at) }) : t('backup.lastAutoNever')}
-      </AppText>
-      {always || autoBackupLooksOff(at) ? (
+      <StatusLine
+        ok={!autoBackupLooksOff(at)}
+        text={
+          at ? t('backup.lastAuto', { date: formatBackupDate(t, at) }) : t('backup.lastAutoNever')
+        }
+      />
+      {always ? (
         <Button
           title={buttonTitle ?? t('backup.enableAuto')}
           kind="secondary"
           onPress={() => void enable()}
         />
+      ) : autoBackupLooksOff(at) ? (
+        <TextButton title={t('backup.enableAuto')} onPress={() => void enable()} />
       ) : null}
     </View>
   );
 }
+
+/** A backup's state in one line: a teal check when fine, gold info when not (design). */
+export function StatusLine({ ok, text }: { ok: boolean; text: string }) {
+  const { colors } = useAppTheme();
+  const color = ok ? colors.primaryInk : colors.accentInk;
+  return (
+    <View style={styles.status}>
+      <Icon name={ok ? 'check' : 'info'} size={15} color={color} strokeWidth={2.2} />
+      <AppText style={[styles.statusText, { color }]}>{text}</AppText>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  status: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  statusText: { flexShrink: 1, fontFamily: UI_FONTS.semibold, fontSize: 12, lineHeight: 19 },
+});

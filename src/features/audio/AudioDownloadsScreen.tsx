@@ -5,8 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { useDialog } from '@/components/Dialog';
+import { Icon } from '@/components/Icon';
+import { IconTile } from '@/components/IconTile';
 import { TextButton } from '@/components/TextButton';
 import { APP_CONFIG } from '@/config/app-config';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { type DownloadScope, toMegabytes } from './audio-plan';
@@ -100,20 +103,24 @@ function DownloadBox({ scope }: { scope: DownloadScope }) {
         gap: spacing.md,
       }}
     >
-      <View style={{ gap: spacing.xs }}>
-        <AppText variant="label" tone="muted">
-          {t(text.title)}
-        </AppText>
-        <AppText variant="bodyStrong">
-          {t('audio.downloads.downloaded', { done: plan.downloadedFiles, count: plan.totalFiles })}
-        </AppText>
-        <AppText tone="muted">
-          {t('audio.downloads.sizeOf', {
-            done: toMegabytes(plan.downloadedBytes),
-            total: toMegabytes(plan.totalBytes),
-          })}
-        </AppText>
+      <View style={[styles.head, { gap: spacing.sm + 2 }]}>
+        <IconTile icon="head" />
+        <View style={styles.grow}>
+          <AppText style={styles.title}>{t(text.title)}</AppText>
+          <AppText variant="caption" tone="muted">
+            {t('audio.downloads.downloaded', {
+              done: plan.downloadedFiles,
+              count: plan.totalFiles,
+            })}
+          </AppText>
+        </View>
       </View>
+      <AppText tone="muted" style={styles.size}>
+        {t('audio.downloads.sizeOf', {
+          done: toMegabytes(plan.downloadedBytes),
+          total: toMegabytes(plan.totalBytes),
+        })}
+      </AppText>
 
       {running ? (
         <View style={{ gap: spacing.sm }}>
@@ -149,7 +156,10 @@ function DownloadBox({ scope }: { scope: DownloadScope }) {
           />
         </View>
       ) : plan.missing.length === 0 && plan.totalFiles > 0 ? (
-        <AppText tone="primary">{t(text.allDone)}</AppText>
+        <View style={[styles.head, { gap: spacing.xs + 2 }]}>
+          <Icon name="done" size={18} color={colors.primaryInk} />
+          <AppText style={[styles.grow, { color: colors.primaryInk }]}>{t(text.allDone)}</AppText>
+        </View>
       ) : (
         <Button
           title={
@@ -176,6 +186,10 @@ function DownloadBox({ scope }: { scope: DownloadScope }) {
 }
 
 const styles = StyleSheet.create({
+  head: { flexDirection: 'row', alignItems: 'center' },
+  grow: { flex: 1 },
+  title: { fontFamily: UI_FONTS.semibold, fontSize: 15, lineHeight: 22 },
+  size: { fontSize: 14, lineHeight: 22 },
   track: { height: 8, overflow: 'hidden' },
   fill: { height: '100%' },
 });

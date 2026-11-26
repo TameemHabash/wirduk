@@ -38,7 +38,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | R2 | Redesign: three tabs, Home, the Adhkar tab (search, reorder), own adhkar editors | 🟢 Done | one commit 2026-11-26 |
 | R3 | Redesign: the reader (fadl, «المصدر», long text), the restore toast, the finish screen | 🟢 Done | one commit 2026-11-26 |
 | R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | 🟢 Done | one commit 2026-11-26 |
-| R5 | Redesign: Settings (notifications card) and the other screens | Not started | |
+| R5 | Redesign: Settings (notifications card) and the other screens | 🟢 Done | one commit 2026-11-26 |
 | R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | Not started | |
 | 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
@@ -227,6 +227,21 @@ R4, done (2026-11-26):
 - Claude's choices (for the owner to know): «لم أقطعها بعد» is not on the finished path;
   «تغيير الترتيب» waits until a step put back is saved; a step put back needs its full weeks
   when reached again (not the one week of a climb back).
+
+R5, done (2026-11-26):
+
+- Settings: «أدومها» first in a gold card («مفعّلة» / «غير مفعّلة»); every row with an icon
+  tile; the text size with its value as a badge; the dhikr fonts as lines (a ring for the one
+  chosen); the theme as a small segmented control with icons and no box; the reminders with a
+  tile, the time in a chip; the backup with status lines (a teal check, or gold info) and the
+  "enable" link; «سياسة الخصوصية» with an "external" icon.
+- New: a lasting gold card above the reminder rows while notifications are not allowed
+  (`features/reminders/NotificationsDeniedCard.tsx`; Settings and «أدومها» settings), checked
+  again when the screen shows and when the app comes back; a tap opens the app's page in the
+  phone settings. Not shown before the app ever asked.
+- About: the promise in a teal band under the logo; the new audio line (the owner's sentence);
+  the Tanzil link with an "external" icon. Audio downloads: a tile and the count, then the size;
+  the red text button to delete. The startup error centered with a gold tile.
 
 ## Owner feedback 2026-11-14 («أدومها»)
 

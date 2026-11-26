@@ -3,11 +3,14 @@ import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/AppText';
+import { IconTile } from '@/components/IconTile';
 import { useToast } from '@/components/Toast';
 import type { ReminderSetting } from '@/data/settings/settings';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { displayTime, formatTime, parseTime } from '@/features/reminders/reminder-time';
+import { NotificationsDeniedCard } from '@/features/reminders/NotificationsDeniedCard';
 import { type ReminderKind, ensurePermission } from '@/features/reminders/reminders';
+import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { RowDivider, SettingsGroup } from './SettingsParts';
@@ -28,17 +31,20 @@ export function ReminderSettings({
   const { t } = useTranslation();
   const { spacing } = useAppTheme();
   return (
-    <SettingsGroup title={title ?? t('settings.reminders')}>
-      <ReminderRow kind="morning" name={names?.morning} />
-      <RowDivider />
-      <ReminderRow kind="evening" name={names?.evening} />
-      <RowDivider />
-      <View style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.sm }}>
-        <AppText variant="caption" tone="muted">
-          {t('settings.remindersHint')}
-        </AppText>
-      </View>
-    </SettingsGroup>
+    <View style={{ gap: spacing.sm }}>
+      <SettingsGroup
+        title={title ?? t('settings.reminders')}
+        // While notifications are not allowed: a lasting card (owner, 2026-11-25).
+        before={<NotificationsDeniedCard />}
+      >
+        <ReminderRow kind="morning" name={names?.morning} />
+        <RowDivider />
+        <ReminderRow kind="evening" name={names?.evening} />
+      </SettingsGroup>
+      <AppText variant="caption" tone="muted" style={{ paddingHorizontal: spacing.xs + 2 }}>
+        {t('settings.remindersHint')}
+      </AppText>
+    </View>
   );
 }
 
@@ -81,35 +87,45 @@ function ReminderRow({ kind, name }: { kind: ReminderKind; name?: string }) {
 
   return (
     <View
-      style={[styles.row, { paddingHorizontal: spacing.lg, gap: spacing.md, paddingVertical: 4 }]}
+      style={[
+        styles.row,
+        { paddingHorizontal: spacing.lg - 2, gap: spacing.md, paddingVertical: 4 },
+      ]}
     >
-      <View style={styles.label}>
-        <AppText>{label}</AppText>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('settings.changeTime', { name: label, time })}
-          onPress={pickTime}
-          hitSlop={8}
-          style={({ pressed }) => [styles.time, pressed && { opacity: 0.6 }]}
-        >
-          <AppText variant="label" tone="primary">
-            {time}
-          </AppText>
-        </Pressable>
-      </View>
+      <IconTile
+        icon={kind === 'morning' ? 'sun' : 'moon'}
+        tone={kind === 'morning' ? 'gold' : 'primary'}
+      />
+      <AppText style={styles.label}>{label}</AppText>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('settings.changeTime', { name: label, time })}
+        onPress={pickTime}
+        hitSlop={6}
+        style={({ pressed }) => [
+          styles.time,
+          { backgroundColor: colors.surfaceMuted },
+          pressed && { opacity: 0.6 },
+        ]}
+      >
+        <AppText key={time} roomy style={styles.timeText}>
+          {time}
+        </AppText>
+      </Pressable>
       <Switch
         value={reminder.enabled}
         onValueChange={(v) => void onToggle(v)}
         accessibilityLabel={label}
-        trackColor={{ false: colors.border, true: colors.primary }}
-        thumbColor={colors.surface}
+        trackColor={{ false: colors.borderStrong, true: colors.primary }}
+        thumbColor={colors.knob}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', minHeight: 64 },
-  label: { flex: 1, alignItems: 'flex-start' },
-  time: { paddingVertical: 4 },
+  row: { flexDirection: 'row', alignItems: 'center', minHeight: 60 },
+  label: { flex: 1 },
+  time: { borderRadius: 10, paddingVertical: 6, paddingHorizontal: 12 },
+  timeText: { fontFamily: UI_FONTS.semibold, fontSize: 15, lineHeight: 22 },
 });
