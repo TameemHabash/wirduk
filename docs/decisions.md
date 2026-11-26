@@ -412,6 +412,84 @@ Claude's choices (in the approved design):
 - The sheet scrolls now (it is taller; small screens, big fonts), and keeps clear of the status
   and navigation bars. Checked on the emulator with the system font at 1.0, 1.3 and 2.0.
 
+## 2026-11-22 to 2026-11-26 — Redesign
+
+The owner asked for a full new design of every screen, as an HTML page to approve before any code
+change. Six versions; the owner approved version 6 on 2026-11-26
+(https://claude.ai/artifact/A735PFQGu1BP5D1eevRuLJ) and answered the last question the same day
+(5.3, below). The owner's words in the app (e.g. «الرئيسية», «عرض أقل») are cut from their
+messages by script, never typed.
+
+The look:
+
+| Topic | Decision |
+|---|---|
+| Colors | The same family as the logo (teal, gold, cream), a little deeper; new tokens for small gold text, the toast, a soft red, and the golden morning and evening cards. Every text pair passes WCAG AA. |
+| Rings and beads | Clockwise from the top in Arabic; counterclockwise later in left-to-right languages (owner). The reader's counter stays a ring; beads only for «مساري» and the finish screen (owner). |
+| Dialogs | An in-app dialog instead of Android's: an icon, the title, the text, then big full-width buttons, the action on top (red for a delete), cancel below (owner asked for clearer buttons). For "discard changes" the safe button is the filled one. |
+| Toast | A light floating card with an icon (owner: the old one did not look good). |
+| A chapter name in a sentence | No «», bold and in teal (owner): the finish screen, the delete-chapter dialog, and the search with no results (5.3, owner: "yes"). |
+
+Tabs and Home:
+
+| Topic | Decision |
+|---|---|
+| Tabs | Three: «الرئيسية» (the owner's word), «الأذكار», «الإعدادات». |
+| Home | One golden card for the current period (the other period is a small row); with «أدومها» on, «وردك اليوم» in its place, golden too (owner). Favorites as tiles. The category list moves to the Adhkar tab. |
+| The «أدومها» badge | «ابنِ وردك خطوةً خطوة» with an arrow (owner's choice), while «أدومها» is off. |
+| «أذكاري» | First in the Adhkar tab and bigger: about 2.5 chapters show (owner). |
+| Search box | Keeps its color while typing (owner). |
+| Reorder | A «حفظ» button like the editors (owner); the order is saved only on «حفظ» (owner: OK). |
+| Dhikr editor | The count: tap the number and type it, or + and − (owner). «تسجيل بصوتي» and «اختيار ملف صوتي» hide once there is audio (owner). |
+
+Reader:
+
+| Topic | Decision |
+|---|---|
+| The text | On the page, no card behind it; a long dhikr has no background, its end fades only while more text is below (owner). The fadl and source come at the end of a long dhikr (owner). |
+| Fadl | Option «ب» (owner): a small gold eight-point star and the text in a quiet color, no label, no box. |
+| Source | Folded under a borderless «المصدر» line (owner); a tap counts like any tap and opens it (owner: "correct"). It folds again on the next dhikr. |
+| Own adhkar | The «أذكاري» badge first, then the gold line, on one row (owner). |
+| Landscape | The progress segments are back (owner). |
+| Restore toast | Its arrow opens Settings at «المتابعة من حيث توقفت», the row highlighted (owner, new). |
+
+«أدومها»:
+
+| Topic | Decision |
+|---|---|
+| Hadith card | No ornament above it anywhere (owner). |
+| Setup 2 | «الخطوة N» centered between + and −, the step's words under it (owner). |
+| Setup 3 and settings | «عرض أقل» with an up arrow (owner's words). |
+| After a ward | A hadith's source folds under «المصدر» (no counting here); a verse stays as it is (owner). |
+| «مساري» | A bead path instead of the ring (owner). No «افتح ورد…» button (owner). «أنهِ الاستراحة وعُد» stays (owner). |
+| The two rows | «خفّف وردك أو خذ استراحة» (new title, owner's choice) and «عدّل الخطة» (kept, owner), each with a note, in «مساري» and in «أدومها» settings. |
+| Step back | «نصف الخطوة» and «الخطوات الأولى» are removed from the app (owner: «ارجع إلى الخطوة» covers both). Old event logs with them still load. |
+| Plan save confirm | «أبقِ الخطة كما كانت» is the main button; «نعم، احفظ التعديل» the quietest (owner). |
+| «لم أقطعها بعد» | New (owner's idea and word): a step done goes back to the plan, right after the current step. |
+| «خطوتك الآن» | Keeps «قطعتُها» (owner). |
+
+Settings and the rest:
+
+| Topic | Decision |
+|---|---|
+| «أدومها» card | First in Settings, gold (owner: "excellent"). |
+| Dhikr fonts | Lines, as before, not boxes (owner). |
+| Theme | Smaller, an icon for each choice (owner). |
+| Notifications not allowed | A lasting card in Settings and «أدومها» settings (owner, new). |
+| Report | All the details still sent (owner). |
+| About | «التسجيلات الصوتية بصوت حمد الدريهم، وأذكار الصباح والمساء بصوت أخٍ متطوّع، جزاه الله خيرًا.» (the owner's sentence; Claude's words for «سري»; the owner chose «جزاه الله خيرًا»). |
+
+Claude's choices in the approved design (for the owner to know):
+
+- New interface words: «ابدأ» (the card's button), the empty favorites hint, the notes under the
+  two «مساري» rows, «الخطوات N–M» (the steps done, folded).
+- «لم أقطعها بعد»: not on the current step or the opening step; saved with «حفظ التعديل» after the
+  usual warning; «تراجع» undoes it before saving; the step's past days are kept (as other step
+  moves keep history).
+- Radii: buttons 16, cards 22, the big card, sheets and dialogs 28. Touch targets 48.
+- The plan save confirm keeps the hadith card inside the dialog.
+- Fonts, logo, app icon, splash, content and every «أدومها» rule stay the same.
+
 ## Technical choices (milestone 0–1)
 
 | Topic | Choice | Why |

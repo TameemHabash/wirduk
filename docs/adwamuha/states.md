@@ -36,7 +36,7 @@ Each state below is reached in a test, and what the app decides and shows there 
 | «أبقِني أسبوعًا آخر» | The user waits | Asked again 7 days later | `plan-walk`, `scenarios` |
 | Not opened for weeks | The app opens after a long gap | Nothing added; the good weeks before stay | `scenarios` (not opened) |
 | The gentle suggestion | 2 full weeks short | «طرأ عليّ ظرف» offered; then 14 days quiet | `plan-walk`, `scenarios`, `stepback-plan.test.tsx` |
-| Step back (half / first three) | «طرأ عليّ ظرف» | A word; reached steps a week each | `scenarios`, `stepback-plan.test.tsx` |
+| Step back (half / first three) | «طرأ عليّ ظرف» | A word; reached steps a week each. **To remove in the redesign (R4, owner 2026-11-25)**: «ارجع إلى الخطوة» covers both; old event logs with them must still load | `scenarios`, `stepback-plan.test.tsx` |
 | Step back to a picked step (2026-11-22) | «طرأ عليّ ظرف» → «ارجع إلى الخطوة:», − and + (1 to the step before the current one; one back to begin with), then «ارجع إلى الخطوة N» | As a step back: a word; reached steps a week each. Shows the step's first words and «…», or the owner's name (steps 4 and 5). None on step 1 | `progress.test.ts`, `stepback-plan.test.tsx` |
 | A break (1 or 2 weeks) | «طرأ عليّ ظرف» → break | A line in the grid, the bars faded; «أنهِ الاستراحة»; a week it cut still counts with 4 + 4 | `scenarios` (break, two cases), `stepback-plan.test.tsx`, `progress-screens.test.tsx` |
 | The ward read in parts | Leave the ward, open it again in its window | It goes on at the first dhikr not read; fresh in the next window; cleared once finished | `WardScreen.test.tsx`, `adwamuha-repository.test.ts`, `ward-progress.test.ts` |
@@ -48,6 +48,7 @@ Each state below is reached in a test, and what the app decides and shows there 
 | The last step done | Step 24, the rule met | «وضع المحافظة», the end word with its offer, its tip; no question | `plan-walk`, `scenarios` (end), `messages.test.tsx` |
 | The plan edited | «عدّل الخطة» | The step stays; the ward follows; reset keeps the steps done | `scenarios`, `stepback-plan.test.tsx`, `plan-edit.test.ts` |
 | A step marked «قطعتها» (2026-11-22) | «عدّل الخطة», the current step or a later one, saved after the warning | It joins the steps done (the ward has it at once); the current step moves on by one per mark. Only later steps marked: the same step goes on (its days, weeks and week word kept). The current one marked: the next begins today. One step at least stays | `plan-edit.test.ts`, `stepback-plan.test.tsx` |
+| A step done put back, «لم أقطعها بعد» (redesign R4, to build) | «عدّل الخطة», a step done (not the opening step), saved after the warning | It comes right after the current step (the next step); its dhikr leaves the ward at once; «تراجع» undoes it before saving; its past days are kept | (R4) |
 | Ward times changed | «أوقات الورد» | The windows move | `sessions.test.ts`, `settings-reminders.test.tsx` |
 | Ward order | «ترتيب الورد» (setup 3, settings) | The same adhkar, another order | `ward.test.ts`, `WardScreen.test.tsx`, `setup.test.tsx` |
 | Week start changed | «بداية الأسبوع» (any of 4, mid-week) | Grid and bars from that day; no repeated word | `settings-reminders.test.tsx`, `messages.test.tsx`, `weeks.test.ts` |

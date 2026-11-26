@@ -1,6 +1,6 @@
 # Project status and next steps
 
-Last updated: 2026-11-22. Read this first when you come back to the project.
+Last updated: 2026-11-26. Read this first when you come back to the project.
 Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 
 ## Milestones
@@ -34,7 +34,13 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | — | Owner feedback 2026-11-21: no message repeats before all of its kind were shown (after a ward and on Home); a ward never opens outside its time (also from a reminder); Home's messages back as before | 🟢 Done | 4e6afd0, one commit 2026-11-21 |
 | — | Owner feedback 2026-11-22 («عدّل الخطة»): «قطعتها» marks a step as passed (saved after the warning); steps 4 and 5 by the owner's names | 🟢 Done | b106530, be45c3f |
 | — | Owner feedback 2026-11-22 (2) («طرأ عليّ ظرف»): «ارجع إلى الخطوة:», a step picked with − and + (design approved first) | 🟢 Done | one commit 2026-11-22 |
-| 14 | Google Play | Not started | |
+| R1 | Redesign: the look (colors, icons, buttons, rows, the in-app dialog, the toast, the ring) | Not started | |
+| R2 | Redesign: three tabs, Home, the Adhkar tab (search, reorder), own adhkar editors | Not started | |
+| R3 | Redesign: the reader (fadl, «المصدر», long text), the restore toast, the finish screen | Not started | |
+| R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | Not started | |
+| R5 | Redesign: Settings (notifications card) and the other screens | Not started | |
+| R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | Not started | |
+| 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
 The commit ids above (and any from before 2026-11-01) are in the private archive
@@ -106,6 +112,37 @@ Before that, nothing (2026-11-01). The old items, all closed:
 The owner feedback of 2026-11-01 («مساري»'s square dot, "continue where I stopped" after the
 audio, the second ward's finish screen) was checked by the owner on both phones with the APK of
 eecb345 (2026-11-01): all good.
+
+## Redesign (R1–R6)
+
+The owner asked for a full new design (2026-11-22), saw it as an HTML page, asked for changes six
+times, and **approved version 6 on 2026-11-26**: https://claude.ai/artifact/A735PFQGu1BP5D1eevRuLJ
+(25 screens, every state in its own phone at the Galaxy S21+ size; its last section «الخلاصة
+والخطة» is the plan and the test plan in Arabic). The decisions: `docs/decisions.md`
+("2026-11-22 to 2026-11-26 — Redesign"). The page source and the full plan in English with the
+files to change are on the owner's PC only (`.local/redesign/`, not in git).
+
+Built step by step; after each step: `npm run verify`, commit, push, report.
+
+1. **R1 The look**: the new colors (same family as the logo), radii, the new icon set, the
+   button kinds, rows with icon tiles, a segmented control with icons, the in-app dialog instead
+   of Android's dialog (10 places), the new toast, the ring clockwise in Arabic.
+2. **R2 Tabs, Home, the Adhkar tab**: three tabs («الرئيسية», «الأذكار», «الإعدادات»); Home with the
+   golden card of the current period (or «وردك اليوم»), favorites as tiles; the Adhkar tab with a
+   search box on top, «أذكاري» first, the list, reorder saved only with «حفظ»; the dhikr editor's
+   count as a number field and its audio buttons hidden once there is audio.
+3. **R3 Reader**: no card border, the fadl with a small gold star (option «ب»), the source folded
+   under «المصدر» (a tap counts and opens it), the long-text fade, segments in landscape; the
+   restore toast opens Settings at «المتابعة من حيث توقفت»; the finish screen's beads clockwise.
+4. **R4 «أدومها»**: no ornaments on the hadith card, «عرض أقل», the hadith source folded after a
+   ward, «مساري»'s bead path, no «افتح ورد…» button, «خفّف وردك أو خذ استراحة»; the step-back sheet
+   without «نصف الخطوة» and «الخطوات الأولى»; the plan editor's steps done folded and the new «لم
+   أقطعها بعد».
+5. **R5 Settings and the rest**: icon tiles, fonts as lines, the theme as icons, the
+   notifications-not-allowed card, audio downloads, report, about (the new audio line), startup
+   error.
+6. **R6 Checks**: contrast and dark-mode tests, the largest font, an emulator pass of every screen
+   against the design page.
 
 ## Owner feedback 2026-11-14 («أدومها»)
 
