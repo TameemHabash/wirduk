@@ -10,7 +10,8 @@ import { Button } from '@/components/Button';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { counterStore } from '@/features/counter/counter-store';
 import { haptics } from '@/features/feedback/haptics';
-import { DISPLAY_FONT } from '@/theme/fonts';
+import { NAME_MARK, aroundName } from '@/i18n/around-name';
+import { DISPLAY_FONT, UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { BeadCircle } from './BeadCircle';
@@ -33,6 +34,7 @@ export function CompletionScreen() {
   }, [settings.completionVibration]);
 
   const title = state.status === 'ready' ? state.category.title : '';
+  const subtitle = aroundName(t('completion.subtitle', { title: NAME_MARK }));
 
   // The reader already resets on leaving; doing it here too keeps both buttons
   // right even if a reader of this category is still open below.
@@ -62,8 +64,11 @@ export function CompletionScreen() {
             <Text style={[styles.blessing, { color: colors.text }]}>{t('completion.line2')}</Text>
           </View>
           {title ? (
-            <AppText tone="muted" style={styles.centerText}>
-              {t('completion.subtitle', { title })}
+            // The chapter's name bold and teal, no «» (owner, 2026-11-25).
+            <AppText tone="muted" style={styles.subtitle}>
+              {subtitle[0]}
+              <AppText style={[styles.name, { color: colors.primaryInk }]}>{title}</AppText>
+              {subtitle[1]}
             </AppText>
           ) : null}
           <View style={[styles.actions, { gap: spacing.md, marginTop: spacing.md }]}>
@@ -80,7 +85,8 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   grow: { flexGrow: 1 },
   center: { alignItems: 'center', justifyContent: 'center' },
-  centerText: { textAlign: 'center' },
-  blessing: { fontFamily: DISPLAY_FONT, fontSize: 32, lineHeight: 60, textAlign: 'center' },
+  subtitle: { textAlign: 'center', fontSize: 15, lineHeight: 24 },
+  name: { fontFamily: UI_FONTS.semibold, fontSize: 15 },
+  blessing: { fontFamily: DISPLAY_FONT, fontSize: 36, lineHeight: 58, textAlign: 'center' },
   actions: { alignSelf: 'stretch', maxWidth: 360, width: '100%', marginHorizontal: 'auto' },
 });

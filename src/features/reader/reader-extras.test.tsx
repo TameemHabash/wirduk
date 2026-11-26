@@ -48,22 +48,41 @@ function inBackground() {
   };
 }
 
+/** A tap on a part of the page that has its own gesture («المصدر», the Dorar link). */
+const tapGesture = (testId: string) =>
+  act(async () =>
+    fireGestureHandler(getByGestureTestId(testId), [
+      { state: State.BEGAN },
+      { state: State.ACTIVE },
+      { state: State.END },
+    ]),
+  );
+
+describe('Reader — «المصدر» folded', () => {
+  it('a tap on «المصدر» counts like any tap and opens it (owner, 2026-11-26)', async () => {
+    await open(1017);
+    expect(screen.queryByText(/^المصدر:/)).toBeNull();
+    await tapGesture('source-fold');
+    expect(counter().props.accessibilityLabel).toBe('تم 1 من 100');
+    expect(screen.getByText(/^المصدر:/)).toBeOnTheScreen();
+    // Another tap closes it, and counts too.
+    await tapGesture('source-fold');
+    expect(counter().props.accessibilityLabel).toBe('تم 2 من 100');
+    expect(screen.queryByText(/^المصدر:/)).toBeNull();
+  });
+});
+
 describe('Reader — "عرض في الدرر السنية"', () => {
   it('counts the tap, and a toast opens Dorar', async () => {
     const openUrl = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
     await open(1017); // سبحان الله وبحمده: 100 times, with a Dorar source
-    await act(async () =>
-      fireGestureHandler(getByGestureTestId('dorar-link'), [
-        { state: State.BEGAN },
-        { state: State.ACTIVE },
-        { state: State.END },
-      ]),
-    );
-    expect(counter().props.accessibilityLabel).toBe('تم 1 من 100');
+    await tapGesture('source-fold'); // the link is inside «المصدر»
+    await tapGesture('dorar-link');
+    expect(counter().props.accessibilityLabel).toBe('تم 2 من 100');
     expect(openUrl).not.toHaveBeenCalled();
     // Counting goes on while the toast is shown.
     await tap();
-    expect(counter().props.accessibilityLabel).toBe('تم 2 من 100');
+    expect(counter().props.accessibilityLabel).toBe('تم 3 من 100');
     await fireEvent.press(screen.getByText(DORAR_TOAST));
     expect(openUrl).toHaveBeenCalledWith(expect.stringMatching(/^https:\/\/dorar\.net\//));
     expect(screen.queryByText(DORAR_TOAST)).toBeNull();

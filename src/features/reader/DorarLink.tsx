@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 import { AppText } from '@/components/AppText';
+import { Icon } from '@/components/Icon';
+import { UI_FONTS } from '@/theme/fonts';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { ReaderActionsContext } from './reader-actions';
 
@@ -15,6 +18,7 @@ import { ReaderActionsContext } from './reader-actions';
  */
 export function DorarLink({ url }: { url: string }) {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const reader = useContext(ReaderActionsContext);
   const open = () => void Linking.openURL(url);
   const tap = useMemo(
@@ -34,6 +38,7 @@ export function DorarLink({ url }: { url: string }) {
       <View
         accessible
         accessibilityRole="link"
+        accessibilityLabel={t('reader.openOnDorar')}
         accessibilityActions={[{ name: 'activate' }]}
         onAccessibilityAction={(e) => {
           if (e.nativeEvent.actionName === 'activate') open();
@@ -41,14 +46,16 @@ export function DorarLink({ url }: { url: string }) {
         hitSlop={8}
         style={styles.link}
       >
-        <AppText variant="caption" tone="primary">
+        <AppText style={[styles.text, { color: colors.primaryInk }]}>
           {t('reader.openOnDorar')}
         </AppText>
+        <Icon name="external" size={15} color={colors.primaryInk} />
       </View>
     </GestureDetector>
   );
 }
 
 const styles = StyleSheet.create({
-  link: { alignSelf: 'flex-start' },
+  link: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4, minHeight: 32 },
+  text: { fontFamily: UI_FONTS.medium, fontSize: 13, lineHeight: 20 },
 });

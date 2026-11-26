@@ -78,7 +78,9 @@ export function useSessionRestore(): void {
       toast.show({
         message: t('settings.restored'),
         icon: 'history',
-        onPress: () => router.push('/settings'),
+        // Settings at «المتابعة من حيث توقفت», the row lit for a moment (owner, 2026-11-26).
+        onPress: () =>
+          router.navigate({ pathname: '/settings', params: { focus: 'restoreSession' } }),
         durationMs: RESTORED_TOAST_MS,
       });
     };

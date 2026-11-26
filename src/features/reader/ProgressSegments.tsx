@@ -52,7 +52,7 @@ export function ProgressSegments({ complete, current }: Props) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 3 },
-  segment: { flex: 1, height: 3, borderRadius: 2 },
-  bar: { height: 3, borderRadius: 2, overflow: 'hidden' },
-  fill: { height: 3 },
+  segment: { flex: 1, height: 4, borderRadius: 2 },
+  bar: { height: 4, borderRadius: 2, overflow: 'hidden' },
+  fill: { height: 4 },
 });

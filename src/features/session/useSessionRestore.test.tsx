@@ -41,7 +41,10 @@ describe('Continue where I stopped — app start', () => {
     expect(await repos.session.load()).toBeNull(); // used once
     // The toast leads to the setting.
     await fireEvent.press(screen.getByText(RESTORED));
-    expect(mockRouter.push).toHaveBeenLastCalledWith('/settings');
+    expect(mockRouter.navigate).toHaveBeenLastCalledWith({
+      pathname: '/settings',
+      params: { focus: 'restoreSession' },
+    });
   });
 
   it('starts fresh after more than 5 hours', async () => {

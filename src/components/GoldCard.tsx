@@ -27,26 +27,29 @@ export function GoldCard({
   const to = period === 'morning' ? colors.morningTo : colors.eveningTo;
   return (
     <View style={[styles.card, { borderColor: colors.accentLine, backgroundColor: to }, style]}>
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
-        <Defs>
-          <LinearGradient id={`g${id}`} x1="0.3" y1="0" x2="0.7" y2="1">
-            <Stop offset="0" stopColor={from} />
-            <Stop offset="0.72" stopColor={to} />
-          </LinearGradient>
-          <Pattern id={`p${id}`} width="44" height="44" patternUnits="userSpaceOnUse">
-            <G fill="none" stroke={colors.accent} strokeWidth="1.1" opacity="0.13">
-              <Rect x="13" y="13" width="18" height="18" />
-              <Path d="M22 9.27 34.73 22 22 34.73 9.27 22z" />
-              <Circle cx="0" cy="0" r="5" />
-              <Circle cx="44" cy="0" r="5" />
-              <Circle cx="0" cy="44" r="5" />
-              <Circle cx="44" cy="44" r="5" />
-            </G>
-          </Pattern>
-        </Defs>
-        <Rect width="100%" height="100%" fill={`url(#g${id})`} />
-        <Rect width="100%" height="100%" fill={`url(#p${id})`} />
-      </Svg>
+      {/* In its own layer: a size of 100% on the card itself would leave out its padding. */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <Svg width="100%" height="100%">
+          <Defs>
+            <LinearGradient id={`g${id}`} x1="0.3" y1="0" x2="0.7" y2="1">
+              <Stop offset="0" stopColor={from} />
+              <Stop offset="0.72" stopColor={to} />
+            </LinearGradient>
+            <Pattern id={`p${id}`} width="44" height="44" patternUnits="userSpaceOnUse">
+              <G fill="none" stroke={colors.accent} strokeWidth="1.1" opacity="0.13">
+                <Rect x="13" y="13" width="18" height="18" />
+                <Path d="M22 9.27 34.73 22 22 34.73 9.27 22z" />
+                <Circle cx="0" cy="0" r="5" />
+                <Circle cx="44" cy="0" r="5" />
+                <Circle cx="0" cy="44" r="5" />
+                <Circle cx="44" cy="44" r="5" />
+              </G>
+            </Pattern>
+          </Defs>
+          <Rect width="100%" height="100%" fill={`url(#g${id})`} />
+          <Rect width="100%" height="100%" fill={`url(#p${id})`} />
+        </Svg>
+      </View>
       {sky ? <Sky period={period} /> : null}
       {children}
     </View>

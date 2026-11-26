@@ -74,7 +74,11 @@ export function TabBar({ state, navigation }: Pick<BottomTabBarProps, 'state' | 
             onPress={onPress}
             style={styles.tab}
           >
-            <View style={[styles.pill, selected && { backgroundColor: colors.primarySoft }]}>
+            <View
+              // A new view when selected: Android drew it square after its fill changed in place.
+              key={selected ? 'on' : 'off'}
+              style={[styles.pill, selected && { backgroundColor: colors.primarySoft }]}
+            >
               <Icon name={tab.icon} size={22} color={color} />
             </View>
             <AppText

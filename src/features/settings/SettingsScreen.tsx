@@ -1,5 +1,6 @@
-import { Linking, ScrollView, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { Linking, ScrollView, StyleSheet, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -30,10 +31,33 @@ export function SettingsScreen() {
   const audio = useAudioStatus();
   const adwamuhaOn = useAdwamuha().enabled;
 
+  // ?focus=restoreSession (the restore toast's arrow): scroll to that row and light it for a
+  // few seconds (owner, 2026-11-26).
+  const { focus } = useLocalSearchParams<{ focus?: string }>();
+  const scroll = useRef<ScrollView>(null);
+  const readingY = useRef(0);
+  const [lit, setLit] = useState(false);
+  useEffect(() => {
+    if (focus !== 'restoreSession') return;
+    router.setParams({ focus: '' });
+    const show = setTimeout(() => {
+      scroll.current?.scrollTo({ y: Math.max(0, readingY.current - 12), animated: true });
+      setLit(true);
+    }, 250);
+    const hide = setTimeout(() => setLit(false), 250 + FOCUS_MS);
+    return () => {
+      clearTimeout(show);
+      clearTimeout(hide);
+    };
+  }, [focus, router]);
+
   return (
     // A tab (redesign): its own large title, no header.
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingTop: 0, gap: spacing.xl }}>
+      <ScrollView
+        ref={scroll}
+        contentContainerStyle={{ padding: spacing.lg, paddingTop: 0, gap: spacing.xl }}
+      >
         <AppText accessibilityRole="header" style={styles.largeTitle}>
           {t('settings.title')}
         </AppText>
@@ -42,24 +66,27 @@ export function SettingsScreen() {
 
         <ReadingSettings />
 
-        <SettingsGroup title={t('settings.whileReading')}>
-          <ToggleRow
-            label={t('settings.keepScreenOn')}
-            value={settings.keepScreenOn}
-            onChange={(v) => void update('keepScreenOn', v)}
-          />
-          <RowDivider />
-          <ToggleRow
-            label={t('settings.restoreSession')}
-            hint={t('settings.restoreSessionHint')}
-            value={settings.restoreSession}
-            onChange={(v) => {
-              void update('restoreSession', v);
-              // Off: forget a state saved earlier, so it is never restored.
-              if (!v) void session.clear().catch(() => undefined);
-            }}
-          />
-        </SettingsGroup>
+        <View onLayout={(e) => (readingY.current = e.nativeEvent.layout.y)}>
+          <SettingsGroup title={t('settings.whileReading')}>
+            <ToggleRow
+              label={t('settings.keepScreenOn')}
+              value={settings.keepScreenOn}
+              onChange={(v) => void update('keepScreenOn', v)}
+            />
+            <RowDivider />
+            <ToggleRow
+              label={t('settings.restoreSession')}
+              hint={t('settings.restoreSessionHint')}
+              value={settings.restoreSession}
+              highlight={lit}
+              onChange={(v) => {
+                void update('restoreSession', v);
+                // Off: forget a state saved earlier, so it is never restored.
+                if (!v) void session.clear().catch(() => undefined);
+              }}
+            />
+          </SettingsGroup>
+        </View>
 
         {adwamuhaOn ? null : <ReminderSettings />}
 
@@ -148,6 +175,9 @@ export function SettingsScreen() {
     </SafeAreaView>
   );
 }
+
+/** How long the row stays lit. */
+export const FOCUS_MS = 3000;
 
 const styles = StyleSheet.create({
   largeTitle: { fontFamily: UI_FONTS.semibold, fontSize: 28, lineHeight: 40, paddingTop: 8 },

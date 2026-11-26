@@ -92,7 +92,7 @@ function ReaderHeader({ category, onReset }: { category: Category; onReset?: () 
   return (
     <View style={[styles.header, { paddingHorizontal: spacing.xs }]}>
       <IconButton icon="back" label={t('common.back')} onPress={() => router.back()} />
-      <AppText variant="heading" numberOfLines={1} style={styles.title} accessibilityRole="header">
+      <AppText numberOfLines={1} style={styles.title} accessibilityRole="header">
         {category.title}
       </AppText>
       {category.custom && (
@@ -371,7 +371,10 @@ export function Reader({
     },
     [onTap, t, toast],
   );
-  const readerActions = useMemo(() => ({ onDorarPress }), [onDorarPress]);
+  const readerActions = useMemo(
+    () => ({ onDorarPress, onSourcePress: onTap }),
+    [onDorarPress, onTap],
+  );
 
   // Landscape: the text and the counter side by side.
   const { width, height } = useWindowDimensions();
@@ -428,8 +431,16 @@ export function Reader({
           <ProgressSegments complete={complete} current={index} />
           <View style={styles.meta}>
             <View>
-              <AppText variant="caption" tone="muted">
-                {t('reader.position', { current: index + 1, total: adhkar.length })}
+              <AppText
+                tone="muted"
+                style={styles.position}
+                accessibilityLabel={t('reader.position', {
+                  current: index + 1,
+                  total: adhkar.length,
+                })}
+              >
+                <AppText style={styles.positionNow}>{String(index + 1)}</AppText>{' '}
+                {t('reader.of', { total: adhkar.length })}
               </AppText>
               {/* When the audio counts, the counter already shows the progress. */}
               {!audioCounts &&
@@ -496,9 +507,9 @@ export function Reader({
                 audio.onShow(adhkar[i]!.id);
               }}
             >
-              {adhkar.map((d) => (
+              {adhkar.map((d, i) => (
                 <View key={d.id} style={styles.fill} collapsable={false}>
-                  <DhikrPage dhikr={d} />
+                  <DhikrPage dhikr={d} current={i === index} />
                 </View>
               ))}
             </PagerView>
@@ -548,9 +559,17 @@ const styles = StyleSheet.create({
     minHeight: TOUCH_TARGET,
   },
   actions: { flexDirection: 'row', alignItems: 'center' },
-  title: { flex: 1, textAlign: 'center' },
+  title: {
+    flex: 1,
+    textAlign: 'center',
+    fontFamily: UI_FONTS.semibold,
+    fontSize: 17,
+    lineHeight: 26,
+  },
+  position: { fontSize: 13, lineHeight: 22 },
+  positionNow: { fontFamily: UI_FONTS.semibold, fontSize: 15 },
   row: { flexDirection: 'row' },
   counter: { alignItems: 'center' },
   hint: { textAlign: 'center', maxWidth: 260 },
-  count: { fontFamily: UI_FONTS.semibold, fontSize: 34, lineHeight: 40 },
+  count: { fontFamily: UI_FONTS.semibold, fontSize: 40, lineHeight: 48 },
 });

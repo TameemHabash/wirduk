@@ -1,12 +1,25 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react-native';
 
 import { DHIKR_FONT_SIZE } from '@/data/settings/settings';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
-import { mockRouter } from '@/test-utils/router-mock';
+import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
 
-import { SettingsScreen } from './SettingsScreen';
+import { FOCUS_MS, SettingsScreen } from './SettingsScreen';
 
 describe('SettingsScreen', () => {
+  it('opened from the restore toast: «المتابعة من حيث توقفت» lit for a few seconds', async () => {
+    jest.useFakeTimers();
+    setRouteParams({ focus: 'restoreSession' });
+    await renderWithApp(<SettingsScreen />);
+    expect(mockRouter.setParams).toHaveBeenCalledWith({ focus: '' });
+    await act(async () => jest.advanceTimersByTime(300));
+    const row = screen.getByTestId('row-highlight');
+    expect(within(row).getByLabelText('المتابعة من حيث توقفت')).toBeOnTheScreen();
+    await act(async () => jest.advanceTimersByTime(FOCUS_MS));
+    expect(screen.queryByTestId('row-highlight')).toBeNull();
+    jest.useRealTimers();
+  });
+
   it('has the reading switches, all on by default, and saves them', async () => {
     const { repos } = await renderWithApp(<SettingsScreen />);
     const next = await screen.findByLabelText('اهتزاز عند الانتقال إلى الذكر التالي');

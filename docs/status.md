@@ -36,7 +36,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | — | Owner feedback 2026-11-22 (2) («طرأ عليّ ظرف»): «ارجع إلى الخطوة:», a step picked with − and + (design approved first) | 🟢 Done | one commit 2026-11-22 |
 | R1 | Redesign: the look (colors, icons, buttons, rows, the in-app dialog, the toast, the ring) | 🟢 Done | one commit 2026-11-26 |
 | R2 | Redesign: three tabs, Home, the Adhkar tab (search, reorder), own adhkar editors | 🟢 Done | one commit 2026-11-26 |
-| R3 | Redesign: the reader (fadl, «المصدر», long text), the restore toast, the finish screen | Not started | |
+| R3 | Redesign: the reader (fadl, «المصدر», long text), the restore toast, the finish screen | 🟢 Done | one commit 2026-11-26 |
 | R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | Not started | |
 | R5 | Redesign: Settings (notifications card) and the other screens | Not started | |
 | R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | Not started | |
@@ -183,6 +183,27 @@ R2, done (2026-11-26):
   then only the player (play, «الصوت جاهز» with a progress line, delete).
 - The owner's redesign words are in `docs/adwamuha/owner-edits.json` (`redesign`), checked
   against the app's strings by `src/i18n/owner-words.test.ts`.
+
+R3, done (2026-11-26; checked on the emulator in dark mode: Home, the adhkar tab, the reader, a
+tap on «المصدر» counting, the long-text fade):
+
+- The reader: the text on the page with no card; the top bar, the segments (4 high), the
+  position with the number in bold, «إتمام» as a pill, play as a soft teal circle (filled with a
+  halo while playing). The ring as before, teal, clockwise.
+- Fadl, option «ب»: a small gold eight-point star and the text in the quiet color, no label, no
+  box (a screen reader still hears «الفضل:»).
+- «المصدر» folded under a thin line (`SourceFold.tsx`): a tap counts like any tap and opens or
+  closes it; open, the source, the grading and «عرض في الدرر السنية» (same rule as before:
+  counts and shows the toast). It folds again on the next page. No source: nothing under the
+  text.
+- A long dhikr starts at the top and scrolls; its bottom edge fades only while text is below
+  (`components/BottomFade.tsx`); the fadl and the source come at its end.
+- The user's own dhikr: the «أذكاري» badge, then the sand line.
+- The restore toast's arrow opens Settings at «المتابعة من حيث توقفت», lit for 3 seconds.
+- The finish screen: 33 gold beads light up one by one, clockwise, around a check; the subtitle
+  «أتممت» + the chapter's name bold in teal, no «».
+- Found on the emulator and fixed: the golden card's gradient missed its padding strip; a tab's
+  pill was drawn square after it was selected (a new view per state now).
 
 ## Owner feedback 2026-11-14 («أدومها»)
 

@@ -11,6 +11,7 @@ import type { DhikrAudioPhase } from './useDhikrAudio';
 export function PlayButton({ phase, onPress }: { phase: DhikrAudioPhase; onPress: () => void }) {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
+  const playing = phase === 'playing';
   const label =
     phase === 'loading'
       ? t('audio.loading')
@@ -24,22 +25,24 @@ export function PlayButton({ phase, onPress }: { phase: DhikrAudioPhase; onPress
       accessibilityState={{ busy: phase === 'loading' }}
       onPress={onPress}
       hitSlop={4}
+      // A new view when it starts or stops playing: the Galaxy S21+ drew a round view
+      // square after its border changed in place (2026-11-01).
+      key={playing ? 'on' : 'off'}
       style={({ pressed }) => [
         styles.button,
-        {
-          backgroundColor: pressed ? colors.surfaceMuted : colors.surface,
-          borderColor: colors.border,
-        },
+        playing
+          ? { backgroundColor: colors.primary, borderColor: colors.primarySoft, borderWidth: 4 }
+          : { backgroundColor: colors.primarySoft },
+        pressed && { opacity: 0.85 },
       ]}
     >
       {phase === 'loading' ? (
-        <ActivityIndicator size="small" color={colors.primary} />
+        <ActivityIndicator size="small" color={colors.primaryInk} />
       ) : (
         <Icon
-          name={phase === 'playing' ? 'pause' : 'play'}
+          name={playing ? 'pause' : 'play'}
           size={18}
-          color={colors.primary}
-          solid
+          color={playing ? colors.onPrimary : colors.primaryInk}
         />
       )}
     </Pressable>
@@ -51,7 +54,6 @@ const styles = StyleSheet.create({
     width: TOUCH_TARGET,
     height: TOUCH_TARGET,
     borderRadius: TOUCH_TARGET / 2,
-    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

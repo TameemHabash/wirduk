@@ -125,6 +125,7 @@ export function ToggleRow({
   iconTone,
   value,
   onChange,
+  highlight = false,
 }: {
   label: string;
   hint?: string;
@@ -132,14 +133,23 @@ export function ToggleRow({
   iconTone?: TileTone;
   value: boolean;
   onChange: (value: boolean) => void;
+  /** Lit for a moment when another screen sends the user here (design `.row.hl`). */
+  highlight?: boolean;
 }) {
   const { colors, spacing } = useAppTheme();
   return (
     <View
+      testID={highlight ? 'row-highlight' : undefined}
       style={[
         styles.row,
         { paddingHorizontal: spacing.lg - 2, gap: spacing.md },
         hint ? { paddingVertical: spacing.sm + 3 } : null,
+        highlight && {
+          backgroundColor: colors.primarySoft,
+          borderColor: colors.primary,
+          borderWidth: 1.5,
+          borderRadius: 18,
+        },
       ]}
     >
       <RowText icon={icon} iconTone={iconTone} label={label} hint={hint} />
