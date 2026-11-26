@@ -39,7 +39,7 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | R3 | Redesign: the reader (fadl, «المصدر», long text), the restore toast, the finish screen | 🟢 Done | one commit 2026-11-26 |
 | R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | 🟢 Done | one commit 2026-11-26 |
 | R5 | Redesign: Settings (notifications card) and the other screens | 🟢 Done | one commit 2026-11-26 |
-| R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | Not started | |
+| R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | 🟢 Done | one commit 2026-11-26 |
 | 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -82,12 +82,16 @@ an "إتمام" button, the editor's count box, audio that repeats as many times
     Newer APKs from this PC install over it (same debug key).
   - Before Google Play: the Play build is signed with another key, so testers must uninstall the
     test build first (their own adhkar and settings are lost, unless a backup feature exists).
-- **Tests:** 805 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
+- **Tests:** 845 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
   `AdwamuhaMessagePicks`, the message each ward got, 2026-11-21).
 
 ## Waiting for the owner
 
+- **The redesign (R1–R6, 2026-11-26)**: built and checked on the emulator; the owner checks it
+  all together (owner, 2026-11-26). A phone APK only when the owner asks. Claude's choices to
+  confirm: in R4 above (the rules around «لم أقطعها بعد»), and the reader ring is teal as in
+  the design (it was gold).
 - **The owner feedback of 2026-11-21** (below): to check on the phone with the APK of f477969
   (on the link). The 2026-11-14 changes: tested by the owner (2026-11-21).
 - **The owner feedback of 2026-11-22** («قطعتها», below): on the link (APK of f477969), to check
@@ -242,6 +246,19 @@ R5, done (2026-11-26):
 - About: the promise in a teal band under the logo; the new audio line (the owner's sentence);
   the Tanzil link with an "external" icon. Audio downloads: a tile and the count, then the size;
   the red text button to delete. The startup error centered with a gold tile.
+
+R6, done (2026-11-26):
+
+- Tests: every text color pair passes AA in both themes (`colors.test.ts`, the golden cards
+  too); `edge-cases.test.tsx` draws the new screens (the adhkar tab, reorder, the editors) in
+  dark and light with no color of the other theme. 845 tests.
+- Emulator pass (dev build, light and dark): Home (with «أدومها»), the adhkar tab, the reader
+  (fold, fade, a tap on «المصدر» counting), Settings, «مساري» (bead path, the two rows), «عدّل
+  الخطة» (fold open, «لم أقطعها بعد»), the step-back sheet, the dialogs, the toast. With the
+  system font at 1.3: Home and the adhkar tab, nothing cut. All matched the design page.
+- Not checked yet: the owner's Galaxy S21+ (no APK built: only when the owner asks), the system
+  font at 2.0, the finish screen's animation on a device, setup 1–4 and the editors on the
+  emulator (they are covered by tests).
 
 ## Owner feedback 2026-11-14 («أدومها»)
 
