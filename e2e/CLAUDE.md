@@ -23,8 +23,10 @@ with the baseline: the `/check-screens` skill.
 
 - It needs `hw.keyboard=no` in its `config.ini`: with the PC's keyboard as a physical one, Gboard
   shows only a small floating bar that Maestro cannot hide.
-- If it hangs on start ("Not Responding", no CPU): stop it, delete the `*.lock` files in its
-  `.avd` folder, start it with `-no-snapshot-load`.
+- If it hangs ("Not Responding", no CPU; adb gets no answer), on start or in a run: stop it,
+  delete the `*.lock` files in its `.avd` folder, start it with `-no-snapshot-load`. It can also
+  quit in a run with exit code 59 (GPU errors in its log, not the app): the same restart, then
+  run the suite again.
 - The timeline moves the date with `adb root` + `date`: that needs the `google_apis` image.
 - `npx expo run:android --device` wants the AVD name (`Wirdak_Pixel`), not `emulator-5554`.
 - Changing `font_scale` restarts the app. adb typing: `input keyboard text 'Word%sWord'` (Latin

@@ -110,4 +110,21 @@ describe('HomeScreen («الرئيسية»)', () => {
       params: { focus: 'search' },
     });
   });
+
+  it('the chapters cannot be read: the error and its reason in the log; «إعادة المحاولة» reads again', async () => {
+    setClock(8);
+    const repos = await createTestRepositories();
+    jest.spyOn(repos.favorites, 'list').mockRejectedValueOnce(new Error('database is locked'));
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await renderWithApp(<HomeScreen />, repos);
+    expect(await screen.findByText(tr('home.loadError'))).toBeOnTheScreen();
+    expect(warn).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ message: 'database is locked' }),
+    );
+    warn.mockRestore();
+    await fireEvent.press(screen.getByRole('button', { name: tr('common.retry') }));
+    expect(await screen.findByLabelText(/^أذكار الصباح، 24 ذكرًا، الآن$/)).toBeOnTheScreen();
+    expect(screen.queryByText(tr('home.loadError'))).toBeNull();
+  });
 });

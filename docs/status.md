@@ -50,7 +50,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | 🟢 Done | one commit 2026-11-27 |
 | RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | 🟢 Done | one commit 2026-11-27 |
 | RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | 🟢 Done | one commit 2026-11-27 |
-| RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | Not started | |
+| RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | 🟢 Done | one commit 2026-11-27 |
 | 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -64,8 +64,8 @@ clean code, better tests, speed, a clean repo, a simple Claude Code setup, and *
 user sees changes**. The owner's answers: feature folders, Maestro, delete the old files, and keep
 the user's data (decided in RF2; `docs/decisions.md`).
 
-**Next: RF8. The plan for RF8 and how each RF runs: [refactor-plan.md](refactor-plan.md).
-One RF per session (owner, 2026-11-27): a new session says "continue the refactor".**
+**The refactor is done (RF0–RF8, 2026-11-27).** What waits for the owner: "Waiting for the
+owner" below. Then milestone 14 (Google Play).
 
 RF0, done (2026-11-27):
 
@@ -260,6 +260,45 @@ comments point to the new notes), so no screen compare.
   and how to add a screen, a feature, a migration, a setting, a string, a content change, a
   native module.
 
+RF8, done (2026-11-27): the full check. One small app change (a log line, below).
+
+- `npm run verify` passes: 1084 tests; coverage statements 90.1%, branches 83.2%, functions
+  88.5%, lines 92.2% (RF0: 89.0 / 82.4 / 86.9 / 91.1).
+- `npx expo-doctor`: 20 of 21 checks pass. 11 Expo packages are a few patch versions behind
+  (expo 57.0.31 → 57.0.34, expo-router 57.0.29 → 57.0.32, expo-sqlite 57.0.4 → 57.0.7, …). Not
+  changed in RF8: the check covers the refactor alone (Waiting for the owner).
+- Release build: the 6 user flows pass (3.5 min). Every screen in light, dark and font 1.3
+  compared with the baselines of the old code (22803cf): 48 of 48 the same in each (37 is random
+  by design). In font 1.3, screen 24 differed in 0.09% of its pixels: only the edges cut at the
+  top and bottom (a drag that landed a pixel or two apart). The old code's own run today had
+  screens 22–24 about 30 px apart (the same: a drag, not a change).
+- The «أدومها» timeline: the first run stopped on day 17. Home showed «تعذّر عرض الأذكار.» (the
+  chapters' read failed; the retry button was there). The app never logged why, and 23 more
+  starts in the same state did not show it again. The read is the same as before RF5. Change: a
+  failed read now writes its error to the phone's log (`console.warn` in
+  `adhkar/state/CategoriesProvider.tsx`, logcat `ReactNativeJS`; nothing on screen changes), and
+  a test checks the error screen and its retry. The second run, with that build, passed all 40
+  days (27 min) with no error in 70 app starts. If it shows again: `adb logcat -s ReactNativeJS`.
+- Dev build: the dev clock (a filled week; «جاهز لإضافة الذكر التالي؟» with both answers after
+  two good weeks; a week's break on «مساري») and the audio with the screen off (75 s: it kept
+  playing and the reader moved from dhikr 1 to 3) work. Seen: during a break, a waiting
+  «جاهز لإضافة الذكر التالي؟» stays on «مساري» (the rules did not change; Waiting for the owner).
+- Speed: the old build (22803cf) and the new one measured one after the other on the same
+  emulator (medians of 5; `.local/perf-*-old-22803cf.txt`, `-rf8.txt`, `-rf8b.txt`): «الأذكار»
+  tab, tap to screen **416 → 119 / 159 ms**; JS before it 200 → 48 / 69 ms; a second visit's JS
+  **82 → 18 ms**; opening the morning adhkar JS **190 → 100 / 110 ms**; the tab's JS in 2 s
+  212 → 292 ms (the list draws its other rows after the screen shows, as in RF5); 10 counting
+  taps JS 110 → 130 ms (2 ms a tap); reader swipes 7.1% janky frames for both today (RF5
+  measured 14.5 → 7.3%; this number moves with the emulator); cold start 565 → 611 / 608 ms
+  (one run moved between 505 and 1014 ms: not clear). The emulator was slower than in the
+  morning (both builds' CPU numbers about 30–45% above RF5's).
+- The emulator froze once (adb no answer, no CPU) and once quit with exit code 59 (GPU errors in
+  its log); a restart fixed both (`e2e/CLAUDE.md`).
+- A private report page for the owner with every screen before and after:
+  https://claude.ai/artifact/8QMjco9DFQY45Uv5d2MjM3 (its files: `.local/rf8-report/`).
+- `docs/refactor-plan.md` deleted (the refactor is done); the "one RF per session" lines left
+  the `/finish-milestone` skill.
+
 ## Where things are now
 
 - **Content:** version **13** (`APP_CONFIG.content.version`; v9 added "times said per recording";
@@ -288,7 +327,7 @@ comments point to the new notes), so no screen compare.
   - The next APK installs over the old one: the data is kept (decisions, 2026-11-27). Before
     Google Play: the Play build is signed with another key, so testers uninstall then (a backup
     file keeps their data).
-- **Tests:** 1083 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
+- **Tests:** 1084 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
   6 Maestro user flows (`npm run e2e`) and the «أدومها» timeline (`npm run e2e:timeline`).
   `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
@@ -296,6 +335,15 @@ comments point to the new notes), so no screen compare.
 
 ## Waiting for the owner
 
+- **The refactor (RF0–RF8, 2026-11-27)**: done; every screen compared, nothing the user sees
+  changed (report page: RF8 above). Not on the phone yet: the link still has the APK of e3b69e2.
+  A new APK (`/phone-apk`) when the owner asks.
+- **11 Expo packages** are a few patch versions behind (`npx expo-doctor`, RF8). Update them
+  before Google Play (`npx expo install --fix`, a new dev build, then the full check again)?
+- **The notifications card on a fresh install** (found in RF6, old): Settings shows
+  «الإشعارات غير مسموحة» before the app ever asked. Fix it, or keep it?
+- **During a break** (seen in RF8): a waiting «جاهز لإضافة الذكر التالي؟» stays on «مساري». Keep
+  it, or hide it until the break ends?
 - **The redesign (R1–R6, 2026-11-26)**: built and checked on the emulator; the owner checks it
   all together (owner, 2026-11-26), on the phone with the APK of e3b69e2 (on the link).
   Claude's choices to confirm: the rules around «لم أقطعها بعد» (below), and the reader ring is teal as in

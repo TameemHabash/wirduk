@@ -40,7 +40,15 @@ export interface CategoriesValue {
 
 const NONE: readonly never[] = [];
 const byId = (c: Category) => c.id;
-const toError = (e: unknown) => (e instanceof Error ? e : new Error(String(e)));
+/**
+ * A failed read shows `home.loadError` with a retry. It also goes to the phone's log (logcat,
+ * `ReactNativeJS`), so the reason can be found: seen once in the RF8 timeline, not repeated.
+ */
+const toError = (e: unknown) => {
+  const error = e instanceof Error ? e : new Error(String(e));
+  console.warn('Reading the chapters failed:', error);
+  return error;
+};
 
 const CategoriesContext = createContext<CategoriesValue | null>(null);
 

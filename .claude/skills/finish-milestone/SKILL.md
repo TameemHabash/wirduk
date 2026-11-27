@@ -30,6 +30,3 @@ Do the steps in order. Stop at the first one that fails and fix it.
 8. **Report** to the owner in simple English (short sentences, common words): what was done,
    what was found, what waits for them, then the **full milestones table** copied from
    `docs/status.md` (done rows 🟢, the others as they are). Then stop and wait.
-
-In the refactor (RF steps): one RF per session. At the end, tell the owner to start a new
-session and say "continue the refactor".
