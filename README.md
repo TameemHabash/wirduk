@@ -16,7 +16,8 @@ No ads, no analytics, no accounts. Works offline (audio downloads are optional).
   [Dorar](https://dorar.net) and the fadl where there is one.
 - **Audio** for most adhkar: downloaded on first play (or all at once), repeated as many times
   as the count, with autoplay, background playback and lock-screen controls.
-- **The user's own adhkar** («أذكاري»): chapters and adhkar they write, with optional recordings.
+- **The user's own adhkar** («أذكاري»): chapters and adhkar they write, with optional recordings,
+  and a count or none («بلا حد»: count on until «إتمام»).
 - **«أدومها»**: a habit plan that starts with one dhikr in the morning and one in the evening
   and grows step by step to the full adhkar.
 - **Reminders** for the morning and evening (local notifications), **a backup file** and

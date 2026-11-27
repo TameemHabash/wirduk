@@ -39,6 +39,7 @@ function toDhikr(r: DhikrRow): Dhikr {
     categoryId: r.categoryId,
     order: r.order,
     count: r.count,
+    unlimited: false,
     text: r.text,
     audioFile: r.audioFile,
     audioRepeats: r.audioRepeats,

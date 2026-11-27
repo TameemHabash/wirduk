@@ -16,6 +16,7 @@ import { AppBar, AppBarAction } from '@/components/layout/AppBar';
 import { AppText } from '@/components/ui/AppText';
 import { useDialog } from '@/components/ui/Dialog';
 import { Icon } from '@/components/ui/Icon';
+import { Segmented } from '@/components/ui/Segmented';
 import { TextButton } from '@/components/ui/TextButton';
 import { TextField } from '@/components/ui/TextField';
 import { useRepositories } from '@/data/DataProvider';
@@ -35,16 +36,26 @@ import { useUnsavedGuard } from '@/hooks/useUnsavedGuard';
 interface Form {
   text: string;
   count: string;
+  /** «بلا حد» (owner, 2026-11-27): `count` stays, hidden, for when «عدد محدد» comes back. */
+  unlimited: boolean;
   fadl: string;
   source: string;
   audioFile: string | null;
 }
 
-const EMPTY_FORM: Form = { text: '', count: '1', fadl: '', source: '', audioFile: null };
+const EMPTY_FORM: Form = {
+  text: '',
+  count: '1',
+  unlimited: false,
+  fadl: '',
+  source: '',
+  audioFile: null,
+};
 
 const fromDhikr = (d: Dhikr): Form => ({
   text: d.text,
   count: String(d.count),
+  unlimited: d.unlimited,
   fadl: d.source?.fadl ?? '',
   source: d.source?.source ?? '',
   audioFile: d.audioFile,
@@ -53,9 +64,16 @@ const fromDhikr = (d: Dhikr): Form => ({
 const sameForm = (a: Form, b: Form) =>
   a.text === b.text &&
   a.count === b.count &&
+  a.unlimited === b.unlimited &&
   a.fadl === b.fadl &&
   a.source === b.source &&
   a.audioFile === b.audioFile;
+
+/** A typed count, or NaN when it is not a whole number. */
+const parseCount = (value: string) => (/^\d+$/.test(value.trim()) ? Number(value.trim()) : NaN);
+const validCount = (n: number) => Number.isInteger(n) && n >= 1 && n <= CUSTOM_LIMITS.countMax;
+
+type CountKind = 'fixed' | 'unlimited';
 
 type ErrorField = 'text' | 'count' | 'notes' | 'general';
 const FIELD_OF: Record<CustomContentError['code'], ErrorField> = {
@@ -141,9 +159,13 @@ export function DhikrEditorScreen() {
 
   const save = async () => {
     setSaving(true);
+    const typed = parseCount(form.count);
+    // «بلا حد»: the hidden number is only kept; a bad one is not the user's to fix now.
+    const kept = validCount(parseCount(initial.count)) ? parseCount(initial.count) : 1;
     const input = {
       text: form.text,
-      count: /^\d+$/.test(form.count.trim()) ? Number(form.count.trim()) : Number.NaN,
+      count: form.unlimited && !validCount(typed) ? kept : typed,
+      unlimited: form.unlimited,
       fadl: form.fadl,
       source: form.source,
       audioFile: form.audioFile,
@@ -238,12 +260,26 @@ export function DhikrEditorScreen() {
               }}
             />
 
-            <View style={{ gap: spacing.xs }}>
-              {/* + and −, or tap the number and type it (owner, 2026-11-26), 1–100000. */}
+            <View style={{ gap: spacing.sm }}>
+              {/* «عدد محدد» or «بلا حد» (owner's design ب, 2026-11-27). */}
               <View style={[styles.row, { gap: spacing.md }]}>
                 <AppText variant="label" tone="muted" style={styles.fill}>
                   {t('custom.count')}
                 </AppText>
+                <View style={styles.countKind}>
+                  {/* No group label: «عدد المرات» is read just before, and is the number's label. */}
+                  <Segmented<CountKind>
+                    options={[
+                      { value: 'fixed', label: t('custom.countFixed') },
+                      { value: 'unlimited', label: t('custom.countUnlimited') },
+                    ]}
+                    value={form.unlimited ? 'unlimited' : 'fixed'}
+                    onChange={(kind) => set('unlimited', kind === 'unlimited')}
+                  />
+                </View>
+              </View>
+              {/* + and −, or tap the number and type it (owner, 2026-11-26), 1–100000. */}
+              {form.unlimited ? null : (
                 <View
                   style={[
                     styles.row,
@@ -284,7 +320,7 @@ export function DhikrEditorScreen() {
                     <Icon name="minus" size={18} color={colors.primaryInk} />
                   </Pressable>
                 </View>
-              </View>
+              )}
               {fieldError('count') ? (
                 <AppText variant="caption" tone="danger">
                   {fieldError('count')}
@@ -336,7 +372,10 @@ export function DhikrEditorScreen() {
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },
-  stepper: { borderRadius: 11, padding: 3 },
+  // Room for both choices; a bigger font grows it (never exactly as wide as measured: Galaxy).
+  countKind: { minWidth: 200 },
+  // Under the two choices, at their end (the left in Arabic).
+  stepper: { borderRadius: 11, padding: 3, alignSelf: 'flex-end' },
   step: { width: 40, height: 40, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   // No inner padding: Android's default padding plus the tall UI font cut the
   // digits at the top in a 44-point box. Centered both ways, and it grows with

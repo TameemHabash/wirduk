@@ -56,6 +56,17 @@ describe('Edit category', () => {
     });
   });
 
+  it('an unlimited dhikr shows «× ∞» instead of its number (owner, 2026-11-27)', async () => {
+    const { repos, category } = await withCategory();
+    await repos.custom.createDhikr(category.id, { text: 'أ', count: 33, unlimited: true });
+    await repos.custom.createDhikr(category.id, { text: 'ب', count: 3 });
+    setRouteParams({ id: String(category.id) });
+    await renderWithApp(<CategoryEditorScreen />, repos);
+    expect(await screen.findByText(tr('custom.times', { n: '∞' }))).toBeOnTheScreen();
+    expect(screen.getByText(tr('custom.times', { n: 3 }))).toBeOnTheScreen();
+    expect(screen.queryByText(tr('custom.times', { n: 33 }))).toBeNull();
+  });
+
   it('renames the category', async () => {
     const { repos, category } = await withCategory('قديم');
     setRouteParams({ id: String(category.id) });

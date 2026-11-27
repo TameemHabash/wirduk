@@ -4,8 +4,14 @@
   by «أدومها»'s ward. `screens/ReaderScreen.tsx` loads a category; `CompletionScreen.tsx` is the
   finish screen; `logic/navigation.ts` the page moves.
 - Counts live in memory (`state/counter-store.ts`); leaving the reader resets that category's
-  counts. A component watches only the count it shows (`useCount`, `useCompleteFlags` in
-  `state/useCounters.ts`), so a tap draws only the counter, the progress and «إتمام».
+  counts. A component watches only the count it shows (`useCount`, `useIsComplete`,
+  `useCompleteFlags` in `state/useCounters.ts`), so a tap draws only the counter, the progress
+  and «إتمام». The store's methods take the whole dhikr (`CountedItem`), never an id and a count.
+- An own dhikr can be unlimited («بلا حد», `Dhikr.unlimited`; owner, 2026-11-27): taps never
+  complete it, «إتمام» marks it done (the store's `done` set; its count stays), its recording
+  repeats until paused or «إتمام», and the counter shows the number only. "Continue where I
+  stopped" saves those done ones (`ReaderSession.done`). `count` is the number kept for
+  «عدد محدد».
 - The reader draws the pages near the current one (`useDrawnPages`: 3 on each side; a page once
   drawn stays).
 - "Continue where I stopped": `src/data/session.ts` + `SessionRepository` +

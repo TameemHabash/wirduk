@@ -62,7 +62,7 @@ export function useSessionRestore(): void {
         : await content.listAdhkar(saved.categoryId, lang);
       // The category or the dhikr may be gone (own adhkar deleted, content changed).
       if (!adhkar.some((d) => d.id === saved.dhikrId)) return;
-      counterStore.restore(adhkar, saved.counts);
+      counterStore.restore(adhkar, saved.counts, saved.done);
       if (saved.ward) {
         // An Adwamuha ward: its adhkar are in the morning / evening category.
         router.push({

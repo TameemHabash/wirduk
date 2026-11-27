@@ -16,6 +16,8 @@ export interface ReaderSession {
   dhikrId: number;
   /** Counts of that category's adhkar (only those above 0), by dhikr id. */
   counts: Record<string, number>;
+  /** The unlimited adhkar finished with «إتمام» (their count cannot tell it); omitted when none. */
+  done?: number[];
   /** Set when it was an Adwamuha ward (its adhkar are in `categoryId`): reopens the ward. */
   ward?: 'morning' | 'evening';
 }
@@ -55,10 +57,12 @@ export function parseSession(json: string, savedAt: number): SavedSession | null
     const counts = parseCounts(v.counts);
     if (counts === null) return null;
     const ward = v.ward === 'morning' || v.ward === 'evening' ? v.ward : undefined;
+    const done = Array.isArray(v.done) ? v.done.filter((id) => Number.isInteger(id)) : [];
     return {
       categoryId: v.categoryId!,
       dhikrId: v.dhikrId!,
       counts,
+      ...(done.length > 0 ? { done } : {}),
       ...(ward ? { ward } : {}),
       savedAt,
     };

@@ -192,6 +192,12 @@ export const USER_MIGRATIONS: readonly string[] = [
     PRIMARY KEY (Moment, Occasion)
   );
   `,
+
+  // 8 — the user's own dhikr with no end, «بلا حد» (owner, 2026-11-27). Count keeps the last
+  // number: it comes back when «عدد محدد» is chosen again.
+  `
+  ALTER TABLE CustomAdhkar ADD COLUMN Unlimited INTEGER NOT NULL DEFAULT 0;
+  `,
 ];
 
 export const USER_SCHEMA_VERSION = USER_MIGRATIONS.length;

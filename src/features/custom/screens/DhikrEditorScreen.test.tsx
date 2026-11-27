@@ -76,6 +76,74 @@ describe('Dhikr editor', () => {
     expect(mockRouter.back).not.toHaveBeenCalled();
   });
 
+  describe('«بلا حد» (owner, design ب, 2026-11-27)', () => {
+    /** The choice «عدد محدد» / «بلا حد». */
+    const kind = (key: 'custom.countFixed' | 'custom.countUnlimited') =>
+      screen.getByLabelText(tr(key));
+
+    it('a new dhikr starts with «عدد محدد» and its + and −', async () => {
+      const { repos, category } = await withCategory();
+      setRouteParams({ id: String(category.id), dhikrId: 'new' });
+      await renderWithApp(<DhikrEditorScreen />, repos);
+      expect(kind('custom.countFixed')).toBeSelected();
+      expect(kind('custom.countUnlimited')).not.toBeSelected();
+      expect(screen.getByLabelText(tr('custom.increaseCount'))).toBeOnTheScreen();
+    });
+
+    it('«بلا حد» hides + and −, and is saved', async () => {
+      const { repos, category } = await withCategory();
+      setRouteParams({ id: String(category.id), dhikrId: 'new' });
+      await renderWithApp(<DhikrEditorScreen />, repos);
+      await fireEvent.changeText(screen.getByLabelText(tr('custom.dhikrText')), 'نص');
+      await fireEvent.press(kind('custom.countUnlimited'));
+      expect(kind('custom.countUnlimited')).toBeSelected();
+      expect(screen.queryByLabelText(tr('custom.increaseCount'))).toBeNull();
+      expect(screen.queryByLabelText(tr('custom.count'))).toBeNull();
+      await fireEvent.press(screen.getByText(tr('custom.save')));
+      await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
+      expect((await repos.custom.listAdhkar(category.id))[0]).toMatchObject({ unlimited: true });
+    });
+
+    it('an unlimited dhikr opens on «بلا حد»; «عدد محدد» brings its number back', async () => {
+      const { repos, category } = await withCategory();
+      const d = await repos.custom.createDhikr(category.id, {
+        text: 'نص',
+        count: 33,
+        unlimited: true,
+      });
+      setRouteParams({ id: String(category.id), dhikrId: String(d.id) });
+      await renderWithApp(<DhikrEditorScreen />, repos);
+      expect(await screen.findByLabelText(tr('custom.countUnlimited'))).toBeSelected();
+      await fireEvent.press(kind('custom.countFixed'));
+      expect(screen.getByLabelText(tr('custom.count')).props.value).toBe('33');
+      await fireEvent.press(screen.getByText(tr('custom.save')));
+      await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
+      expect(await repos.custom.getDhikr(d.id)).toMatchObject({ count: 33, unlimited: false });
+    });
+
+    it('a bad number left behind «بلا حد» does not stop the save (the old number is kept)', async () => {
+      const { repos, category } = await withCategory();
+      const d = await repos.custom.createDhikr(category.id, { text: 'نص', count: 7 });
+      setRouteParams({ id: String(category.id), dhikrId: String(d.id) });
+      await renderWithApp(<DhikrEditorScreen />, repos);
+      await fireEvent.changeText(await screen.findByLabelText(tr('custom.count')), '');
+      await fireEvent.press(kind('custom.countUnlimited'));
+      await fireEvent.press(screen.getByText(tr('custom.save')));
+      await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
+      expect(await repos.custom.getDhikr(d.id)).toMatchObject({ count: 7, unlimited: true });
+    });
+
+    it('a change to «بلا حد» alone is a change: leaving asks first', async () => {
+      const { repos, category } = await withCategory();
+      const d = await repos.custom.createDhikr(category.id, { text: 'نص', count: 3 });
+      setRouteParams({ id: String(category.id), dhikrId: String(d.id) });
+      await renderWithApp(<DhikrEditorScreen />, repos);
+      await fireEvent.press(await screen.findByLabelText(tr('custom.countUnlimited')));
+      expect(await tryToLeave()).toBe(false);
+      expect(openDialog().getByText(tr('custom.discardTitle'))).toBeOnTheScreen();
+    });
+  });
+
   it('hides the two audio buttons once there is audio; removing it brings them back', async () => {
     const { repos, category } = await withCategory();
     const d = await repos.custom.createDhikr(category.id, {

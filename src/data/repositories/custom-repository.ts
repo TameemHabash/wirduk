@@ -55,6 +55,7 @@ function checkDhikr(input: CustomDhikrInput) {
   return {
     text,
     count: input.count,
+    unlimited: input.unlimited ? 1 : 0,
     fadl: checkNote(input.fadl),
     source: checkNote(input.source),
     audioFile: input.audioFile ?? null,
@@ -78,6 +79,8 @@ interface DhikrRow {
   categoryRowId: number;
   sortOrder: number;
   count: number;
+  /** 0 or 1. */
+  unlimited: number;
   text: string;
   fadl: string | null;
   source: string | null;
@@ -97,6 +100,7 @@ const toDhikr = (r: DhikrRow): Dhikr => ({
   categoryId: toCustomId(r.categoryRowId),
   order: r.sortOrder,
   count: r.count,
+  unlimited: r.unlimited === 1,
   text: r.text,
   audioFile: r.audioFile,
   // The user's own recording: one play says the dhikr once.
@@ -113,7 +117,8 @@ const CATEGORY_SELECT = `
 
 const DHIKR_SELECT = `
   SELECT Id AS rowId, CategoryId AS categoryRowId, SortOrder AS sortOrder, Count AS count,
-         Text AS text, Fadl AS fadl, Source AS source, AudioFile AS audioFile
+         Unlimited AS unlimited, Text AS text, Fadl AS fadl, Source AS source,
+         AudioFile AS audioFile
     FROM CustomAdhkar`;
 
 /**
@@ -229,13 +234,15 @@ export class CustomRepository {
       );
       const r = await tx.run(
         `INSERT INTO CustomAdhkar
-           (CategoryId, Text, SearchText, Count, Fadl, Source, AudioFile, SortOrder, CreatedAt, UpdatedAt)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           (CategoryId, Text, SearchText, Count, Unlimited, Fadl, Source, AudioFile, SortOrder,
+            CreatedAt, UpdatedAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           catRowId,
           d.text,
           toSearchText(d.text),
           d.count,
+          d.unlimited,
           d.fadl,
           d.source,
           d.audioFile,
@@ -262,12 +269,14 @@ export class CustomRepository {
     if (!current) throw new CustomContentError('notFound');
     await this.db.run(
       `UPDATE CustomAdhkar
-          SET Text = ?, SearchText = ?, Count = ?, Fadl = ?, Source = ?, AudioFile = ?, UpdatedAt = ?
+          SET Text = ?, SearchText = ?, Count = ?, Unlimited = ?, Fadl = ?, Source = ?,
+              AudioFile = ?, UpdatedAt = ?
         WHERE Id = ?`,
       [
         d.text,
         toSearchText(d.text),
         d.count,
+        d.unlimited,
         d.fadl,
         d.source,
         d.audioFile,

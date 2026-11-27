@@ -8,6 +8,16 @@ export function useCount(dhikrId: number, store: CounterStore = counterStore): n
   return useSyncExternalStore(store.subscribe, read, read);
 }
 
+/** Whether one dhikr is complete (an unlimited one: after «إتمام»). Draws again only when it changes. */
+export function useIsComplete(item: CountedItem, store: CounterStore = counterStore): boolean {
+  const { id, count, unlimited } = item;
+  const read = useCallback(
+    () => store.isComplete({ id, count, unlimited }),
+    [store, id, count, unlimited],
+  );
+  return useSyncExternalStore(store.subscribe, read, read);
+}
+
 /**
  * Whether each item is complete, in order. The component draws again only when one of them
  * becomes complete (or not), not on every tap.

@@ -41,6 +41,18 @@ describe('saved session', () => {
     });
   });
 
+  it('keeps the unlimited adhkar finished with «إتمام», and drops damaged ids', () => {
+    expect(
+      parseSession('{"categoryId":-1,"dhikrId":-2,"counts":{},"done":[-2,"x",1.5]}', 1),
+    ).toEqual({ categoryId: -1, dhikrId: -2, counts: {}, done: [-2], savedAt: 1 });
+    expect(parseSession('{"categoryId":-1,"dhikrId":-2,"counts":{},"done":"all"}', 1)).toEqual({
+      categoryId: -1,
+      dhikrId: -2,
+      counts: {},
+      savedAt: 1,
+    });
+  });
+
   it('is stored as one row: saved, read back, cleared', async () => {
     const repo = new SessionRepository(await createUserDb(), () => 42);
     expect(await repo.load()).toBeNull();

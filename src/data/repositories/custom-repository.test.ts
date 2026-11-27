@@ -84,6 +84,7 @@ describe('CustomRepository — adhkar', () => {
       categoryId: cat.id,
       order: 1,
       count: 33,
+      unlimited: false,
       text,
       audioFile: 'rec-1.m4a',
       audioRepeats: 1, // the user's own recording says it once
@@ -91,6 +92,20 @@ describe('CustomRepository — adhkar', () => {
       custom: true,
     });
     expect((await r.getCategory(cat.id))?.adhkarCount).toBe(1);
+  });
+
+  it('«بلا حد»: saved and read back, its number kept for «عدد محدد» (owner, 2026-11-27)', async () => {
+    const r = await repo();
+    const cat = await r.createCategory('باب');
+    const d = await r.createDhikr(cat.id, { text: 'نص', count: 33, unlimited: true });
+    expect(d).toMatchObject({ count: 33, unlimited: true });
+    expect(await r.listAdhkar(cat.id)).toEqual([expect.objectContaining({ unlimited: true })]);
+    const back = await r.updateDhikr(d.id, { text: 'نص', count: 33, unlimited: false });
+    expect(back.dhikr).toMatchObject({ count: 33, unlimited: false });
+    // The number is still checked: a bad one is refused even with «بلا حد».
+    expect(await codeOf(r.createDhikr(cat.id, { text: 'نص', count: 0, unlimited: true }))).toBe(
+      'badCount',
+    );
   });
 
   it('stores empty notes as no source', async () => {

@@ -15,7 +15,7 @@ defaults live in `models/adwamuha.ts`.
 ## Rules
 
 - Migrations: `db/user-schema.ts`. **Add** a new entry at the end; never edit or remove a shipped
-  one (phones already ran it). `migrate()` refuses a database newer than the app. Schema 7 now.
+  one (phones already ran it). `migrate()` refuses a database newer than the app. Schema 8 now.
 - Never reset the user's data. Android's automatic backup puts an old `user.db` back on a new
   install (RF2, `docs/decisions.md`), so the code that reads old stored data (`extraWeeks`, old
   event kinds) stays.

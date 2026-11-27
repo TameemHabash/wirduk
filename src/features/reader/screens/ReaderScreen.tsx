@@ -33,7 +33,7 @@ export function ReaderScreen() {
   return (
     <Reader
       // A new key after an edit restarts the pager with the updated list.
-      key={state.adhkar.map((d) => `${d.id}:${d.count}`).join(',')}
+      key={state.adhkar.map((d) => `${d.id}:${d.count}${d.unlimited ? 'u' : ''}`).join(',')}
       category={state.category}
       adhkar={state.adhkar}
       startDhikrId={params.dhikr ? Number(params.dhikr) : undefined}

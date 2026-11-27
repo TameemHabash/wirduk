@@ -54,7 +54,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | — | Owner decisions after RF8 (2026-11-27): 11 Expo packages updated; the notifications card only after the app asked; no «جاهز لإضافة الذكر التالي؟» during a break; then the APK | 🟢 Done | one commit 2026-11-27 |
 | — | Owner feedback 2026-11-27 (2): a tap on the «المصدر» row in the reader no longer counts (what it shows inside still counts) | 🟢 Done | one commit 2026-11-27 |
 | — | Owner feedback 2026-11-27 (2): Home crashed when the phone's date went back before the «أدومها» step's start | 🟢 Done | one commit 2026-11-27 |
-| — | Owner feedback 2026-11-27 (2): an unlimited count for own adhkar (design option ب) | In progress | |
+| — | Owner feedback 2026-11-27 (2): an unlimited count for own adhkar, «بلا حد» (design option ب) | 🟢 Done | one commit 2026-11-27 |
 | 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -353,6 +353,35 @@ word «بلا حد»; fix the crash; tests for both.
   "the phone's date went back"); the 3 fail on the old code with the emulator's error. On the
   emulator, that `user.db` put back: Home shows «وردك اليوم» and «مساري» opens ("0 من 1", the
   week «—»). `docs/adwamuha/states.md`: the row "The phone's date moves back" names them.
+- The unlimited count, «بلا حد» (design ب):
+  - Data: user.db migration 8, `CustomAdhkar.Unlimited` (0 or 1). `Count` keeps the last
+    number, so «عدد محدد» brings it back. Old own adhkar stay as they were (0). A backup is
+    restored by column name after its own migrations, so old backup files still work.
+    `Dhikr.unlimited` (always false for the book's adhkar).
+  - Editor: «عدد المرات», then «عدد محدد | بلا حد» (the kit's `Segmented`) on the same row;
+    + and − under them, at their end, only for «عدد محدد». A bad number left behind «بلا حد»
+    does not stop the save: the old number is kept.
+  - Reader: the counter takes the whole dhikr now (`tap(item)`, `complete(item)`). An
+    unlimited one never completes from taps; «إتمام» marks it done (a `done` set in the store)
+    and keeps its number. The counter: the number only (no «من N»), TalkBack «تم 12، بلا حد»;
+    the ring empty, full after «إتمام». Its recording repeats until paused or «إتمام» (no
+    «التكرار» line); with «العدّ مع الصوت» each play counts. "Continue where I stopped" saves
+    the done ones (`done` in the saved session). The chapter's list: «× ∞».
+  - A number of 4 digits or more gets a smaller font in the ring (`logic/count-font.ts`), so it
+    stays inside it. Up to 999 nothing changes; the book's counts are at most 100.
+  - New strings: `custom.countFixed` «عدد محدد», `custom.countUnlimited` «بلا حد»,
+    `reader.counterUnlimited` «تم {{done}}، بلا حد».
+  - Tests (26 new): the counter rules, the repository and migration 8, the saved session, the
+    editor (choose, hide + and −, open on «بلا حد», the number back, a bad number behind,
+    leaving asks), the reader (no «من», past the number, «إتمام», the finish, reset, continue
+    where I stopped), the recording (repeats, «إتمام», pause, counting with the audio), the
+    list badge, and the font size.
+  - On the emulator (dev build, the schema-7 database from the timeline, so migration 8 ran on
+    real data): the editor in both states, «× ∞» in the list, the reader with 12 taps (number
+    only, ring empty), «إتمام» (grey, then the finish screen; with two adhkar, back on it: the
+    ring full, the number kept).
+  - No screen compare: the screens it changes (the dhikr editor's count, the reader of an own
+    dhikr) are the new design; the rest draws as before.
 
 ## Where things are now
 
@@ -382,14 +411,20 @@ word «بلا حد»; fix the crash; tests for both.
   - The next APK installs over the old one: the data is kept (decisions, 2026-11-27). Before
     Google Play: the Play build is signed with another key, so testers uninstall then (a backup
     file keeps their data).
-- **Tests:** 1101 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
+- **Tests:** 1127 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
   6 Maestro user flows (`npm run e2e`) and the «أدومها» timeline (`npm run e2e:timeline`).
   `npm run verify` passes.
-- **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
-  `AdwamuhaMessagePicks`, the message each ward got, 2026-11-21).
+- **user.db:** schema 8 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
+  `AdwamuhaMessagePicks`, the message each ward got, 2026-11-21; 8: `CustomAdhkar.Unlimited`,
+  «بلا حد», 2026-11-27).
 
 ## Waiting for the owner
 
+- **The owner feedback of 2026-11-27 (2)** («المصدر» does not count, the crash when the date
+  went back, «بلا حد»): built and checked on the emulator; not on the link yet (the APK only
+  when the owner asks). Claude's choices to confirm: a tap on a finished «بلا حد» dhikr does
+  nothing (as with any finished dhikr; the reset button starts it again); a number of 4 digits
+  or more gets a smaller font in the ring.
 - **The refactor (RF0–RF8) and the decisions after RF8 (2026-11-27)**: on the link (APK of
   63bddc8), to check on the phone. Every screen was compared; the only visible change is the
   approved one: on a new install, Settings has no «الإشعارات غير مسموحة» card until the app has

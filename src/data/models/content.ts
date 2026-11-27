@@ -29,8 +29,13 @@ export interface Dhikr {
   categoryId: number;
   /** Position inside its category, from 1. */
   order: number;
-  /** How many times to say it. Always >= 1. */
+  /** How many times to say it. Always >= 1 (for an unlimited one: the number kept for later). */
   count: number;
+  /**
+   * No end («بلا حد», the user's own adhkar only; owner, 2026-11-27): taps never complete it,
+   * only «إتمام» does, and `count` is not shown.
+   */
+  unlimited: boolean;
   /** Display text with full tashkeel. */
   text: string;
   /**
@@ -83,6 +88,8 @@ export interface DownloadedAudio extends AudioFileInfo {
 export interface CustomDhikrInput {
   text: string;
   count: number;
+  /** «بلا حد» (default false); `count` is still kept. */
+  unlimited?: boolean;
   fadl?: string | null;
   source?: string | null;
   audioFile?: string | null;

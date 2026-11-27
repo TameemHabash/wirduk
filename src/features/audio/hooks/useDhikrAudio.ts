@@ -25,12 +25,19 @@ interface Options {
    * next, at once (with autoplay on), also with the screen off.
    */
   onPlayed?: (dhikr: Dhikr) => { next: Dhikr | null } | undefined;
-  /** How many times to play a dhikr's recording. Default: count ÷ times said per recording. */
+  /**
+   * How many times to play a dhikr's recording. Default: count ÷ times said per recording.
+   * Infinity: until paused or the dhikr is finished (an unlimited one).
+   */
   playsFor?: (dhikr: Dhikr) => number;
 }
 
-/** Plays of a recording for the whole count (e.g. count 100, said 4 times per recording: 25). */
-export function playsForCount(dhikr: Pick<Dhikr, 'count' | 'audioRepeats'>): number {
+/**
+ * Plays of a recording for the whole count (e.g. count 100, said 4 times per recording: 25).
+ * An unlimited dhikr: no end, it plays until paused or «إتمام» (owner, 2026-11-27).
+ */
+export function playsForCount(dhikr: Pick<Dhikr, 'count' | 'audioRepeats' | 'unlimited'>): number {
+  if (dhikr.unlimited) return Number.POSITIVE_INFINITY;
   return Math.max(1, Math.ceil(dhikr.count / dhikr.audioRepeats));
 }
 

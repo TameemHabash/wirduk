@@ -324,7 +324,7 @@ function EditCategory({ id }: { id: number }) {
                   ]}
                 >
                   <AppText variant="label" style={{ color: colors.customAccent }}>
-                    {t('custom.times', { n: d.count })}
+                    {t('custom.times', { n: d.unlimited ? '∞' : d.count })}
                   </AppText>
                 </View>
               </Pressable>

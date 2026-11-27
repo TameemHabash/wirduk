@@ -208,7 +208,7 @@ export function Reader({
   const onTap = useCallback(() => {
     const dhikr = adhkar[indexRef.current];
     if (!dhikr) return;
-    const result = counterStore.tap(dhikr.id, dhikr.count);
+    const result = counterStore.tap(dhikr);
     if (result.event === 'ignored') return;
     tick();
     if (result.event === 'counted') {
@@ -220,16 +220,18 @@ export function Reader({
 
   const onComplete = useCallback(() => {
     const dhikr = adhkar[indexRef.current];
-    if (dhikr && counterStore.complete(dhikr.id, dhikr.count)) finishedByUser(dhikr);
+    if (dhikr && counterStore.complete(dhikr)) finishedByUser(dhikr);
   }, [adhkar, finishedByUser]);
 
   // "Count with the audio" (setting): each finished play counts the times the
   // recording says the dhikr (usually 1; never above the count), and the
   // recording plays only the times still left. After counting by hand, the
   // last play may say it more often than it still counts (e.g. 2 left, said 4).
+  // An unlimited dhikr: each play counts, and it plays on until paused or «إتمام» (owner,
+  // 2026-11-27).
   const onPlayed = useCallback(
     (dhikr: Dhikr) => {
-      const result = counterStore.tap(dhikr.id, dhikr.count, dhikr.audioRepeats);
+      const result = counterStore.tap(dhikr, dhikr.audioRepeats);
       if (result.event !== 'completed') return undefined;
       const i = adhkar.findIndex((d) => d.id === dhikr.id);
       return { next: advanceAfterComplete(i) };
@@ -237,7 +239,10 @@ export function Reader({
     [adhkar, advanceAfterComplete],
   );
   const playsLeft = useCallback(
-    (dhikr: Dhikr) => Math.ceil((dhikr.count - counterStore.get(dhikr.id)) / dhikr.audioRepeats),
+    (dhikr: Dhikr) =>
+      dhikr.unlimited
+        ? Number.POSITIVE_INFINITY
+        : Math.ceil((dhikr.count - counterStore.get(dhikr.id)) / dhikr.audioRepeats),
     [],
   );
   const audioCounts = settings.audioCounts;
@@ -328,11 +333,13 @@ export function Reader({
                 <AppText style={styles.positionNow}>{String(index + 1)}</AppText>{' '}
                 {t('reader.of', { total: adhkar.length })}
               </AppText>
-              {/* When the audio counts, the counter already shows the progress. */}
+              {/* When the audio counts, the counter already shows the progress. An unlimited
+                  dhikr's recording has no last play to show. */}
               {!audioCounts &&
               audio.activeId === current.id &&
               audio.repeat &&
-              audio.repeat.total > 1 ? (
+              audio.repeat.total > 1 &&
+              Number.isFinite(audio.repeat.total) ? (
                 <AppText variant="caption" tone="muted">
                   {t('audio.repeat', {
                     current: audio.repeat.current,

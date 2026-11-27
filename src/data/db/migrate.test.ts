@@ -85,6 +85,23 @@ describe('migrate', () => {
     expect(await shown(updated)).toEqual(['intro']);
   });
 
+  it('8: the own adhkar saved before «بلا حد» keep their count (not unlimited)', async () => {
+    const db = createNodeSqlDatabase();
+    await migrate(db, USER_MIGRATIONS.slice(0, 7));
+    await db.run(
+      `INSERT INTO CustomCategories (Title, SearchTitle, SortOrder, CreatedAt, UpdatedAt)
+       VALUES ('a', 'a', 1, 1, 1)`,
+    );
+    await db.run(
+      `INSERT INTO CustomAdhkar (CategoryId, Text, SearchText, Count, SortOrder, CreatedAt, UpdatedAt)
+       VALUES (1, 'x', 'x', 33, 1, 1, 1)`,
+    );
+    await migrate(db, USER_MIGRATIONS);
+    expect(await db.getAll('SELECT Count, Unlimited FROM CustomAdhkar')).toEqual([
+      { Count: 33, Unlimited: 0 },
+    ]);
+  });
+
   it('refuses a database from a newer app version', async () => {
     const db = createNodeSqlDatabase();
     await db.exec('PRAGMA user_version = 99');

@@ -34,9 +34,16 @@ export function useSaveReaderSession({
           const n = counterStore.get(d.id);
           if (n > 0) counts[String(d.id)] = n;
         }
+        const done = counterStore.doneUnlimited(adhkar);
         const dhikr = adhkar[indexRef.current] ?? adhkar[0]!;
         void session
-          .save({ categoryId, dhikrId: dhikr.id, counts, ...(ward ? { ward } : {}) })
+          .save({
+            categoryId,
+            dhikrId: dhikr.id,
+            counts,
+            ...(done.length > 0 ? { done } : {}),
+            ...(ward ? { ward } : {}),
+          })
           .catch(() => undefined);
       } else if (state === 'active') {
         void session.clear().catch(() => undefined);

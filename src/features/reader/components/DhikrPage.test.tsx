@@ -14,6 +14,7 @@ const dhikr = (source: Dhikr['source']): Dhikr => ({
   categoryId: 1,
   order: 17,
   count: 100,
+  unlimited: false,
   text: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
   audioFile: null,
   audioRepeats: 1,

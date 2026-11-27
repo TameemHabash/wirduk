@@ -373,6 +373,66 @@ describe('Reader audio: a recording that says the dhikr several times', () => {
   });
 });
 
+describe('Reader audio: an own dhikr «بلا حد» (owner, 2026-11-27: it plays until paused or «إتمام»)', () => {
+  const MINE = 'file:///docs/custom-audio/mine.m4a';
+  const NEXT = 'file:///docs/custom-audio/next.m4a';
+
+  /** An own chapter: an unlimited dhikr with a recording, then another with a recording. */
+  async function openUnlimited(audioCounts: boolean) {
+    const repos = await createTestRepositories();
+    await repos.settings.set('audioCounts', audioCounts);
+    const cat = await repos.custom.createCategory('أدعيتي');
+    const d = await repos.custom.createDhikr(cat.id, {
+      text: 'نص',
+      count: 3,
+      unlimited: true,
+      audioFile: 'mine.m4a',
+    });
+    await repos.custom.createDhikr(cat.id, { text: 'التالي', count: 1, audioFile: 'next.m4a' });
+    counterStore.resetMany([d.id, d.id - 1]);
+    setRouteParams({ id: String(cat.id) });
+    await renderWithApp(<ReaderScreen />, repos);
+    await screen.findByLabelText(PLAY);
+    return d;
+  }
+
+  it('listening only: it plays again and again, past its number, with no «التكرار» line', async () => {
+    const d = await openUnlimited(false);
+    await play();
+    for (let n = 0; n < 5; n++) await finishPlaying();
+    expect(recordingsHeard()).toEqual(times(6, MINE));
+    expect(screen.queryByText(/^التكرار /)).toBeNull();
+    expect(counterStore.get(d.id)).toBe(0); // listening only: taps count
+  });
+
+  it('«إتمام» ends it: on to the next dhikr, whose recording plays', async () => {
+    await openUnlimited(false);
+    await play();
+    await finishPlaying();
+    await fireEvent.press(screen.getByLabelText(tr('reader.completeLabel')));
+    await waitFor(() => expect(recordingsHeard().at(-1)).toBe(NEXT));
+    expect(recordingsHeard()).toEqual([...times(2, MINE), NEXT]);
+  });
+
+  it('pause stops it', async () => {
+    await openUnlimited(false);
+    await play();
+    await finishPlaying();
+    await fireEvent.press(screen.getByLabelText(PAUSE));
+    expect(recitationPlayer()?.playing).toBe(false);
+    expect(recordingsHeard()).toEqual(times(2, MINE));
+  });
+
+  it('with «العدّ مع الصوت», each play counts and it never moves on by itself', async () => {
+    const d = await openUnlimited(true);
+    await play();
+    for (let n = 0; n < 4; n++) await finishPlaying();
+    expect(screen.getByLabelText(tr('reader.counterUnlimited', { done: 4 }))).toBeOnTheScreen();
+    expect(recordingsHeard()).toEqual(times(5, MINE));
+    expect(counterStore.isComplete(d)).toBe(false);
+  });
+});
+
 describe('Reader audio with the default settings', () => {
   it('each play counts: the counter goes up with the audio and the reader moves on', async () => {
     const repos = await createTestRepositories(); // «العدّ مع الصوت» as it comes: on

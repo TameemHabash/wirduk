@@ -45,7 +45,7 @@ describe('CompletionScreen', () => {
   });
 
   it('goes back home, so the category starts from zero when opened again', async () => {
-    counterStore.tap(4001, 1);
+    counterStore.tap({ id: 4001, count: 1 });
     await renderWithApp(<CompletionScreen />);
     await screen.findByText('أتممت دعاء دخول الخلاء');
     await fireEvent.press(screen.getByText(tr('completion.home')));
@@ -54,7 +54,7 @@ describe('CompletionScreen', () => {
   });
 
   it('starts the category again with fresh counters', async () => {
-    counterStore.tap(4001, 1);
+    counterStore.tap({ id: 4001, count: 1 });
     await renderWithApp(<CompletionScreen />);
     await screen.findByText('أتممت دعاء دخول الخلاء');
     await fireEvent.press(screen.getByText(tr('completion.again')));

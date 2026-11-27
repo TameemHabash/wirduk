@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/ui/AppText';
 import { Icon } from '@/components/ui/Icon';
 import type { CountedItem } from '@/features/reader/state/counter-store';
-import { useCount } from '@/features/reader/state/useCounters';
+import { useIsComplete } from '@/features/reader/state/useCounters';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 import { TOUCH_TARGET } from '@/theme/tokens';
@@ -17,7 +17,7 @@ import { TOUCH_TARGET } from '@/theme/tokens';
 export function CompleteButton({ dhikr, onPress }: { dhikr: CountedItem; onPress: () => void }) {
   const { t } = useTranslation();
   const { colors, spacing } = useAppTheme();
-  const done = useCount(dhikr.id) >= dhikr.count;
+  const done = useIsComplete(dhikr);
   return (
     <Pressable
       accessibilityRole="button"
