@@ -28,38 +28,13 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | 10d | «بداية الأسبوع» (the owner's design, 2026-10-30): a setting, not the phone's region | 🟢 Done | 930bc0c |
 | 10e | Owner feedback 2026-10-30 (2): «مساري» goal line; audio download of the morning and evening only | 🟢 Done | one commit, 2026-10-30 |
 | 11 | Update the morning and evening recordings (the owner's 30 m4a files, content v13) | 🟢 Done | 40ebb84, 3217fe5; wirduk-audio 30d2cc7 |
-| — | After 11: the audio that does not count waits for the user's count; «العدّ مع الصوت» on by default | 🟢 Done | 0370843, one commit 2026-10-31 |
-| 12 | Backup: Android's automatic backup fixed + a backup file (save, restore) | 🟢 Done | 45ccb23, 4eb9e45, 050538f |
-| 13 | Quality and edge cases (every «أدومها» state tested, dev clock, cleanup, edge cases, the owner's phone) | 🟢 Done | 2d49084, 698aff6, 9373c31, 68a8074 |
-| — | Owner feedback 2026-11-01: «مساري»'s dot drawn square after «قرأتها من حفظي» (Galaxy only); "continue where I stopped" after the audio played (the process kept); the second ward's finish screen like the first (option ب) | 🟢 Done | 63091f6, ae60182, one commit 2026-11-01 |
-| — | Owner feedback 2026-11-14: a reminder tap checks the ward first; the ward read in parts (kept for its window); the «أدومها» badge on Home while off; the good-weeks rule (a week counts once it is over), the goal bars always shown | 🟢 Done | 907c445, one commit 2026-11-15 |
-| — | Owner feedback 2026-11-21: no message repeats before all of its kind were shown (after a ward and on Home); a ward never opens outside its time (also from a reminder); Home's messages back as before | 🟢 Done | 4e6afd0, one commit 2026-11-21 |
-| — | Owner feedback 2026-11-22 («عدّل الخطة»): «قطعتها» marks a step as passed (saved after the warning); steps 4 and 5 by the owner's names | 🟢 Done | b106530, be45c3f |
-| — | Owner feedback 2026-11-22 (2) («طرأ عليّ ظرف»): «ارجع إلى الخطوة:», a step picked with − and + (design approved first) | 🟢 Done | one commit 2026-11-22 |
-| R1 | Redesign: the look (colors, icons, buttons, rows, the in-app dialog, the toast, the ring) | 🟢 Done | one commit 2026-11-26 |
-| R2 | Redesign: three tabs, Home, the Adhkar tab (search, reorder), own adhkar editors | 🟢 Done | one commit 2026-11-26 |
-| R3 | Redesign: the reader (fadl, «المصدر», long text), the restore toast, the finish screen | 🟢 Done | one commit 2026-11-26 |
-| R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | 🟢 Done | one commit 2026-11-26 |
-| R5 | Redesign: Settings (notifications card) and the other screens | 🟢 Done | one commit 2026-11-26 |
-| R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | 🟢 Done | one commit 2026-11-26 |
-| RF0 | Refactor: safety net (Maestro screen runs, baseline pictures, coverage and speed numbers) | 🟢 Done | one commit 2026-11-27 |
-| RF1 | Refactor: clean the repo and the PC (old files, history docs, stale references) | 🟢 Done | one commit 2026-11-27 |
-| RF2 | Refactor: the data (kept, not reset: Android's backup would bring old data back; stale comments) | 🟢 Done | one commit 2026-11-27 |
-| RF3 | Refactor: the new structure (feature folders, shared UI kit, layer rules) | 🟢 Done | two commits 2026-11-27 |
-| RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | 🟢 Done | one commit 2026-11-27 |
-| RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | 🟢 Done | one commit 2026-11-27 |
-| RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | 🟢 Done | one commit 2026-11-27 |
-| RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | 🟢 Done | one commit 2026-11-27 |
-| RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | 🟢 Done | one commit 2026-11-27 |
-| — | Owner decisions after RF8 (2026-11-27): 11 Expo packages updated; the notifications card only after the app asked; no «جاهز لإضافة الذكر التالي؟» during a break; then the APK | 🟢 Done | one commit 2026-11-27 |
-| — | Owner feedback 2026-11-27 (2): a tap on the «المصدر» row in the reader no longer counts (what it shows inside still counts) | 🟢 Done | one commit 2026-11-27 |
-| — | Owner feedback 2026-11-27 (2): Home crashed when the phone's date went back before the «أدومها» step's start | 🟢 Done | one commit 2026-11-27 |
-| — | Owner feedback 2026-11-27 (2): an unlimited count for own adhkar, «بلا حد» (design option ب) | 🟢 Done | one commit 2026-11-27 |
-| 14 | Google Play (waits for the redesign) | Not started | |
+| 12–13 | From milestone 11 to Google Play: backup (Android's own and a backup file), quality and edge cases, the owner's feedback (2026-10-31 to 2026-11-27), the redesign (R1–R6), the refactor (RF0–RF8), «المصدر» no longer counts, the crash when the date went back, «بلا حد» | 🟢 Done | 0370843 … 6191674 (each step: the notes below) |
+| 14 | Google Play (after the owner's testing) | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
-The commit ids above (and any from before 2026-11-01) are in the private archive
-`TameemHabash/wirduk-archive`. The public `wirduk` starts with one clean commit.
+Commit ids from before 2026-11-01 are in the private archive `TameemHabash/wirduk-archive`; the
+public `wirduk` starts with one clean commit. Milestones 12–13 were many rows (owner, 2026-11-27:
+one row); their steps are in the notes below.
 
 ## Refactor (RF0–RF8, from 2026-11-27)
 
