@@ -1,7 +1,9 @@
 # Project status and next steps
 
-Last updated: 2026-11-26. Read this first when you come back to the project.
-Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
+Last updated: 2026-11-27. Read this first when you come back to the project.
+Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md). The owner's decisions are
+in [decisions.md](decisions.md). The story of each milestone is in git (`git log`), and before
+2026-11-01 in the private archive `TameemHabash/wirduk-archive`.
 
 ## Milestones
 
@@ -41,11 +43,11 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | R5 | Redesign: Settings (notifications card) and the other screens | 🟢 Done | one commit 2026-11-26 |
 | R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | 🟢 Done | one commit 2026-11-26 |
 | RF0 | Refactor: safety net (Maestro screen runs, baseline pictures, coverage and speed numbers) | 🟢 Done | one commit 2026-11-27 |
-| RF1 | Refactor: clean the repo and the PC (old files, history docs, stale references) | Not started | |
+| RF1 | Refactor: clean the repo and the PC (old files, history docs, stale references) | 🟢 Done | one commit 2026-11-27 |
 | RF2 | Refactor: start the data from zero (one schema, content v1, no old-data code) | Not started | |
 | RF3 | Refactor: the new structure (feature folders, shared UI kit, layer rules) | Not started | |
 | RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | Not started | |
-| RF5 | Refactor: speed (reader, «أدومها» context, audio progress, shared loads) | Not started | |
+| RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | Not started | |
 | RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | Not started | |
 | RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | Not started | |
 | RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | Not started | |
@@ -54,10 +56,6 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 
 The commit ids above (and any from before 2026-11-01) are in the private archive
 `TameemHabash/wirduk-archive`. The public `wirduk` starts with one clean commit.
-
-After milestone 8 (same day, from the owner's phone test): counts reset when leaving the reader,
-an "إتمام" button, the editor's count box, audio that repeats as many times as the count, and the
-"العدّ مع الصوت" setting (off by default then; on by default since 2026-10-31).
 
 ## Refactor (RF0–RF8, from 2026-11-27)
 
@@ -80,6 +78,20 @@ RF0, done (2026-11-27):
   lines 91.1%; cold start median 609 ms; reader swipes 11.2% janky frames (emulator).
 - Found: a link to the reader already open (`wirduk://category/1?dhikr=1002` while category 1
   is open) keeps the page it is on. Not changed (no behavior change); for the owner to decide.
+- Owner (2026-11-27): the «الأذكار» tab is slow to open since the redesign: fix it in RF5. Likely
+  cause: it draws all 131 chapters at once (a plain `ScrollView`, an SVG star per row), and
+  reloads them on every visit with new objects, so every row draws again.
+
+RF1, done (2026-11-27):
+
+- Deleted old files (in git history): `docs/screenshots/`, `docs/design/proposal.html`,
+  `docs/app-summary.md`, `docs/adwamuha/plan.md`, `matching.md` (`match-plan.ts --out` makes it
+  again), `texts-for-review.md`, `scripts/dev/wav-level.ts`, and the logo's PDF, EPS and PNG
+  copies (the build uses only the two SVGs). Every mention fixed; `research/` (moved to the
+  archive on 2026-11-01) left `tsconfig.json`, ESLint and Prettier.
+- This file: only the current state (779 → about 170 lines). On the PC: about 750 MB of old
+  files in `.local/` deleted (kept: the two newest APKs, `devices.md`, `redesign/`, the Dorar
+  pages, `tanzil/`, the owner's chat texts, `keys/`), and the emulator's app data cleared.
 
 ## Where things are now
 
@@ -95,25 +107,20 @@ RF0, done (2026-11-27):
   branch `archive-main`) and `TameemHabash/wirduk-audio` (public, GitHub Pages: 397 mp3 +
   privacy policy at `/privacy/`), checked out at `D:\SelfProjects\wirduk-audio`.
 - **Devices:**
-  - Emulator `Wirdak_Pixel` (Android 16, x86_64): dev build of 2026-10-31, content v13, signed
-    in to the owner's Google account (for the backup screen). Its app data was empty on
-    2026-11-01; «أدومها» set up again then, with test days from the dev clock. On 2026-11-22 its
-    plan was edited by hand with «قطعتُها» (2 steps passed: step 1 → 3). If it hangs on start
-    ("Not Responding", no CPU): stop it, delete the `*.lock` files in its `.avd` folder, start it
-    with `-no-snapshot-load`.
-  - Owner's phone: Galaxy S21+ (serial: `.local/devices.md`, Android 15, arm64): release build of commit
-    eecb345 (content v13), installed by the owner from the link, tested 2026-11-01. Update it with
-    `scripts/dev/phone-apk.ps1` (CLAUDE.md, "Phone"): the APKs are in `.local/apk/`, and the
-    latest is always at https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk
-    (public pre-release `test-build`, owner's choice 2026-11-01).
-  - On the link since 2026-11-26: the APK of e3b69e2 (the whole redesign, R1–R6; kept as
-    `.local/apk/wirduk-e3b69e2-phone-arm64.apk`), built at the owner's request. Before it, the
-    APK of f477969 (2026-11-22, the owner feedback of 2026-11-21 and both of 2026-11-22), and
-    before that 385b255 (2026-11-21).
-  - A second phone (Samsung): the same APK (eecb345), installed by the owner from the link (no USB).
-    Newer APKs from this PC install over it (same debug key).
-  - Before Google Play: the Play build is signed with another key, so testers must uninstall the
-    test build first (their own adhkar and settings are lost, unless a backup feature exists).
+  - Emulator `Wirdak_Pixel` (Android 16, x86_64, `google_apis`): the release x86_64 build for
+    the Maestro runs (`e2e/README.md`); every run clears the app's data and sets the date. Signed
+    in to the owner's Google account (for the backup screen). If it hangs on start ("Not
+    Responding", no CPU): stop it, delete the `*.lock` files in its `.avd` folder, start it with
+    `-no-snapshot-load`.
+  - The owner's Galaxy S21+ (serial: `.local/devices.md`, Android 15, arm64) and a second
+    Samsung phone: release builds from the fixed link
+    https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk (public
+    pre-release `test-build`, owner's choice 2026-11-01), built with `scripts/dev/phone-apk.ps1`
+    (CLAUDE.md, "Phone"). On the link since 2026-11-26: the APK of e3b69e2 (the whole redesign,
+    R1–R6; kept in `.local/apk/`).
+  - From RF2 on (the data starts from zero), testers uninstall the old test app once before the
+    next APK. Before Google Play: the Play build is signed with another key, so testers uninstall
+    again (a backup file keeps their data).
 - **Tests:** 845 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
   `AdwamuhaMessagePicks`, the message each ward got, 2026-11-21).
@@ -121,636 +128,26 @@ RF0, done (2026-11-27):
 ## Waiting for the owner
 
 - **The redesign (R1–R6, 2026-11-26)**: built and checked on the emulator; the owner checks it
-  all together (owner, 2026-11-26), on the phone with the APK of e3b69e2 (on the link). Claude's choices to
-  confirm: in R4 above (the rules around «لم أقطعها بعد»), and the reader ring is teal as in
+  all together (owner, 2026-11-26), on the phone with the APK of e3b69e2 (on the link).
+  Claude's choices to confirm: the rules around «لم أقطعها بعد» (below), and the reader ring is teal as in
   the design (it was gold).
-- **The owner feedback of 2026-11-21** (below): to check on the phone with the APK of f477969
-  (on the link). The 2026-11-14 changes: tested by the owner (2026-11-21).
-- **The owner feedback of 2026-11-22** («قطعتها», below): on the link (APK of f477969), to check
+  - «لم أقطعها بعد» is not on the finished path;
+    «تغيير الترتيب» waits until a step put back is saved; a step put back needs its full weeks
+    when reached again (not the one week of a climb back).
+- **The owner feedback of 2026-11-21** (`docs/decisions.md`): to check on the phone with the
+  APK of e3b69e2 (on the link). The 2026-11-14 changes: tested by the owner (2026-11-21).
+- **The owner feedback of 2026-11-22** («قطعتها», `docs/decisions.md`): on the link (APK of e3b69e2), to check
   on the phone. Claude's choices to confirm: «قطعتها» on later steps too, the last step cannot be
   marked, reset keeps the steps done, the intro line.
-- **The owner feedback of 2026-11-22 (2)** («ارجع إلى الخطوة:», below): built as the approved
-  design; on the link (APK of f477969), to check on the phone.
-- **The week rule** (2026-11-14, point 4) is Claude's advice, asked for by the owner: confirm or
-  change it.
-
-Before that, nothing (2026-11-01). The old items, all closed:
-
-- **Audio for the opening dhikr** (1901/133901): the owner's recording `1901.m4a` (milestone 11,
-  content v13).
-- **Evening audio** (`docs/content-review.md` §E): the six evening adhkar with evening words play
-  the owner's own evening recordings (`133003.m4a`, …; milestone 11).
-- **Recordings that already repeat**: the owner gave the numbers with the new audio
-  (`audioRepeats`: `1017.m4a` and `1022.m4a` say it 5 times; every other recording once).
-- **The manual checklist**: the owner checked it on the Galaxy S21+ (2026-11-01, APK 68a8074, the
-  note at the top of `docs/manual-test-checklist.md`).
-
-The owner feedback of 2026-11-01 («مساري»'s square dot, "continue where I stopped" after the
-audio, the second ward's finish screen) was checked by the owner on both phones with the APK of
-eecb345 (2026-11-01): all good.
-
-## Redesign (R1–R6)
-
-The owner asked for a full new design (2026-11-22), saw it as an HTML page, asked for changes six
-times, and **approved version 6 on 2026-11-26**: https://claude.ai/artifact/A735PFQGu1BP5D1eevRuLJ
-(25 screens, every state in its own phone at the Galaxy S21+ size; its last section «الخلاصة
-والخطة» is the plan and the test plan in Arabic). The decisions: `docs/decisions.md`
-("2026-11-22 to 2026-11-26 — Redesign"). The page source and the full plan in English with the
-files to change are on the owner's PC only (`.local/redesign/`, not in git).
-
-Built step by step; after each step: `npm run verify`, commit, push, report.
-
-1. **R1 The look**: the new colors (same family as the logo), radii, the new icon set, the
-   button kinds, rows with icon tiles, a segmented control with icons, the in-app dialog instead
-   of Android's dialog (10 places), the new toast, the ring clockwise in Arabic.
-2. **R2 Tabs, Home, the Adhkar tab**: three tabs («الرئيسية», «الأذكار», «الإعدادات»); Home with the
-   golden card of the current period (or «وردك اليوم»), favorites as tiles; the Adhkar tab with a
-   search box on top, «أذكاري» first, the list, reorder saved only with «حفظ»; the dhikr editor's
-   count as a number field and its audio buttons hidden once there is audio.
-3. **R3 Reader**: no card border, the fadl with a small gold star (option «ب»), the source folded
-   under «المصدر» (a tap counts and opens it), the long-text fade, segments in landscape; the
-   restore toast opens Settings at «المتابعة من حيث توقفت»; the finish screen's beads clockwise.
-4. **R4 «أدومها»**: no ornaments on the hadith card, «عرض أقل», the hadith source folded after a
-   ward, «مساري»'s bead path, no «افتح ورد…» button, «خفّف وردك أو خذ استراحة»; the step-back sheet
-   without «نصف الخطوة» and «الخطوات الأولى»; the plan editor's steps done folded and the new «لم
-   أقطعها بعد».
-5. **R5 Settings and the rest**: icon tiles, fonts as lines, the theme as icons, the
-   notifications-not-allowed card, audio downloads, report, about (the new audio line), startup
-   error.
-6. **R6 Checks**: contrast and dark-mode tests, the largest font, an emulator pass of every screen
-   against the design page.
-
-R1, done (2026-11-26):
-
-- Colors (`colors.ts`): the design's values and new tokens (`primarySoft`, `primaryInk`,
-  `accentInk`, `toast`, `dangerSoft`, `onDanger`, the morning and evening card gradients, …). Two
-  light colors are one shade darker than the design so that every text pair passes AA
-  (`textFaint` #617074, `accentInk` #85611A). Radii 10 / 16 / 22 / 28, touch target 48.
-- The new icon set (`Icon.tsx`), the button kinds, `TextButton` (the red delete buttons on the
-  editors and the audio screen), `IconTile`, rows with icon tiles and notes (`SettingsParts`),
-  `Segmented` (the theme picker now has an icon per choice).
-- The app's own dialog in all 10 places that used Android's (and the plan's save notice, with
-  the hadith inside, «أبقِ الخطة كما كانت» first and «نعم، احفظ التعديل» the quietest). The
-  delete-chapter title has no «» and the name in teal.
-- The new toast: a light card with an icon tile (each toast has the design's icon), a chevron
-  when it can be pressed.
-- The reader's ring: teal on a quiet track (the design); clockwise in Arabic, counterclockwise
-  in left-to-right languages.
-- Tests: 805 (new: the dialog, the toast, the ring, the button kinds, more contrast pairs).
-
-R2, done (2026-11-26):
-
-- Three tabs (`src/app/(tabs)/`, our own tab bar): «الرئيسية» (the owner's word, cut from their
-  message by script), «الأذكار», «الإعدادات». Toasts sit above the tab bar on the tabs, lower
-  elsewhere. `wirduk://search` opens the adhkar tab with the keyboard up.
-- Home: the logo, «ابنِ وردك خطوةً خطوة ›» while «أدومها» is off, the search button; the golden
-  card of the current period (sun or moon, «الآن», «ابدأ»), the other period as a small row;
-  with «أدومها» on, «وردك اليوم» is that golden card, then the quiet morning and evening cards;
-  the favorites as tiles, or a dashed card with the new hint. The chapter list left Home.
-- The adhkar tab: a large title, a real search box (results in place of the lists; no «» around
-  the word when nothing is found, the word in teal: the owner's answer to 5.3), «أذكاري» first in
-  the sand color (every chapter in full, then «إضافة باب»), then every chapter (the book number
-  small and faint, the star at the end).
-- «تعديل الترتيب» is its own screen with close, the title and «حفظ»: the order is saved only
-  with «حفظ»; leaving with changes asks «تجاهل التغييرات؟»; the restore uses the new dialog.
-- The own-adhkar editors and «أذكاري» manage screen: a top bar with close and «حفظ» / «إنشاء»
-  (no save button at the bottom); the count is + / the number (tap and type) / −; the audio:
-  «تسجيل بصوتي» and «اختيار ملف صوتي» only while there is no audio, a red card while recording,
-  then only the player (play, «الصوت جاهز» with a progress line, delete).
-- The owner's redesign words are in `docs/adwamuha/owner-edits.json` (`redesign`), checked
-  against the app's strings by `src/i18n/owner-words.test.ts`.
-
-R3, done (2026-11-26; checked on the emulator in dark mode: Home, the adhkar tab, the reader, a
-tap on «المصدر» counting, the long-text fade):
-
-- The reader: the text on the page with no card; the top bar, the segments (4 high), the
-  position with the number in bold, «إتمام» as a pill, play as a soft teal circle (filled with a
-  halo while playing). The ring as before, teal, clockwise.
-- Fadl, option «ب»: a small gold eight-point star and the text in the quiet color, no label, no
-  box (a screen reader still hears «الفضل:»).
-- «المصدر» folded under a thin line (`SourceFold.tsx`): a tap counts like any tap and opens or
-  closes it; open, the source, the grading and «عرض في الدرر السنية» (same rule as before:
-  counts and shows the toast). It folds again on the next page. No source: nothing under the
-  text.
-- A long dhikr starts at the top and scrolls; its bottom edge fades only while text is below
-  (`components/BottomFade.tsx`); the fadl and the source come at its end.
-- The user's own dhikr: the «أذكاري» badge, then the sand line.
-- The restore toast's arrow opens Settings at «المتابعة من حيث توقفت», lit for 3 seconds.
-- The finish screen: 33 gold beads light up one by one, clockwise, around a check; the subtitle
-  «أتممت» + the chapter's name bold in teal, no «».
-- Found on the emulator and fixed: the golden card's gradient missed its padding strip; a tab's
-  pill was drawn square after it was selected (a new view per state now).
-
-R4, done (2026-11-26):
-
-- The hadith card: soft gold, no ornament anywhere (setup 1 bigger, «مساري», the save notice).
-- Setup 2: «الخطوة N من 24» in the middle between + and −, the step's words under it, the ward
-  as chips. Setup 3 and «أدومها» settings: «عرض أقل» with an up arrow (the owner's words).
-- After a ward (and on Home's message card): a hadith's Dorar data folds under «المصدر» (no
-  counting there); a verse stays as it is.
-- «مساري»: the bead path (`BeadPath.tsx`, 24 beads clockwise from a small star) instead of the
-  ring; no «افتح ورد…» button; «قرأتُ وردي بدون التطبيق» as a row; then two rows with notes
-  (`PlanRows.tsx`): «خفّف وردك أو خذ استراحة» (the owner's choice) and «عدّل الخطة». Finished:
-  «إيقاف أدومها» takes the first row. The same rows in «أدومها» settings under «الخطة».
-- The step-back sheet, from the bottom: the owner's title, «ارجع إلى الخطوة:» (− / the step and
-  its words / +), the two breaks side by side. «نصف الخطوة» and «الخطوات الأولى» are removed from
-  the app (`StepBack` is only `{ step }`); old event logs with them still load.
-- «عدّل الخطة»: the steps done folded in one row («الخطوات 1–N · قطعتَها»); open, each has «لم
-  أقطعها بعد» (the owner's word): the step goes right after the current one and its dhikr leaves
-  the ward, saved with «حفظ التعديل» after the warning, «تراجع» before (`withEdits` in
-  `logic/plan-edit.ts`; the same step goes on under a new number). The current step framed in
-  teal with «خطوتك الآن» and «قطعتُها»; the weeks with + and −; a save bar always in sight.
-- Claude's choices (for the owner to know): «لم أقطعها بعد» is not on the finished path;
-  «تغيير الترتيب» waits until a step put back is saved; a step put back needs its full weeks
-  when reached again (not the one week of a climb back).
-
-R5, done (2026-11-26):
-
-- Settings: «أدومها» first in a gold card («مفعّلة» / «غير مفعّلة»); every row with an icon
-  tile; the text size with its value as a badge; the dhikr fonts as lines (a ring for the one
-  chosen); the theme as a small segmented control with icons and no box; the reminders with a
-  tile, the time in a chip; the backup with status lines (a teal check, or gold info) and the
-  "enable" link; «سياسة الخصوصية» with an "external" icon.
-- New: a lasting gold card above the reminder rows while notifications are not allowed
-  (`features/reminders/NotificationsDeniedCard.tsx`; Settings and «أدومها» settings), checked
-  again when the screen shows and when the app comes back; a tap opens the app's page in the
-  phone settings. Not shown before the app ever asked.
-- About: the promise in a teal band under the logo; the new audio line (the owner's sentence);
-  the Tanzil link with an "external" icon. Audio downloads: a tile and the count, then the size;
-  the red text button to delete. The startup error centered with a gold tile.
-
-R6, done (2026-11-26):
-
-- Tests: every text color pair passes AA in both themes (`colors.test.ts`, the golden cards
-  too); `edge-cases.test.tsx` draws the new screens (the adhkar tab, reorder, the editors) in
-  dark and light with no color of the other theme. 845 tests.
-- Emulator pass (dev build, light and dark): Home (with «أدومها»), the adhkar tab, the reader
-  (fold, fade, a tap on «المصدر» counting), Settings, «مساري» (bead path, the two rows), «عدّل
-  الخطة» (fold open, «لم أقطعها بعد»), the step-back sheet, the dialogs, the toast. With the
-  system font at 1.3: Home and the adhkar tab, nothing cut. All matched the design page.
-- Not checked yet: the owner's Galaxy S21+ (no APK built: only when the owner asks), the system
-  font at 2.0, the finish screen's animation on a device, setup 1–4 and the editors on the
-  emulator (they are covered by tests).
-
-## Owner feedback 2026-11-14 («أدومها»)
-
-The owner's four points; decisions and details in `docs/decisions.md` (2026-11-14). Done
-(2026-11-15), checked on the emulator (dev build) and in tests, and tested by the owner on the
-phone with the APK of 385b255 (2026-11-21):
-
-1. **A reminder tap checks the ward first** (`useNotificationTaps`): already read today, Home
-   stays with a toast «قرأتَ ورد الصباح / المساء اليوم، تقبّل الله منك.»; otherwise the ward opens.
-2. **The ward read in parts** (`ward-progress.ts`, user.db migration 6 `WardProgress`, a phone
-   table that stays out of backups): the counts are kept while the ward's window is open, the
-   ward opens again at the first dhikr not read (also after the app is closed); the next window
-   starts fresh; finishing clears it. The full categories still start from zero.
-3. **The «أدومها» badge** on Home, next to the settings button, while «أدومها» is off: opens
-   setup 1. Gone while on.
-4. **The good-weeks rule**: a step of N weeks needs N weeks with 4 mornings and 4 evenings each,
-   not in a row; a week short of that does not count (no extension any more). «مساري» always shows
-   the goal bars (faded during a break; in the step's first week with «يُحسب هذا الأسبوع من بدء
-   خطوتك.»), and under the ring «الأسابيع المكتملة في هذه الخطوة: N من M». The owner asked for
-   Claude's advice on the rule (any good weeks, not in a row): to confirm.
-
-A week counts only once it is over (owner, 2026-11-15): on its last day after both wards, or the
-day after. So a steady user is asked after exactly the step's weeks, as before.
-
-## Owner feedback 2026-11-21 («أدومها»)
-
-The owner's three points; decisions and details in `docs/decisions.md` (2026-11-21). Done
-(2026-11-21), checked in tests (not on the emulator or phone yet):
-
-1. **The message after a ward never repeats before all were shown** (and Home's too, see 3): the
-   19 messages (the
-   owner's words + 18 approved verses and hadiths) come in rounds, in a random order; a new round
-   does not start with the last one. Each ward keeps its message (user.db migration 7,
-   `AdwamuhaMessagePicks`; `chooseMessage` in `AdwamuhaProvider`, `nextPick` in
-   `logic/messages.ts`).
-2. **A ward never opens outside its time** (`closedWard` in `logic/sessions.ts`): a reminder
-   tapped late keeps Home, with «انتهى وقت ورد الصباح.» / «… المساء.» (or «يبدأ ورد … الساعة …» for
-   a reminder set before the ward begins; times from the settings). "Continue where I stopped"
-   does not reopen it, and the ward screen opened late goes back to Home with the note.
-3. **Home's messages**: first taken off Home (the end-of-week, new-step, step-back / break and
-   end-of-path messages), then brought back the same day at the owner's request (second
-   commit). They now come in rounds too (one per moment): none again before all were shown.
-
-## Owner feedback 2026-11-22 («عدّل الخطة»)
-
-The owner's two points; decisions and details in `docs/decisions.md` (2026-11-22). Done
-(2026-11-22), checked in tests:
-
-1. **«قطعتها»** on the current step and every later one (`PlanEditorScreen.tsx`,
-   `logic/plan-edit.ts`: `withPassed`, `passSteps`): a marked step joins the steps done and the
-   current step moves on by one; saved only with «حفظ التعديل», after the same light-plan
-   warning. «تراجع» undoes a mark before saving. Reset now keeps the steps done.
-2. **Steps 4 and 5** show «الإخلاص والمعوذتين» and «آية الكرسي» (`dhikrLabel`, as «ترتيب الورد»).
-
-## Owner feedback 2026-11-22 (2) («طرأ عليّ ظرف»)
-
-The owner's point; decisions in `docs/decisions.md` (2026-11-22 (2)). The owner approved an HTML
-design first (https://claude.ai/artifact/7KCktREA6T2xDbf2dp7ufM). Done (2026-11-22), checked in
-tests and on the emulator (dev build; system font 1.0, 1.3 and 2.0: the sheet scrolls):
-
-- **«ارجع إلى الخطوة:»** in the step-back sheet (`StepBackSheet.tsx`), before the break: − and +
-  pick a step from 1 to the one before the current step (one back to begin with); the step shows
-  by its first words and «…», or the owner's name (steps 4 and 5), with its wards; «ارجع إلى
-  الخطوة N» goes back there (`stepBackTarget(step, { step: N })`, a step back like the others).
-  The sheet scrolls. The step labels: `stepLabel` / `stepSession` (`setup.ts`) and
-  `useDhikrTexts`, shared with «عدّل الخطة».
-
-## Milestone 9 — notifications and "report an issue"
-
-Built and tested on the emulator (2026-10-23); decisions in `docs/decisions.md` (2026-10-23).
-
-**Reminders: done.** Settings → "التذكير", both off by default. Checked on the emulator: the
-permission question, a reminder arriving, a tap opening the morning adhkar (app open and app
-closed), refusing the permission (toast → the app's page in the phone settings).
-
-**Report an issue: the app part and the relay code are done; the relay is not deployed.**
-Checked on the emulator against a fake relay on this PC: description, 3 screenshots (62–83 KB
-each after shrinking), details, the "no connection" message. The Settings row stays hidden
-until `APP_CONFIG.report.endpoint` is set.
-
-What is left, each step only with the owner's OK (details: `workers/report/README.md`):
-1. ~~Create the private repo `TameemHabash/wirduk-reports`.~~ Done 2026-10-23 (default branch
-   `master`, issues on).
-2. ~~`npx wrangler@4 login` and `npx wrangler@4 deploy`.~~ Done 2026-10-23: the owner's account,
-   workers.dev name `wirduk`, relay at **https://wirduk-report.wirduk.workers.dev** (answers
-   `503 unavailable` until the token is set).
-3. ~~The owner makes the fine-grained GitHub token and sets it as the secret `GITHUB_TOKEN`.~~
-   Done 2026-10-23 (Cloudflare dashboard, type Secret; the token expires after about a year:
-   then reports fail with "failed" until a new one is set, see `workers/report/README.md`).
-4. ~~Set `APP_CONFIG.report.endpoint`, send a test report end to end.~~ Done 2026-10-23: issue #1
-   in `wirduk-reports` (text, screenshot, details). The phones get it with the next release build.
-5. ~~Privacy page: add the reminders and the report.~~ Done 2026-10-23 (`wirduk-audio` 85a4585,
-   live at the same address). It stays in `wirduk-audio` (owner, 2026-11-01).
-6. Google Play's Data safety form must declare what a report sends (milestone 14).
-
-Open question for the owner: reminders may come up to an hour late (Android's battery window).
-Exact timing needs the user to allow "Alarms & reminders" for the app (a system page), plus the
-`SCHEDULE_EXACT_ALARM` permission.
-
-## Going public (only when the owner says "make the repo public")
-
-Decided 2026-10-23. **The owner gave the word on 2026-11-01**, with changes: the privacy page
-stays in `wirduk-audio` and says nothing about the code (an organization may adopt the app and
-make the repo private again, and Google Play needs that page); no "open source" box in the app
-(the owner decides before Google Play, so skip steps 5a, 5b, 11, 12 and 13); the Tanzil text the
-scripts read is kept in git (`.local/tanzil/`); a note for forks at the top of `CLAUDE.md`; README
-"Develop with Claude Code" and "License". **All done on 2026-11-01**: steps 1–4 (serial in
-`.local/devices.md`, `research/` removed, MIT `LICENSE`), step 6 (pushed, 42f9ac0 in the
-archive), steps 7 and 8 by the owner (the auto-mode check blocks them for Claude), steps 5, 9
-and 10 by Claude (one clean commit, the remotes, only `main` pushed, the checks) and step 14.
-**`origin` is public: push only `main` to it, never `archive-main`** (`git push --all` or
-`--mirror` would publish the old history).
-
-- **Fresh start**: the public `wirduk` gets one clean first commit. The full history stays in a
-  **private** archive. (Deleting files in a new commit is not enough: old commits keep them, and
-  GitHub keeps old commits reachable by their id even after a history rewrite.)
-- **Remove**: `research/` (the raw Dorar results of the first run; it stays in the archive) and
-  the owner's phone serial.
-- **Email**: keep the owner's personal email on commits (owner's choice).
-- **License**: the code is open for anyone to fork, build apps with and reuse (owner's words):
-  **MIT** for the code. Third-party parts keep their own terms, listed in the README: the adhkar
-  text (`rn0x/Adhkar-json`, "no license, free to use"), the Dorar texts and links, the fonts
-  (OFL-1.1), the tick sound (`assets/sounds/SOURCES.md`), the logo. The audio is not in this repo.
-
-Steps:
-1. Everything committed and pushed; `npm run verify` passes.
-2. Phone serial: copy it to `.local/devices.md` (not in git). In `CLAUDE.md` and this file,
-   write "the owner's phone (serial: `adb devices`, or `.local/devices.md`)". `git grep` for it
-   must find nothing.
-3. Remove `research/` from the tree. Fix what points to it: `CLAUDE.md`, `eslint.config.js`,
-   `tsconfig.json`, `.prettierignore`, `scripts/dorar/README.md`. Say it lives in the private
-   archive `TameemHabash/wirduk-archive`.
-4. Add `LICENSE` (MIT, the owner's name, 2026) and a README "License" section with the
-   third-party list above. Re-check each third-party term before writing it.
-5. Docs: commit ids before the public start (in this file and `docs/decisions.md`) refer to
-   `wirduk-archive`. "GitHub" line above: `wirduk` public, `wirduk-archive` private.
-5a. **Privacy page moves into `wirduk`** (owner, 2026-10-23): copy `wirduk-audio/privacy/index.html`
-   to `site/privacy/index.html`, add a GitHub Actions workflow that publishes only `site/` to
-   GitHub Pages. New address: `https://tameemhabash.github.io/wirduk/privacy/`. Its contact link
-   points to the `wirduk` issues. `APP_CONFIG.privacyPolicyUrl` → the new address.
-5b. **About screen: "open source"** (owner, 2026-10-23). A new box after the fonts, with a link
-   button to the code (`APP_CONFIG.sourceCodeUrl = https://github.com/TameemHabash/wirduk`):
-   - `about.openSourceTitle`: "مفتوح المصدر"
-   - `about.openSource`: "وِرْدُك تطبيق مفتوح المصدر برخصة MIT: يمكن لأي أحد أن يطّلع على شيفرته،
-     وأن ينسخها ويبني عليها تطبيقات أخرى. أما المحتوى والتسجيلات والخطوط فلكلٍّ منها شروطه
-     المذكورة في هذه الصفحة."
-   - `about.sourceCode`: "الشيفرة المصدرية على GitHub"
-   Tests for the box and the link. Ship it only once the repo is public (the link must work).
-6. `npm run verify`, commit, push to the current (private) repo, so the archive has it all.
-7. On GitHub: rename `TameemHabash/wirduk` → `wirduk-archive` (stays private):
-   `gh repo rename wirduk-archive -R TameemHabash/wirduk`.
-8. Create the new public `TameemHabash/wirduk`. The auto-mode check blocks
-   `gh repo create --public`: ask the owner to run `gh repo create TameemHabash/wirduk --public`.
-9. Locally: `git checkout --orphan public-main`, one commit of the whole tree ("Wirduk: first
-   public version; earlier history in the private wirduk-archive"), rename it to `main`; keep the
-   old branch as `archive-main`. Remotes: `origin` → new `wirduk`, `archive` → `wirduk-archive`.
-   Push only `main` to `origin` (old commits are not reachable from it, so they are not sent).
-10. Check on GitHub: no `research/`, `git grep` finds no serial, the README and LICENSE show.
-11. Turn on GitHub Pages for `wirduk` (source: GitHub Actions); open the new privacy address.
-12. `wirduk-audio/privacy/index.html` becomes a short page that sends visitors to the new address
-    (meta refresh + a link), so old app builds and old links still work. Public push. (As of
-    2026-10-23 only the owner and friends who test it have the app.)
-13. New release build for the phones (new privacy address + the About box). Google Play
-    (milestone 14) uses the new privacy address.
-14. Update this file and the memory notes.
-
-Not affected: the audio site (`wirduk-audio`), the relay, and `wirduk-reports` (always private).
-
-## Milestone 10 — Adwamuha
-
-The owner's big feature (named 2026-10-23; first called "Adwamoha"). Description:
-`docs/adwamuha/feature-prompt.md`; build plan: `docs/adwamuha/plan.md`; the owner's answers:
-`docs/decisions.md` → "Adwamuha". Matching approved 2026-10-23 (24 steps, step 23 morning and
-evening).
-
-Progress (the order in `docs/adwamuha/plan.md`):
-- [x] 1. Plan data in the content build + checks (content v10).
-- [x] 2. The logic and its tests (`src/features/adwamuha/logic/`, 57 tests).
-- [x] 2b. Storage in user.db (migration 4: `AdwamuhaState`, `WardRecords`, `AdwamuhaPauses`,
-  `AdwamuhaEvents`, `AdwamuhaShown`; `AdwamuhaRepository`) and the `wardTimes` setting.
-- [x] 3. The ward in the reader (`/adwamuha/ward/[session]`, its finish screen, the full category
-  counts too, "continue where I stopped" reopens a ward). The owner's texts are cut from the
-  description into `src/features/adwamuha/owner-texts.ts` by `scripts/adwamuha/owner-texts.ts`.
-- [x] 4. Home card «وردك اليوم» and «مساري» (`/adwamuha`): step and stage, time left, the week so
-  far, percentages, the week grid, «جاهز لإضافة الذكر التالي؟» (once a day on Home, then on
-  «مساري»), automatic extension, «قرأتُها من حفظي» with undo.
-- [x] 5. Settings and reminders: «أدومها» first in Settings (highlighted), the start screen
-  (`/adwamuha/start`: the idea, the light-plan notice, the hadith card, the starting step), off
-  keeps everything, on again asks continue / start over, the four ward times, the reminders move
-  into the section and speak of the ward, a tap opens the ward. Checked on the emulator.
-- [x] 6. Step back and plan editing: «طرأ عليّ ظرف…» (half the step, the first three, a break of
-  1 or 2 weeks that can end early), the gentle suggestion on Home (once, then 14 days), the plan
-  editor (`/adwamuha/plan`: weeks 1–8 for the current and later steps, reorder later steps only,
-  reset, the light-plan notice with the hadith before saving a change).
-- [x] 7. Explanation screen (`/adwamuha/intro`, first launch of a new install only: user.db
-  migration 5 marks it seen on installs that already have data), the light-plan notice with the
-  hadith card (start screen, plan editor, «مساري»), the stage tips (once when a stage begins,
-  always readable on «مساري»), the owner's messages once each (extension, end of week, end of the
-  path with the keep-on / turn-off offer). The hadith card was checked against
-  dorar.net/hadith/sharh/113728 on 2026-10-24 (by script, with hashes): every field is the same;
-  the text is the same after Unicode NFC (only the order of two marks differs, it looks the same).
-- [x] 7b. The owner's review (2026-10-24): no «أكمل باقي الأذكار» anywhere in the feature (a
-  gentle line after a ward asks to stop at it today), and the owner's wording for «النية لكل يوم…»
-  on the start screen.
-- [x] 8. The message library. `scripts/adwamuha/messages.ts` keeps
-  `content-source/adwamuha-messages.json`: 33 verses cut from the Tanzil Uthmani text (downloaded
-  to `.local/tanzil/`), 29 hadiths and 1 athar from Dorar pages saved on 2026-10-24
-  (`.local/dorar-messages/`, 47 searches; only صحيح / حسن). The owner approved all 63 on
-  2026-10-24 (after reviewing a shared page made from the library). Content v11: table
-  `AdwamuhaMessages`. Each moment shows one message from its pool (the owner's own message + the
-  library's), picked by the occasion (`logic/messages.ts`): the same occasion always shows the
-  same message. A new step and a step back / break now show in the message card (no toast).
-  About credits Tanzil with a link. Checked on the emulator (a hadith, a verse, two verses with
-  the end-of-verse sign, About).
-- [x] 9. Emulator pass (2026-10-24): Home card, «مساري», plan editor, step-back sheet, a break
-  and its message, the ward finish screen (hadith, verse, two verses), About, large text (1.3).
-  Found and fixed: a plan begun in the evening counted that day's morning as missed (now it
-  counts for nothing: `stepStartedIn` / `planStartedIn` in the plan state). README section.
-  Release APK built.
-
-## Milestone 10b — Adwamuha redesign (the owner's design, 2026-10-29)
-
-The owner's design: `docs/adwamuha/flow-design.html` (copy of `adwamuha-flow-latest.html`; its
-Arabic texts are cut from it by script). Every screen and state in it, with the behavior in each
-screen's notes, in the app's own theme, fonts and components (not the HTML's). Decisions:
-`docs/decisions.md` "2026-10-29". Steps:
-
-- [x] 1. Fixes: the backup button on Samsung opens the main Settings (find Google's backup
-  screen; test on the emulator with the owner's account); the shadda in «الله» in the hadith;
-  the hadith without a source line everywhere (Dorar data kept stored); the splash logo is a
-  little cropped. The button now opens Google's backup screen first
-  (`com.google.android.gms.backup.ACTION_BACKUP_SETTINGS`: «Backup & reset» with the account,
-  one tap to «Backup by Google One»), checked on the emulator with the owner's account
-  (2026-10-30); then stock Android's, then the main Settings. To check on the Samsung.
-- [x] 2. Logic (`logic/weeks.ts`, `week-start.ts`, `orderWard` in `logic/ward.ts`; details in
-  `docs/decisions.md` "How the week rule works"): calendar weeks that start on the phone's first
-  day (expo-localization), for the grid, the goal bars and the move-on rule (the last 2 full weeks, 4 mornings + 4 evenings; a
-  week cut by the step's start or a break does not count); week messages and the step-back
-  suggestion on the same weeks; a later starting step gets 2 weeks; «ترتيب الورد» (plan order,
-  default, or category order: same adhkar, same progress) in user.db, with tests.
-- [x] 3. Messages in the database: the owner's messages and tips, the design's welcome and
-  maintenance tip, chosen by state; after both wards, only the owner's prayer. (Content v12,
-  table `AdwamuhaTexts`; the welcome for a later start uses Claude's sentence, for review.)
-- [x] 4. Setup 1–3 (4 screens since 10c) (instead of the old explanation and start screens): first launch, and once
-  after each app update while Adwamuha is off (the last version shown is kept in user.db).
-  Routes `/adwamuha/intro`, `/adwamuha/start`, `/adwamuha/reminders`; the design's texts are cut
-  into `common.json` by `scripts/adwamuha/design-strings.ts`. "After each update" needs the app
-  version or build number to change (`app.config.ts`; still 1.0.0 / 1 on the test APKs).
-- [x] 5. Home with Adwamuha: «وردك اليوم» (hadith line, statuses, one main button, the step
-  link, the one-time message, the move-on question and the suggestion), «الأذكار كاملة» small
-  cards; Home without Adwamuha unchanged. (The move-on question is no longer a pop-up: it stays
-  in the card until answered.)
-- [x] 6. «مساري»: ring, featured hadith, «تتبّع الأسبوع» (calendar week, goal bars, legend,
-  yesterday's dot), the stage tip, «قرأتُ وردي بدون التطبيق» (with undo), the move-on question,
-  break / first week / finished states. (No percentages, no why-light box, no one-time messages
-  here; the old «قرأتُها من حفظي» sheet is gone.)
-- [x] 7. «أدومها» settings screen: on/off, «ترتيب الورد» with its note and preview, reminders,
-  ward times, plan links, «احفظ مسارك» (Claude's own text). Route `/adwamuha/settings`; main
-  Settings has one «أدومها» row that opens it.
-- [x] 8. Emulator pass (Home, «مساري», setup 1–3, the settings screen, the backup button with the
-  owner's account), docs, verify, release APK (2026-10-30), report.
-
-For the owner to check (10b): the welcome for a later start (Claude's middle sentence,
-`docs/adwamuha/claude-drafts.json`); a message due comes before the move-on question in
-«وردك اليوم»; the backup button on the Samsung (Google's backup screen).
-
-## Milestone 10c — owner feedback 2026-10-30
-
-The owner's words are cut from their chat message by script into `docs/adwamuha/owner-edits.json`
-(`designFixes`, `wardNames`); nothing typed. Done:
-
-- Setup 1: the numbers 1–3 in rounded squares (design `.feat .n`).
-- Setup 2: «ابدأ من أول خطوة» (the design had «أبدأ», the user's own voice like «أحافظ»; the
-  owner wants the imperative). The preview shows every dhikr of the chosen step (first words with
-  «…» when cut), and the owner's names «آية الكرسي» and «الإخلاص والمعوذتين» for those two
-  (ids 1001/133001 and 1002/133002; `OWNER_TEXTS.wardNames`, `dhikrLabel` in `setup.ts`).
-- Setup 3 (new, `/adwamuha/order`, `SetupOrderScreen.tsx`): «ترتيب الورد» as in the settings,
-  for the chosen step's ward, the whole ward shown first, «عرض أول أربعة» to shorten it. The
-  reminders are now setup 4 (still «ابدأ مساري» at the end). Shared part: `WardOrderPicker.tsx`.
-- «ننصح به» is a badge after «ترتيب الخطة» (design `.tag`); the choice notes are smaller than
-  their titles (caption), as the other settings notes; the order preview has numbers in rounded
-  squares (design `.oi span`), the four first in the settings with «عرض الورد كله (N)».
-- «أدومها» settings: «ترتيب الورد» moved under «الخطة», before «احفظ مسارك».
-- Home: «الصباح والمساء» above the quiet morning and evening cards (was «الأذكار كاملة»).
-- Main Settings: «غير مفعّلة» showed «غير» on the Galaxy S21+ (drawn wider than measured, the
-  last word wrapped and was cut, as reports#2). `LinkRow`'s value now gets more room.
-- The splash: the 10b images never reached the APK (`android/` was not prebuilt after the change).
-  `npx expo prebuild --platform android` now done; it failed with EBUSY while an adb server
-  started from inside `android/` was running (restart adb from the repo root first).
-- «مساري»'s goal bars («هدف الأسبوع · شرط الانتقال») were already there, from the first full
-  week; the week the step starts in shows the design's «هدفك: ٤ أيام من ٧…» line instead (the
-  design's «أول أسبوع» state: no goal bars). Asked the owner if they want the bars there too.
-
-## Milestone 10d — «بداية الأسبوع» (the owner's design, 2026-10-30)
-
-The design was updated (`docs/adwamuha/flow-design.html`, copy of the owner's new
-`adwamuha-flow-latest.html`). Done:
-
-- A new section in «أدومها»'s settings, after «أوقات الورد»: Friday, Saturday, Sunday or Monday
-  (Saturday by default, no mark), a live preview of the 7 days with the first one marked, and the
-  design's hint. Stored in user.db (setting `weekStart`; any day 0–6 is accepted).
-- It is the only source of the week's first day: `week-start.ts` (the phone's region, through
-  expo-localization) is removed. expo-localization stays for the layout direction.
-- A change applies at once: the grid, the goal bars, the move-on rule and the step-back
-  suggestion are worked out again from the stored days. The week that just ended on the new days
-  brings no end-of-week message (`setWeekStart` marks it shown).
-- «مساري»: the days to come are dashed and faded, their names faded (design); «هدف هذا الأسبوع».
-- The design's new texts are cut by `design-strings.ts` (it now also owns `adwamuha.weekdays`,
-  the short day names, which already matched the design).
-
-## Milestone 11 — update the morning and evening recordings
-
-The sheet for the owner (2026-10-31): `docs/audio/morning-evening-audio.csv`, written by
-`node scripts/content/audio-sheet.ts` from the content database: 31 recordings (the morning
-order, one row when the evening says the same words, then the 7 said only in the evening). The
-owner fills `new_file_path` and `new_recording_says`.
-
-Done (2026-10-31), all from the owner's filled sheet (30 files in `D:\Downloads\Thekrak`, m4a,
-AAC about 131 kbps):
-
-- [x] `node scripts/content/apply-audio-sheet.ts ../wirduk-audio/audio/ar` checks each row (the
-  file is there and is an m4a or mp3; `new_recording_says` divides the count), copies each file
-  to the audio site named after its dhikr (`1001.m4a`, `133003.m4a` for an evening-only one; one
-  file used by two rows once: 1018 and 1019 say the same words), and writes `audioRecordings`
-  (dhikr → file) and `audioRepeats` (1017 and 1022: 5 times per play) into `overrides.json`.
-- [x] Not converted to mp3 (converting would lose quality): the app keeps a name's own extension
-  (`audioFileName`; the book's names have none and stay `.mp3`). New names, so the old mp3 files
-  stay on the site unchanged for older app versions.
-- [x] `make-audio-manifest.ts` lists m4a files too (427 entries); content v13: 273 recordings, the
-  morning and evening ones are the owner's 30 (12.0 MB; «تحميل صوتيات الصباح والمساء» shows it).
-  The 7 evening-only adhkar have their own recordings now (§E of `content-review.md` is solved).
-- [x] On start, the app deletes downloaded recordings no dhikr plays any more
-  (`AudioDownloads.removeUnused`, promised 2026-10-23).
-- [x] wirduk-audio pushed (30d2cc7: the 30 m4a and the README). Release APK.
-- Row 26 (133004): the owner's path came back in the sheet (`2&1.m4a`).
-- Next time: the owner fills the sheet again (or a new one: `node scripts/content/audio-sheet.ts
-  --force` writes a fresh one from the content), then the same steps.
-
-## Milestone 10e — owner feedback 2026-10-30 (2)
-
-- «مساري»: a line before the goal («هدف هذا الأسبوع · شرط الانتقال», or the first week's
-  sentence), as the design's `.goal` top border.
-- Audio: only «تحميل صوتيات الصباح والمساء» shows (24 files then, 30 since milestone 11, about
-  12 MB, the recordings of the morning and evening adhkar; the size comes from the content
-  database). "Download every
-  recording" stays in the code, hidden (`APP_CONFIG.audio.showDownloadAll`). «حذف الصوتيات
-  المحمّلة» still removes every recording on the phone (also those downloaded by playing them).
-
-## Milestone 12 — backup (automatic + a backup file)
-
-Owner's request (2026-10-23): Adwamuha keeps important personal data, so the user must be able to
-keep it safe. Talked through on 2026-10-25; the owner's answers:
-
-1. **Both:** fix Android's automatic backup to the user's Google Drive, and add a backup file.
-2. **Restore replaces all** (no merge), after a safety copy of the current data.
-3. **Reminder:** the last backup dates in Settings, and a gentle note when the automatic backup
-   is not working (Android never backed up the app, or the last time was over 30 days ago).
-4. **The file includes the user's own recordings.**
-
-Found while preparing (2026-10-25): `allowBackup` is on with no rules, so Android tries to copy
-all the app's files. Downloaded adhkar audio (≈116 MB) is in the same place and Android's limit
-is 25 MB per app: above it the whole backup is skipped. So users who downloaded the audio have
-no automatic backup today.
-
-The plan:
-
-- **Automatic (Android):** backup rules (Android 12+ `dataExtractionRules`, older
-  `fullBackupContent`) that keep only the small data: `user.db` (+ its `-wal`) and the backup
-  dates. Not the content database, not any audio, so it never passes 25 MB. A small
-  backup agent (local Expo module in `modules/`, with a config plugin; `android/` stays
-  generated) saves the date each time Android backs the app up. Android does not let an app ask
-  whether backup is on; "never" covers that case.
-- **Backup file:** Settings → «النسخ الاحتياطي»: «حفظ نسخة احتياطية» makes one file (a copy of
-  `user.db` and the user's own recordings, with a format version) and opens the share sheet
-  (Google Drive, Files, WhatsApp…). The app sends nothing itself. «استعادة نسخة احتياطية» picks a
-  file, shows its date and what is inside, asks to confirm, keeps a safety copy on the phone, then
-  replaces the data. Older files go through the usual migrations; damaged files or files from a
-  newer app are refused with a clear message.
-- **After any restore** (file or Android's): downloaded-audio rows whose files are missing are
-  dropped, so the app downloads them again when needed.
-- **Note on Home:** when the automatic backup is never / over 30 days old **and** no backup file
-  was saved in the last 30 days, a gentle note suggests saving one (once, then not for 30 days).
-- **Privacy page** (`wirduk-audio`, public: owner's OK before the push): backups stay with the
-  user (their file, or their own Google account); nothing comes to us.
-- **Tests:** the file round trip, refusing bad files, the note's rule; on the emulator, Android's
-  backup with `adb shell bmgr` (local transport): backup, clear the app, restore.
-- **iOS later (milestone 15):** the same file works there; the phone's own iCloud backup covers
-  the rest. Mark downloaded audio "not for backup" there (Apple's rule for files that can be
-  downloaded again).
-
-Done (2026-10-25):
-
-- [x] 1. The backup file's core (`src/data/backup/backup-db.ts`): save, check (not a backup /
-  newer / damaged), migrate an older one, restore in one transaction, keep this phone's own
-  tables. Node tests with real files, including a restore that fails half-way.
-- [x] 2. In the app: Settings → «النسخ الاحتياطي» (after «أدومها»), the share sheet
-  (`expo-sharing`, sharing out only), pick + confirm + safety copy + restore + the app starts
-  again; the note on Home. Android's rules and backup agent (`modules/wirduk-backup`,
-  `plugins/with-backup-agent.js`).
-- [x] 3. Emulator: saved a file (102 KB) through the share sheet, changed a day, restored the
-  file from Downloads (the change undone, "restored" shown, the safety copy kept). Android's
-  backup with `bmgr` (local transport): it copied only `user.db`, its WAL and the date file
-  (≈4.2 MB), the agent saved the date; after clearing the app and `bmgr restore`, «أدومها» and
-  its days came back and Settings showed both dates.
-- [x] 4. Privacy page update in `wirduk-audio` (backup section, «أدومها» in the stored data,
-  "removed on uninstall, except a backup"): pushed with the owner's OK (wirduk-audio 4308dda).
-- [x] 5. Release APK.
-- [x] 6. The owner's notes (2026-10-25): the section moved just before «الدعم»; the «أدومها»
-  start screen has «احفظ مسارك»; when Android's backup looks off, «تفعيل النسخ الاحتياطي في
-  الهاتف» opens the phone's backup screen (checked on the emulator: Google's backup opt-in
-  opened). The privacy page was pushed (wirduk-audio 4308dda). The next release APK waits for
-  the owner's Adwamuha edit.
-
-## Milestone 13 — quality
-
-Steps (2026-10-31):
-
-- [x] 1. **Every «أدومها» state, tested from start to end** (owner, 2026-10-30: the path takes
-  more than a year, so it cannot be checked by hand). `docs/adwamuha/states.md` lists every state,
-  how it is reached, what shows, and its tests. `logic/plan-walk.test.ts` walks whole plans day by
-  day with the app's rules (steady, 4 of 7, 3 of 7, «أبقِني أسبوعًا آخر», random users);
-  `scenarios.test.tsx` lives 16 kinds of users through the real app with a fake clock
-  (`src/test-utils/adwamuha-scenario.tsx`). Found and fixed: turning «أدومها» off in the evening
-  lost that day (`offPause` now starts the day after).
-- [x] 2. A dev-only clock: `wirduk://dev-clock?days=7&hour=20&read=4` moves «أدومها» days ahead
-  in a dev build (and stores the skipped days' wards as read: `all`, `none`, or N of 7); a release
-  build ignores it (`src/app/dev-clock.tsx`, `dev-clock.ts`). Screenshots of 8 states on the
-  emulator, on a private page for the owner: https://claude.ai/artifact/4hdGamaFSHf47kXS6VSreh
-  (the emulator's test plan now has made-up days, dated ahead: clear its app data to start clean,
-  with the owner's OK).
-- [x] 3. Cleanup (2026-10-31):
-  - The test warning "An update to VirtualizedList … not wrapped in act(...)": the lists drew more
-    rows on a 50 ms timer that sometimes fired after a test ended (Home, own adhkar, session
-    restore, «مساري»). In tests, FlatList and SectionList are now simple lists that draw every row
-    at once (`src/test-utils/simple-lists.tsx`).
-  - The content database copies expo-asset leaves in the cache (`ExponentAsset-*.db`, ≈4.6 MB
-    each) are deleted once the content is installed and checked (`open-databases.ts`).
-  - Permissions: `READ/WRITE_EXTERNAL_STORAGE` and `SYSTEM_ALERT_WINDOW` removed
-    (`android.blockedPermissions` in `app.config.ts`; files come through the system's file
-    picker). Kept: internet, background audio, audio settings, microphone (own recordings),
-    vibration (and the notification ones the libraries add).
-  - `expo-network` removed (not used). `expo install --check`: up to date. `expo-doctor`: 21 of 21.
-  - `npm audit` (app dependencies): 41 findings, almost all in build and test tools (Expo's CLI,
-    config plugins, Jest, glob, minimatch, node-forge, zod). One ships in the app:
-    `decode-uri-component` under `query-string` (expo-router's link parsing; a crafted deep link
-    could slow the app). Its fix comes with an Expo patch: run `npx expo install --fix` before
-    Google Play. Never `npm audit fix --force` (it would install Expo 51).
-  - Checked on the release manifest (merged): no storage, no "draw over other apps". Libraries
-    still add Google push (`c2dm.RECEIVE`), Play's install referrer and launcher badge permissions;
-    the app uses none of them (local reminders only, no tracking). Review before Google Play
-    (milestone 14): block them too if nothing breaks.
-- [x] 4. Edge cases from the brief §16 (2026-10-31): no network, a full phone and cut downloads
-  were already tested (audio-downloads, audio-screens, ReportScreen). New (`edge-cases.test.tsx`):
-  the longest dhikr at the largest font size (40) shows all its text, the counter and «إتمام»
-  work; dark mode everywhere: 16 main screens drawn in dark and in light use no color of the
-  other theme (`renderWithApp`'s new `theme` option). A large system font: on the owner's phone
-  (step 5).
-- [x] 5. The owner's phone (Galaxy S21+, release APK 68a8074, 2026-11-01): TalkBack, the largest
-  system font, audio with the screen off, reminders, a report, rotation, «المتابعة من حيث توقفت»,
-  and the changes since the last test. All fine (`docs/manual-test-checklist.md`).
+- **The owner feedback of 2026-11-22 (2)** («ارجع إلى الخطوة:», `docs/decisions.md`): built as the approved
+  design; on the link (APK of e3b69e2), to check on the phone.
+- **The week rule** (2026-11-14: a step of N weeks needs N good weeks, 4 mornings and 4
+  evenings each, not in a row) is Claude's advice, asked for by the owner: confirm or change it.
+- **A link to the reader already open** keeps the page it is on (found in RF0, above): fix it
+  or leave it?
+
+Not checked yet (from R6): the system font at 2.0 and the finish screen's animation on a
+device. Setup 1–4 and the editors are now in the Maestro screen run (RF0).
 
 ## Milestone 14 — Google Play (after the owner finishes testing)
 

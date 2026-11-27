@@ -103,7 +103,7 @@ adb server started from inside `android/` runs (stop Metro; `adb kill-server` fr
 
 `content-source/dorar-sources.json` (550 KB), `content-source/adhkar.json` (upstream copy, never
 edit), `docs/sources-review.md` (90 KB, generated), `docs/content-changes.md` (generated),
-`docs/design/proposal.html` (125 KB), `package-lock.json`, `assets/db/content.db` (binary),
+`package-lock.json`, `assets/db/content.db` (binary),
 `.local/` (local scratch; only `.local/tanzil/` is in git). Use
 `npm run db:peek`, Grep, or a small script instead.
 README.md is long: read only the section you need.
@@ -146,8 +146,8 @@ content, actions })`, the action first, `cancel: true` on the one a tap outside 
   restore and `WardScreen`). Settings rows: `settings/ReminderSettings.tsx`.
 - `src/features/report/` "report an issue": `ReportScreen.tsx`, `report.ts` (details, send),
   `shrink-image.ts`, and `report-protocol.ts` (format + limits, **shared with the relay**).
-- Adwamuha (أدومها, milestone 10): `docs/adwamuha/` (the owner's description, the build plan, the
-  matching). The move-on rule (owner, 2026-11-14): a step of N weeks needs N good weeks (4
+- Adwamuha (أدومها, milestone 10): `docs/adwamuha/` (the owner's description, the owner's edits,
+  the design, every state). The move-on rule (owner, 2026-11-14): a step of N weeks needs N good weeks (4
   mornings and 4 evenings each, not in a row, counted once the week is over; `goodWeeks` in
   `logic/weeks.ts`, `moveOnStatus`); never extended. The ward read in parts: `ward-progress.ts` + user.db `WardProgress` (migration
   6, a phone table, not in backups), kept while its window is open. Home's «أدومها» badge while

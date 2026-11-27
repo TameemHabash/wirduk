@@ -29,11 +29,12 @@ When a decision here differs from the brief, this file wins.
 | Audio repo | `wirdak-audio` — replaced by `wirduk-audio` (see rename above). Public, GitHub Pages. |
 | Fadl | Shown only after the owner approves each one in `docs/sources-review.md`: an exact quote from the Dorar hadith text, or (since 2026-10-17) the owner's own words. |
 | Dorar access | dorar.net blocks scripts (Cloudflare 403). Searches run from a real Chrome tab, with the owner's OK. |
-| Logo | Replaced on 2026-10-17 by the owner's new design in `wirduk-logo/` (light and dark SVG, PDF, EPS, PNG). The old `wirdak.jpg` and `wirdak-logo.png` were removed (still in git history). |
+| Logo | Replaced on 2026-10-17 by the owner's new design in `wirduk-logo/` (light and dark SVG; the PDF, EPS and PNG copies were removed on 2026-11-27, still in git history). The old `wirdak.jpg` and `wirdak-logo.png` were removed (still in git history). |
 
 ## 2026-10-16 — Design review (milestone 4)
 
-Design direction "paper and ink" in [design/proposal.html](design/proposal.html) is approved, with:
+Design direction "paper and ink" in `docs/design/proposal.html` (removed on 2026-11-27, still in
+git history; the redesign of 2026-11-26 replaced it) is approved, with:
 
 | Topic | Decision |
 |---|---|
@@ -119,7 +120,7 @@ The description is `docs/adwamuha/feature-prompt.md`; these answers win over it.
 
 | Topic | Decision |
 |---|---|
-| Default plan | 24 steps, as in `docs/adwamuha/matching.md`, with one change: **step 23** (أستغفر الله وأتوب إليه ×100) is **morning and evening** (1022 / 133022), not morning only. Every morning (24) and evening (22) dhikr is in the plan; none left out. |
+| Default plan | 24 steps, as matched by `scripts/adwamuha/match-plan.ts` (its report: `--out <file.md>`), with one change: **step 23** (أستغفر الله وأتوب إليه ×100) is **morning and evening** (1022 / 133022), not morning only. Every morning (24) and evening (22) dhikr is in the plan; none left out. |
 | Where the plan lives | The content database keeps only the **default** plan. When the user turns the feature on and confirms the plan (or edits it), the app saves **the user's own copy** in the user database with the progress, and uses only that copy. "Reset to the default plan" copies it again. |
 | 7-day windows | The last 7 days, today included. Today counts once read; it is never "missed" before it ends. |
 | Starting at step N | Steps 1…N count as already reached (a later step back climbs them in 1 week each). |

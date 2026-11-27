@@ -14,8 +14,6 @@ module.exports = defineConfig([
       'coverage/*',
       '.expo/*',
       '.local/*',
-      // Kept as it was run on 2026-10-17 (see its README); not part of the app or the build.
-      'research/**',
       // Generated from the owner's description (scripts/adwamuha/owner-texts.ts).
       'src/features/adwamuha/owner-texts.ts',
     ],

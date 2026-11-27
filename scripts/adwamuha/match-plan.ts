@@ -1,6 +1,6 @@
 /**
  * Adwamuha (milestone 10): finds each item of the owner's default plan in the
- * content database and reports what matched (`docs/adwamuha/matching.md`).
+ * content database and reports what matched (printed, or written with `--out <file.md>`).
  * With --write it also writes the plan file the content build reads
  * (`content-source/adwamuha-plan.json`): ids, stages, and the owner's keys and
  * stage names, cut from the owner's prompt (never retyped).

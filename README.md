@@ -328,7 +328,7 @@ shows only when `APP_CONFIG.report.endpoint` is set; deploy steps are in
 
 ## Logo, icons and splash
 
-The design files are in `wirduk-logo/` (light and dark SVG, plus PDF, EPS and PNG).
+The design files are in `wirduk-logo/` (light and dark SVG).
 `npm run branding:build` turns the SVGs into every image the app uses:
 
 | File                                                         | Use                                                                 |
