@@ -52,6 +52,8 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | 🟢 Done | one commit 2026-11-27 |
 | RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | 🟢 Done | one commit 2026-11-27 |
 | — | Owner decisions after RF8 (2026-11-27): 11 Expo packages updated; the notifications card only after the app asked; no «جاهز لإضافة الذكر التالي؟» during a break; then the APK | 🟢 Done | one commit 2026-11-27 |
+| — | Owner feedback 2026-11-27 (2): a tap on the «المصدر» row in the reader no longer counts (what it shows inside still counts) | 🟢 Done | one commit 2026-11-27 |
+| — | Owner feedback 2026-11-27 (2): an unlimited count for own adhkar (design first) | Waits for the owner's pick | |
 | 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -319,6 +321,28 @@ After RF8, the owner's decisions (2026-11-27, `docs/decisions.md`):
   Those three baselines were taken again (old ones in `.local/shots/baseline*-before-card-fix/`).
   The 40-day timeline passed (29 min), with no failed read in the phone's log.
 
+Owner feedback 2026-11-27 (2) (`docs/decisions.md`):
+
+- «المصدر» in the reader: a tap on its row (the word, the arrow, the two lines) only opens or
+  closes it, open or closed, and never counts. Its own gesture keeps the reader's tap zone from
+  getting the tap, so `SourceFold` just stopped calling the counter (`onSourcePress` removed).
+  The source lines and «عرض في الدرر السنية» still count. Checked on the emulator (dev build,
+  dhikr 1017): the row at the word and at both line ends, open and closed, kept the count; a tap
+  on a source line and on the Dorar link each counted one. No screen compare: nothing drawn
+  changed.
+- An unlimited count for own adhkar: the owner asked for a small design first. Three options
+  for the editor (a switch, two choices, an ∞ button), the reader (the number only, no «من N»;
+  the ring empty, full after «إتمام»), the rules, the recording and the word:
+  https://claude.ai/artifact/1E71SekjnQkGkY7csy4Ym1 (its file: `.local/unlimited-count-design.html`). The
+  data needs a new column (migration 8): `CustomAdhkar.Count` has `CHECK (Count >= 1)`.
+- Found (old, not changed, the owner decides): **Home crashes when "today" is before the
+  «أدومها» step's start** (`useProgress.ts`: `status.weeks[0]` is undefined, so
+  `week.morning` throws). Seen on the emulator: the 40-day timeline left the plan starting
+  2026-11-28 and the step on 2027-01-04, and the emulator's date was back on 2026-11-27. On a
+  phone: a wrong date ahead (a new phone before the network time, a date changed by hand), then
+  the right date again. The app does not open until that day comes. The emulator app's data was
+  cleared to go on (a copy of that `user.db`: `.local/user-db-step-ahead/`).
+
 ## Where things are now
 
 - **Content:** version **13** (`APP_CONFIG.content.version`; v9 added "times said per recording";
@@ -347,7 +371,7 @@ After RF8, the owner's decisions (2026-11-27, `docs/decisions.md`):
   - The next APK installs over the old one: the data is kept (decisions, 2026-11-27). Before
     Google Play: the Play build is signed with another key, so testers uninstall then (a backup
     file keeps their data).
-- **Tests:** 1097 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
+- **Tests:** 1098 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
   6 Maestro user flows (`npm run e2e`) and the «أدومها» timeline (`npm run e2e:timeline`).
   `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
@@ -355,6 +379,10 @@ After RF8, the owner's decisions (2026-11-27, `docs/decisions.md`):
 
 ## Waiting for the owner
 
+- **The unlimited count (2026-11-27)**: pick an option on the design page
+  (https://claude.ai/artifact/1E71SekjnQkGkY7csy4Ym1): A, B or C, the recording, and the word.
+- **Home crashes when "today" is before the «أدومها» step's start** (found 2026-11-27, above):
+  fix it or not.
 - **The refactor (RF0–RF8) and the decisions after RF8 (2026-11-27)**: on the link (APK of
   63bddc8), to check on the phone. Every screen was compared; the only visible change is the
   approved one: on a new install, Settings has no «الإشعارات غير مسموحة» card until the app has

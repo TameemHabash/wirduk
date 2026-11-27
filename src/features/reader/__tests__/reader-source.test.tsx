@@ -1,4 +1,7 @@
-/** The reader's «المصدر» fold and its Dorar link: each tap on them counts too. */
+/**
+ * The reader's «المصدر» fold and its Dorar link. The fold's own row never counts; what it shows
+ * inside counts like the rest of the page (owner, 2026-11-27).
+ */
 import { Linking } from 'react-native';
 import { act, fireEvent, screen } from '@testing-library/react-native';
 import { State } from 'react-native-gesture-handler';
@@ -22,20 +25,28 @@ const tapGesture = (testId: string) =>
 const sourceLine = () => screen.queryByText(trPattern('reader.source'));
 
 describe('Reader — «المصدر» folded', () => {
-  it('a tap on «المصدر» counts like any tap and opens it (owner, 2026-11-26)', async () => {
+  it('a tap on «المصدر» opens it and does not count (owner, 2026-11-27)', async () => {
     await openReader(DHIKR.hundredTimes);
     expect(sourceLine()).toBeNull();
     await tapGesture('source-fold');
-    expect(screen.getByLabelText(counted(1, 100))).toBeOnTheScreen();
+    expect(screen.getByLabelText(counted(0, 100))).toBeOnTheScreen();
     expect(sourceLine()).toBeOnTheScreen();
   });
 
-  it('another tap closes it, and counts too', async () => {
+  it('another tap closes it, and does not count either', async () => {
     await openReader(DHIKR.hundredTimes);
     await tapGesture('source-fold');
     await tapGesture('source-fold');
-    expect(screen.getByLabelText(counted(2, 100))).toBeOnTheScreen();
+    expect(screen.getByLabelText(counted(0, 100))).toBeOnTheScreen();
     expect(sourceLine()).toBeNull();
+  });
+
+  it('counting goes on as before around it', async () => {
+    await openReader(DHIKR.hundredTimes);
+    await tapCounter();
+    await tapGesture('source-fold');
+    await tapCounter();
+    expect(screen.getByLabelText(counted(2, 100))).toBeOnTheScreen();
   });
 });
 
@@ -55,14 +66,14 @@ describe('Reader — "عرض في الدرر السنية"', () => {
 
   it('the tap on the link counts, and opens nothing by itself', async () => {
     await tapDorarLink();
-    expect(screen.getByLabelText(counted(2, 100))).toBeOnTheScreen();
+    expect(screen.getByLabelText(counted(1, 100))).toBeOnTheScreen();
     expect(openUrl).not.toHaveBeenCalled();
   });
 
   it('counting goes on while its toast is shown', async () => {
     await tapDorarLink();
     await tapCounter();
-    expect(screen.getByLabelText(counted(3, 100))).toBeOnTheScreen();
+    expect(screen.getByLabelText(counted(2, 100))).toBeOnTheScreen();
     expect(screen.getByText(tr('reader.dorarToast'))).toBeOnTheScreen();
   });
 

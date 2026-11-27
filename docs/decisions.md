@@ -449,7 +449,7 @@ Reader:
 |---|---|
 | The text | On the page, no card behind it; a long dhikr has no background, its end fades only while more text is below (owner). The fadl and source come at the end of a long dhikr (owner). |
 | Fadl | Option «ب» (owner): a small gold eight-point star and the text in a quiet color, no label, no box. |
-| Source | Folded under a borderless «المصدر» line (owner); a tap counts like any tap and opens it (owner: "correct"). It folds again on the next dhikr. |
+| Source | Folded under a borderless «المصدر» line (owner); a tap counts like any tap and opens it (owner: "correct"; changed 2026-11-27: the row no longer counts, see below). It folds again on the next dhikr. |
 | Own adhkar | The «أذكاري» badge first, then the gold line, on one row (owner). |
 | Landscape | The progress segments are back (owner). |
 | Restore toast | Its arrow opens Settings at «المتابعة من حيث توقفت», the row highlighted (owner, new). |
@@ -514,6 +514,12 @@ After RF8 (owner, 2026-11-27):
 | The card «الإشعارات غير مسموحة» | Fix it: it showed on a new install before the app ever asked (Android 13+ says "denied" then). Now it shows only once the app has asked (the setting `notificationsAsked`), or a reminder is on, or Android will not ask again. |
 | «جاهز لإضافة الذكر التالي؟» during a break | Hidden on Home and «مساري» until the break ends; then it comes back. |
 | The phone APK | After these three, run the tests again; if they pass, build the APK. |
+
+Owner feedback (2026-11-27, 2):
+
+| Topic | Decision |
+|---|---|
+| «المصدر» in the reader | A tap on its row (the word, the arrow and the two lines) only opens or closes it, and **never counts**, open or closed. What it shows inside (the source lines, «عرض في الدرر السنية») still counts like the rest of the page. Replaces the 2026-11-26 rule (a tap on it counted). |
 
 ## Technical choices (milestone 0–1)
 

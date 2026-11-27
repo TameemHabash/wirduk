@@ -274,10 +274,7 @@ export function Reader({
     },
     [onTap, t, toast],
   );
-  const readerActions = useMemo(
-    () => ({ onDorarPress, onSourcePress: onTap }),
-    [onDorarPress, onTap],
-  );
+  const readerActions = useMemo(() => ({ onDorarPress }), [onDorarPress]);
 
   // Landscape: the text and the counter side by side.
   const { width, height } = useWindowDimensions();

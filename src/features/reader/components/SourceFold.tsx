@@ -1,4 +1,4 @@
-import { useContext, useMemo, type ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -8,13 +8,11 @@ import { Icon } from '@/components/ui/Icon';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
-import { ReaderActionsContext } from '@/features/reader/state/reader-actions';
-
 /**
  * «المصدر» folded under a dhikr (owner, 2026-11-22): a thin line, the word and a small
- * chevron, a thin line, no border. In the reader a tap counts like any tap (it is often a
- * counting tap that landed here, as the Dorar link) and opens or closes it. A screen-reader
- * user's "activate" only opens or closes it. Outside the reader (after a ward) it only folds.
+ * chevron, a thin line, no border. A tap only opens or closes it: it never counts, open or
+ * closed (owner, 2026-11-27; its own gesture keeps the reader's tap zone from counting it).
+ * What it shows inside (the source lines, the Dorar link) still counts in the reader.
  */
 export function SourceFold({
   open,
@@ -27,18 +25,15 @@ export function SourceFold({
 }) {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
-  const reader = useContext(ReaderActionsContext);
   const tap = useMemo(
     () =>
       Gesture.Tap()
         .withTestId('source-fold')
         .runOnJS(true)
         .onEnd((_e, success) => {
-          if (!success) return;
-          reader?.onSourcePress();
-          onToggle();
+          if (success) onToggle();
         }),
-    [onToggle, reader],
+    [onToggle],
   );
   const line = [styles.line, { backgroundColor: colors.border }];
   return (
