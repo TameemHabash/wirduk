@@ -46,7 +46,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | RF1 | Refactor: clean the repo and the PC (old files, history docs, stale references) | 🟢 Done | one commit 2026-11-27 |
 | RF2 | Refactor: the data (kept, not reset: Android's backup would bring old data back; stale comments) | 🟢 Done | one commit 2026-11-27 |
 | RF3 | Refactor: the new structure (feature folders, shared UI kit, layer rules) | 🟢 Done | two commits 2026-11-27 |
-| RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | Not started | |
+| RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | 🟢 Done | one commit 2026-11-27 |
 | RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | Not started | |
 | RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | Not started | |
 | RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | Not started | |
@@ -117,8 +117,31 @@ RF3, done (2026-11-27): the structure in `docs/architecture.md`.
   the tone colors (`theme/tones.ts`), the morning/evening ids (`config/categories.ts`),
   `weekdayOf`. Repositories one class per file. The dev clock's logic is a screen of «أدومها».
 - Kept as they are (a merge would change the look): the «قرأتُ وردي بدون التطبيق» sheet and the
-  step-back sheet (corners, dimming, grab line differ), and the reorder row. The other loads do
-  more than load (a delay while typing, a refresh on return, saving a date) and stay.
+  step-back sheet (corners, dimming, grab line differ; owner: keep them as they are), and the
+  reorder row. The other loads do more than load (a delay while typing, a refresh on return,
+  saving a date) and stay.
+
+RF4, done (2026-11-27): the big files split by what they do.
+
+- `AdwamuhaProvider` (704 → 288 lines, most of it the documented interface): `useAdwamuhaData`
+  (read and reload), `useMessageLibrary` (texts, choosing a message), `useAdwamuhaActions`
+  (everything that changes the plan), and Home's messages as a pure function
+  (`logic/due-messages.ts`, tested).
+- The reader: `components/Reader.tsx` (the reader, also used by the ward; the page moves and the
+  screen-off rules kept together and unchanged), `screens/ReaderScreen.tsx` (loads a category),
+  `ReaderHeader`, `EmptyCustomCategory`, and hooks `useAdvanceTimer`, `usePagerRebuild`,
+  `useKeepScreenOn`, `useSaveReaderSession`.
+- The plan editor: its edits as a tested reducer (`logic/plan-editor-state.ts`), `PlanStepCard`,
+  `WeeksStepper`.
+- Own adhkar: `useCustomActions` (delete a chapter or a dhikr with its recordings, favorite and
+  counts). Five promises had no error handling (three loads, two deletes): an unreadable chapter
+  or dhikr now shows as not found, a failed delete shows the error.
+- Pure, tested: today's two wards (`logic/today-wards.ts`), the ward's adhkar in order
+  (`wardAdhkar`). 870 tests.
+- The screen runs: Gboard on the emulator began to show only a small floating bar (a Google-side
+  change; Gboard itself was not updated), which Maestro cannot hide. The emulator now has
+  `hw.keyboard=no` in its `config.ini` (Gboard shows its full keyboard; the PC's keyboard no
+  longer types into the emulator window), and the flows wait for the keyboard before hiding it.
 
 ## Where things are now
 

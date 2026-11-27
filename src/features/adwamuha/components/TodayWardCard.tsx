@@ -12,16 +12,15 @@ import { displayTime } from '@/lib/time';
 import { DISPLAY_FONT, UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
-import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
-import { MessageCard } from './MessageCard';
-import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
-import { setupShownKey } from '@/features/adwamuha/logic/setup';
-import { StepBackSheet } from './StepBackSheet';
-import { useProgress } from '@/features/adwamuha/hooks/useProgress';
 import { type Session, SESSIONS } from '@/data/models';
+import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
+import { useProgress } from '@/features/adwamuha/hooks/useProgress';
+import { setupShownKey } from '@/features/adwamuha/logic/setup';
+import { type WardState, todayWards } from '@/features/adwamuha/logic/today-wards';
+import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
 
-/** A ward's state on Home (design: ✓ done, clock late, framed = its time now, dashed = not yet). */
-type WardState = 'done' | 'late' | 'now' | 'notYet' | 'missed';
+import { MessageCard } from './MessageCard';
+import { StepBackSheet } from './StepBackSheet';
 
 /**
  * Home's top card «وردك اليوم» (only when Adwamuha is on), the one thing that
@@ -68,21 +67,7 @@ export function TodayWardCard() {
 
   if (!enabled || !progress) return null;
 
-  const record = (s: Session) =>
-    records.find((r) => r.date === now.date && r.session === s) ?? null;
-  const stateOf = (s: Session): WardState => {
-    const r = record(s);
-    if (r) return r.late ? 'late' : 'done';
-    if (s === now.session) return 'now';
-    // The morning is over once the evening began; the evening is still ahead in the morning.
-    return s === 'morning' ? 'missed' : 'notYet';
-  };
-  const bothDone = SESSIONS.every((s) => record(s) !== null);
-  const other: Session = now.session === 'morning' ? 'evening' : 'morning';
-  // The ward that can count now; or, once it is done, when the other one starts.
-  const show: { session: Session; open: boolean } = record(now.session)
-    ? { session: other, open: false }
-    : { session: now.session, open: true };
+  const { state, bothDone, show } = todayWards(records, now);
   const times = settings.wardTimes;
   const startsAt = displayTime(
     show.session === 'evening' ? times.eveningStart : times.morningStart,
@@ -175,7 +160,7 @@ export function TodayWardCard() {
 
       <View style={[styles.row, { gap: spacing.sm }]}>
         {SESSIONS.map((s) => (
-          <WardBox key={s} session={s} state={stateOf(s)} />
+          <WardBox key={s} session={s} state={state[s]} />
         ))}
       </View>
 

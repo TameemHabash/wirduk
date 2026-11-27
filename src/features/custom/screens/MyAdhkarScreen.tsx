@@ -27,7 +27,10 @@ export function MyAdhkarScreen() {
 
   const load = useCallback(() => {
     let cancelled = false;
-    custom.listCategories().then((list) => !cancelled && setCategories(list));
+    custom
+      .listCategories()
+      .then((list) => !cancelled && setCategories(list))
+      .catch(() => undefined);
     return () => {
       cancelled = true;
     };

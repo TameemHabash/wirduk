@@ -29,6 +29,25 @@ export function orderWard(
   return [opening, ...rest.sort((a, b) => at(a) - at(b))];
 }
 
+/**
+ * The ward's adhkar to read: `ids` (from `wardDhikrIds`) in the chosen order, taken from the
+ * category's adhkar (`all`, in the book's order). An id the category does not have is left out.
+ */
+export function wardAdhkar<T extends { id: number }>(
+  ids: readonly number[],
+  order: WardOrder,
+  all: readonly T[],
+): T[] {
+  const byId = new Map(all.map((d) => [d.id, d]));
+  return orderWard(
+    ids,
+    order,
+    all.map((d) => d.id),
+  )
+    .map((id) => byId.get(id))
+    .filter((d): d is T => d !== undefined);
+}
+
 /** The user's copy of the default plan (made when the feature is turned on, or on reset). */
 export function copyDefaultPlan(plan: DefaultPlan): UserPlan {
   const opening = plan.steps.find((s) => s.step === 0);

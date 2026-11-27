@@ -15,10 +15,9 @@ import { TextField } from '@/components/ui/TextField';
 import { useRepositories } from '@/data/DataProvider';
 import type { Category, Dhikr } from '@/data/models';
 import { CUSTOM_LIMITS } from '@/data/repositories/custom-repository';
-import { counterStore } from '@/features/reader/state/counter-store';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
-import { deleteCustomAudio } from '@/features/custom/services/custom-audio';
+import { useCustomActions } from '@/features/custom/hooks/useCustomActions';
 import { customErrorMessage } from '@/features/custom/logic/errors';
 import { useUnsavedGuard } from '@/hooks/useUnsavedGuard';
 
@@ -87,7 +86,8 @@ function NewCategory() {
 function EditCategory({ id }: { id: number }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { custom, favorites } = useRepositories();
+  const { custom } = useRepositories();
+  const actions = useCustomActions();
   const dialog = useDialog();
   const { colors, radii, spacing } = useAppTheme();
   const [category, setCategory] = useState<Category | null>(null);
@@ -99,16 +99,19 @@ function EditCategory({ id }: { id: number }) {
 
   const load = useCallback(() => {
     let cancelled = false;
-    Promise.all([custom.getCategory(id), custom.listAdhkar(id)]).then(([c, list]) => {
-      if (cancelled) return;
-      if (!c) {
-        setMissing(true);
-        return;
-      }
-      setCategory(c);
-      setTitle((current) => (current === '' ? c.title : current));
-      setAdhkar(list);
-    });
+    Promise.all([custom.getCategory(id), custom.listAdhkar(id)])
+      .then(([c, list]) => {
+        if (cancelled) return;
+        if (!c) {
+          setMissing(true);
+          return;
+        }
+        setCategory(c);
+        setTitle((current) => (current === '' ? c.title : current));
+        setAdhkar(list);
+      })
+      // Unreadable: shown as missing, as a chapter deleted elsewhere.
+      .catch(() => !cancelled && setMissing(true));
     return () => {
       cancelled = true;
     };
@@ -160,10 +163,15 @@ function EditCategory({ id }: { id: number }) {
           kind: 'danger',
           onPress: () => {
             void (async () => {
-              const { audioFiles } = await custom.deleteCategory(id);
-              deleteCustomAudio(...audioFiles);
-              await favorites.remove(id);
-              counterStore.resetMany(adhkar.map((d) => d.id));
+              try {
+                await actions.deleteCategory(
+                  id,
+                  adhkar.map((d) => d.id),
+                );
+              } catch (e) {
+                setError(customErrorMessage(t, e));
+                return;
+              }
               allowLeave();
               // Back to the adhkar tab, where «أذكاري» is.
               router.dismissTo('/adhkar');

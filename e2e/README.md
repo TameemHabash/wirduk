@@ -45,7 +45,7 @@ Two runs of the same code give the same pictures, with these rules:
   pixel by pixel.
 - A screen that changes by design (the message after a ward is picked at random) is listed
   under `varying`: the compare shows it but does not count it.
-- Hide Android's keyboard before a picture (`hideKeyboard`): it is not ours and changes.
+- Hide Android's keyboard before a picture (`waitForAnimationToEnd`, then `hideKeyboard`): it is not ours and changes. The emulator needs `hw.keyboard=no` in its `config.ini`: with the PC's keyboard as a physical one, Gboard shows only a small floating bar that Maestro cannot hide (since 2026-11-27).
 
 To work on one part: `Invoke-E2e shots -Name dev -Flow 03-reader -NoReset` (keeps the app's
 data, so run the parts before it first).

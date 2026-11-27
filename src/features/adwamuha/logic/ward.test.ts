@@ -1,6 +1,6 @@
 import type { DefaultPlan, UserPlan } from '@/data/models';
 
-import { copyDefaultPlan, orderWard, wardDhikrIds } from './ward';
+import { copyDefaultPlan, orderWard, wardAdhkar, wardDhikrIds } from './ward';
 
 const plan: UserPlan = {
   opening: { morning: 1901, evening: 133901 },
@@ -88,5 +88,17 @@ describe('copyDefaultPlan', () => {
     expect(() => copyDefaultPlan({ ...defaultPlan, steps: defaultPlan.steps.slice(0, 1) })).toThrow(
       /opening/,
     );
+  });
+});
+
+describe('wardAdhkar', () => {
+  const all = [{ id: 1901 }, { id: 1001 }, { id: 1002 }, { id: 1003 }];
+  it('the ward in plan order, or in the category order, the opening first', () => {
+    const ids = [1901, 1003, 1001];
+    expect(wardAdhkar(ids, 'plan', all).map((d) => d.id)).toEqual([1901, 1003, 1001]);
+    expect(wardAdhkar(ids, 'category', all).map((d) => d.id)).toEqual([1901, 1001, 1003]);
+  });
+  it('leaves out an id the category does not have', () => {
+    expect(wardAdhkar([1901, 9999, 1002], 'plan', all).map((d) => d.id)).toEqual([1901, 1002]);
   });
 });

@@ -22,12 +22,12 @@ import { useRepositories } from '@/data/DataProvider';
 import type { Dhikr } from '@/data/models';
 import { CUSTOM_LIMITS, CustomContentError } from '@/data/repositories/custom-repository';
 import { useSettings } from '@/data/settings/SettingsProvider';
-import { counterStore } from '@/features/reader/state/counter-store';
 import { useDirection } from '@/i18n/direction';
 import { UI_FONTS, dhikrLineHeight, findDhikrFont } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { AudioField } from '@/features/custom/components/AudioField';
+import { useCustomActions } from '@/features/custom/hooks/useCustomActions';
 import { deleteCustomAudio } from '@/features/custom/services/custom-audio';
 import { customErrorMessage } from '@/features/custom/logic/errors';
 import { useUnsavedGuard } from '@/hooks/useUnsavedGuard';
@@ -73,6 +73,7 @@ export function DhikrEditorScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { custom } = useRepositories();
+  const actions = useCustomActions();
   const dialog = useDialog();
   const { settings } = useSettings();
   const { colors, radii, spacing } = useAppTheme();
@@ -91,16 +92,20 @@ export function DhikrEditorScreen() {
   useEffect(() => {
     if (dhikrId == null) return;
     let cancelled = false;
-    custom.getDhikr(dhikrId).then((d) => {
-      if (cancelled) return;
-      if (!d) {
-        setError({ field: 'general', message: t('custom.errors.notFound') });
-      } else {
-        setInitial(fromDhikr(d));
-        setForm(fromDhikr(d));
-      }
-      setLoaded(true);
-    });
+    custom
+      .getDhikr(dhikrId)
+      // Unreadable: shown as not found.
+      .catch(() => null)
+      .then((d) => {
+        if (cancelled) return;
+        if (!d) {
+          setError({ field: 'general', message: t('custom.errors.notFound') });
+        } else {
+          setInitial(fromDhikr(d));
+          setForm(fromDhikr(d));
+        }
+        setLoaded(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -173,9 +178,12 @@ export function DhikrEditorScreen() {
           kind: 'danger',
           onPress: () => {
             void (async () => {
-              const { audioFile } = await custom.deleteDhikr(dhikrId);
-              deleteCustomAudio(audioFile, form.audioFile);
-              counterStore.reset(dhikrId);
+              try {
+                await actions.deleteDhikr(dhikrId, form.audioFile);
+              } catch (e) {
+                setError({ field: 'general', message: customErrorMessage(t, e) });
+                return;
+              }
               allowLeave();
               router.back();
             })();

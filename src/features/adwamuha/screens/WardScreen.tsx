@@ -11,13 +11,13 @@ import { useRepositories } from '@/data/DataProvider';
 import type { Category, Dhikr, Session } from '@/data/models';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { counterStore } from '@/features/reader/state/counter-store';
-import { Reader } from '@/features/reader/screens/ReaderScreen';
+import { Reader } from '@/features/reader/components/Reader';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { closedWardText } from '@/features/adwamuha/logic/closed-ward';
 import { recordSlot } from '@/features/adwamuha/logic/sessions';
-import { orderWard } from '@/features/adwamuha/logic/ward';
+import { wardAdhkar } from '@/features/adwamuha/logic/ward';
 import { latestWriter } from '@/features/adwamuha/logic/ward-progress';
 
 export const categoryOfSession = (session: Session) =>
@@ -85,13 +85,7 @@ export function WardScreen() {
     ])
       .then(([all, kept]) => {
         if (cancelled) return;
-        const byId = new Map(all.map((d) => [d.id, d]));
-        const ordered = orderWard(
-          ids,
-          order,
-          all.map((d) => d.id),
-        );
-        const list = ordered.map((id) => byId.get(id)).filter((d): d is Dhikr => d !== undefined);
+        const list = wardAdhkar(ids, order, all);
         // Where the user stopped earlier in this window: the reader opens at the first open dhikr.
         counterStore.restore(list, kept);
         setAdhkar(list);

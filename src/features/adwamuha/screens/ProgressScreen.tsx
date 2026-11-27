@@ -16,8 +16,8 @@ import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { BeadPath } from '@/features/adwamuha/components/BeadPath';
 import { PlanRows } from '@/features/adwamuha/components/PlanRows';
 import { HadithCard } from '@/features/adwamuha/components/HadithCard';
-import { addDays } from '@/features/adwamuha/logic/days';
 import { WEEK_TARGET } from '@/features/adwamuha/logic/commitment';
+import { undoableFromMemory } from '@/features/adwamuha/logic/today-wards';
 import { weekdayOf } from '@/features/adwamuha/logic/weeks';
 import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
 import { ReadOutsideSheet, YesterdaySheet } from '@/features/adwamuha/components/RecordSheets';
@@ -73,7 +73,6 @@ export function ProgressScreen() {
 
   const now = slot();
   const today = now.date;
-  const yesterday = addDays(today, -1);
   const finished = progress.maintenance;
   const onBreak = activeBreak !== null;
   // A word of thanks after recording a ward (the owner's).
@@ -82,8 +81,7 @@ export function ProgressScreen() {
     if (text) toast.show({ message: text, icon: 'check', tone: 'gold' });
   };
   const selfRecorded = (date: DayKey, session: Session) =>
-    (date === today || date === yesterday) &&
-    records.some((r) => r.date === date && r.session === session && r.source === 'manual');
+    undoableFromMemory(records, today, date, session);
   const undo = (date: DayKey, session: Session) => {
     dialog.show({
       icon: 'undo',

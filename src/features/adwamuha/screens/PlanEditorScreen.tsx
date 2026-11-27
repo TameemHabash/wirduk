@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useReducer, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -14,28 +14,24 @@ import { SortableList } from '@/components/ui/SortableList';
 import { TextButton } from '@/components/ui/TextButton';
 import { useToast } from '@/components/ui/Toast';
 import { useRepositories } from '@/data/DataProvider';
+import type { UserPlan, UserPlanStep } from '@/data/models';
+import { HadithCard } from '@/features/adwamuha/components/HadithCard';
+import { PlanBadge, PlanStepCard } from '@/features/adwamuha/components/PlanStepCard';
+import { WeeksStepper } from '@/features/adwamuha/components/WeeksStepper';
+import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
+import { useDhikrTexts } from '@/features/adwamuha/hooks/useDhikrTexts';
+import { canMove, restoreDefault, samePlan, stepKey } from '@/features/adwamuha/logic/plan-edit';
+import {
+  NO_EDITS,
+  planEditorView,
+  planEditsReducer,
+} from '@/features/adwamuha/logic/plan-editor-state';
+import { stepLabel, stepSession } from '@/features/adwamuha/logic/setup';
+import { copyDefaultPlan } from '@/features/adwamuha/logic/ward';
+import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { useAsync } from '@/hooks/useAsync';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
-import { toneColors } from '@/theme/tones';
-
-import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
-import { HadithCard } from '@/features/adwamuha/components/HadithCard';
-import {
-  MAX_STEP_WEEKS,
-  MIN_STEP_WEEKS,
-  canMove,
-  editedCurrent,
-  reorderOthers,
-  restoreDefault,
-  samePlan,
-  stepKey,
-  withEdits,
-} from '@/features/adwamuha/logic/plan-edit';
-import { copyDefaultPlan } from '@/features/adwamuha/logic/ward';
-import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
-import { stepLabel, stepSession } from '@/features/adwamuha/logic/setup';
-import { useDhikrTexts } from '@/features/adwamuha/hooks/useDhikrTexts';
-import type { UserPlan, UserPlanStep } from '@/data/models';
 
 /**
  * «عدّل الخطة» (prompt §4.3; owner): later steps can be reordered, each step's weeks changed
@@ -57,48 +53,25 @@ export function PlanEditorScreen() {
   const { stored, savePlan } = useAdwamuha();
   /** The current step as saved. */
   const saved = stored?.state.step ?? 1;
-
-  // The user's changes to the order and weeks; until the first one, their saved plan (it
-  // may still be loading).
-  const [edited, setEdited] = useState<UserPlan | null>(null);
-  const base = edited ?? stored?.plan ?? null;
-  // The steps marked «قطعتها», and the steps done marked «لم أقطعها بعد», in the order
-  // marked (applied when saved).
-  const [passed, setPassed] = useState<string[]>([]);
-  const [unpassed, setUnpassed] = useState<string[]>([]);
-  const [defaultPlan, setDefaultPlan] = useState<UserPlan | null>(null);
+  const [edits, dispatch] = useReducer(planEditsReducer, NO_EDITS);
+  const defaultPlan = useAsync<UserPlan | null>(
+    () => content.getDefaultPlan(i18n.language).then(copyDefaultPlan),
+    [content, i18n.language],
+    null,
+  );
   const texts = useDhikrTexts();
   const [reordering, setReordering] = useState(false);
   const [doneOpen, setDoneOpen] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    content
-      .getDefaultPlan(i18n.language)
-      .then((plan) => {
-        if (!cancelled) setDefaultPlan(copyDefaultPlan(plan));
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [content, i18n.language]);
-
-  // The plan as it would be saved.
-  const draft = useMemo(
-    () => (base ? withEdits(base, saved, passed, unpassed) : null),
-    [base, saved, passed, unpassed],
+  if (!stored) return <View style={[styles.fill, { backgroundColor: colors.background }]} />;
+  const { passed, unpassed } = edits;
+  const { base, draft, marks, dirty, current, mayPass, kept } = planEditorView(
+    stored.plan,
+    saved,
+    stored.state.maintenance,
+    edits,
   );
-  const marks = passed.length + unpassed.length;
-  const dirty = Boolean(draft && stored && (marks > 0 || !samePlan(draft, stored.plan)));
-  if (!draft || !base || !stored)
-    return <View style={[styles.fill, { backgroundColor: colors.background }]} />;
-
-  /** The current step once saved. */
-  const current = editedCurrent(saved, passed.length, unpassed.length);
   const finished = stored.state.maintenance;
-  const mayPass = !finished && current < draft.steps.length;
-  const kept = current - 1 - passed.length;
 
   const save = async () => {
     await savePlan(draft, passed.length, unpassed.length);
@@ -139,21 +112,14 @@ export function PlanEditorScreen() {
           label: OWNER_TEXTS.labels.resetPlan,
           onPress: () => {
             if (!defaultPlan) return;
-            setEdited(restoreDefault(stored.plan, saved, defaultPlan));
-            setPassed([]);
-            setUnpassed([]);
+            dispatch({ type: 'reset', plan: restoreDefault(stored.plan, saved, defaultPlan) });
           },
         },
         { label: t('common.cancel'), cancel: true },
       ],
     });
   const setWeeks = (step: UserPlanStep, weeks: number) =>
-    setEdited({
-      ...base,
-      steps: base.steps.map((s) => (stepKey(s) === stepKey(step) ? { ...s, weeks } : s)),
-    });
-  const toggle = (list: string[], set: (next: string[]) => void, s: UserPlanStep) =>
-    set(list.includes(stepKey(s)) ? list.filter((k) => k !== stepKey(s)) : [...list, stepKey(s)]);
+    dispatch({ type: 'weeks', base, step, weeks });
 
   const session = (s: UserPlanStep) => t(`adwamuha.plan.${stepSession(s)}`);
   const positionOf = (s: UserPlanStep) =>
@@ -176,7 +142,7 @@ export function PlanEditorScreen() {
             canMove(from + 1, current, draft) && canMove(to + 1, current, draft)
           }
           onReorder={(steps) =>
-            setEdited(reorderOthers(base, saved, passed, steps.slice(current - 1)))
+            dispatch({ type: 'reorder', base, savedStep: saved, later: steps.slice(current - 1) })
           }
           onDone={() => setReordering(false)}
           renderItem={(s) => (
@@ -207,21 +173,17 @@ export function PlanEditorScreen() {
           step: position,
           passed: OWNER_TEXTS.labels.stepPassed,
         })}
-        onPress={() => toggle(passed, setPassed, s)}
+        onPress={() => dispatch({ type: 'pass', step: s })}
       />
     ) : null;
-  const undoButton = (
-    s: UserPlanStep,
-    position: number,
-    list: string[],
-    set: (n: string[]) => void,
-  ) => (
+  /** Takes a mark back: passed (`pass`) or put back (`unpass`). */
+  const undoButton = (s: UserPlanStep, position: number, mark: 'pass' | 'unpass') => (
     <Button
       title={t('adwamuha.plan.unpass')}
       kind="secondary"
       size="small"
       accessibilityLabel={t('adwamuha.plan.unpassLabel', { step: position })}
-      onPress={() => toggle(list, set, s)}
+      onPress={() => dispatch({ type: mark, step: s })}
     />
   );
 
@@ -279,7 +241,7 @@ export function PlanEditorScreen() {
                           step: i + 1,
                           notPassed: t('adwamuha.plan.notPassed'),
                         })}
-                        onPress={() => toggle(unpassed, setUnpassed, s)}
+                        onPress={() => dispatch({ type: 'unpass', step: s })}
                       />
                     )}
                   </View>
@@ -294,24 +256,24 @@ export function PlanEditorScreen() {
           const isCurrent = position === current;
           const isBack = position > current && position <= current + unpassed.length;
           return (
-            <StepCard
+            <PlanStepCard
               key={stepKey(s)}
               title={t('adwamuha.plan.step', { step: position })}
               current={isCurrent}
               badge={
                 isCurrent ? (
-                  <Badge tone="primary">{t('adwamuha.plan.current')}</Badge>
+                  <PlanBadge tone="primary">{t('adwamuha.plan.current')}</PlanBadge>
                 ) : isMarked ? (
-                  <Badge tone="gold">{t('adwamuha.plan.done')}</Badge>
+                  <PlanBadge tone="gold">{t('adwamuha.plan.done')}</PlanBadge>
                 ) : isBack ? (
-                  <Badge tone="primary">{t('adwamuha.plan.notPassed')}</Badge>
+                  <PlanBadge tone="primary">{t('adwamuha.plan.notPassed')}</PlanBadge>
                 ) : null
               }
               action={
                 isMarked
-                  ? undoButton(s, position, passed, setPassed)
+                  ? undoButton(s, position, 'pass')
                   : isBack
-                    ? undoButton(s, position, unpassed, setUnpassed)
+                    ? undoButton(s, position, 'unpass')
                     : passButton(s, position)
               }
               label={stepLabel(s, texts)}
@@ -349,108 +311,6 @@ export function PlanEditorScreen() {
     </SafeAreaView>
   );
 }
-
-/** One step (design `.pstep`): the current one framed in teal. */
-function StepCard({
-  title,
-  current,
-  badge,
-  action,
-  label,
-  session,
-  stepper,
-}: {
-  title: string;
-  current: boolean;
-  badge: ReactNode;
-  action: ReactNode;
-  label: string;
-  session: string;
-  stepper: ReactNode;
-}) {
-  const { colors, spacing } = useAppTheme();
-  return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: colors.surface,
-          borderColor: current ? colors.primary : colors.border,
-          borderWidth: current ? 2 : 1,
-          gap: spacing.sm,
-        },
-      ]}
-    >
-      <View style={[styles.row, { gap: spacing.sm }]}>
-        <AppText style={styles.strong}>{title}</AppText>
-        {badge}
-        <View style={styles.fill} />
-        {action}
-      </View>
-      <DhikrText size={17} style={styles.start}>
-        {label}
-      </DhikrText>
-      <View style={[styles.row, { gap: spacing.sm }]}>
-        <AppText variant="caption" tone="muted" style={styles.fill}>
-          {session}
-        </AppText>
-        {stepper}
-      </View>
-    </View>
-  );
-}
-
-function Badge({ tone, children }: { tone: 'primary' | 'gold'; children: string }) {
-  const { colors } = useAppTheme();
-  const look = toneColors(colors, tone);
-  return (
-    <View style={[styles.badge, { backgroundColor: look.background }]}>
-      <AppText style={[styles.badgeText, { color: look.icon }]}>{children}</AppText>
-    </View>
-  );
-}
-
-/** The weeks of a step, 1–8, with + and − (design `.mini-step`). */
-function WeeksStepper({
-  weeks,
-  step,
-  onFewer,
-  onMore,
-}: {
-  weeks: number;
-  step: number;
-  onFewer: () => void;
-  onMore: () => void;
-}) {
-  const { t } = useTranslation();
-  const { colors } = useAppTheme();
-  const button = (
-    icon: 'plus' | 'minus',
-    label: string,
-    onPress: () => void,
-    disabled: boolean,
-  ) => (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      onPress={onPress}
-      hitSlop={4}
-      style={[styles.miniButton, { backgroundColor: colors.surface }, disabled && { opacity: 0.4 }]}
-    >
-      <Icon name={icon} size={15} color={colors.primaryInk} />
-    </Pressable>
-  );
-  return (
-    <View style={[styles.row, styles.mini, { backgroundColor: colors.surfaceMuted }]}>
-      {button('plus', t('adwamuha.plan.moreWeeks', { step }), onMore, weeks >= MAX_STEP_WEEKS)}
-      <AppText style={styles.weeks}>{t('adwamuha.plan.weeks', { count: weeks })}</AppText>
-      {button('minus', t('adwamuha.plan.fewerWeeks', { step }), onFewer, weeks <= MIN_STEP_WEEKS)}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },
@@ -467,23 +327,6 @@ const styles = StyleSheet.create({
   },
   strong: { fontFamily: UI_FONTS.semibold, fontSize: 15, lineHeight: 22 },
   start: { textAlign: 'auto' },
-  badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 2 },
-  badgeText: { fontFamily: UI_FONTS.semibold, fontSize: 12, lineHeight: 18 },
   links: { justifyContent: 'center', flexWrap: 'wrap', gap: 24 },
   saveBar: { paddingTop: 12, paddingHorizontal: 16, borderTopWidth: 1 },
-  mini: { gap: 6, borderRadius: 11, padding: 3 },
-  miniButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  weeks: {
-    fontFamily: UI_FONTS.semibold,
-    fontSize: 13,
-    lineHeight: 20,
-    minWidth: 62,
-    textAlign: 'center',
-  },
 });

@@ -17,6 +17,7 @@ name: Own adhkar
 - takeScreenshot: 15-chapter-new
 - tapOn: ${output.s['custom.categoryNamePlaceholder']}
 - inputText: E2E
+- waitForAnimationToEnd
 - hideKeyboard
 - tapOn: ${output.s['custom.create']}
 - extendedWaitUntil:
@@ -32,6 +33,7 @@ name: Own adhkar
 - takeScreenshot: 17-dhikr-new
 - tapOn: ${output.s['custom.dhikrTextPlaceholder']}
 - inputText: E2E dhikr
+- waitForAnimationToEnd
 - hideKeyboard
 - tapOn: ${output.s['custom.save']}
 - extendedWaitUntil:

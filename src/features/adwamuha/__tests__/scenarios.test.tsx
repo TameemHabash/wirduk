@@ -12,7 +12,7 @@ import { HomeScreen } from '@/features/home/screens/HomeScreen';
 import { type DayPlan, type Scenario, startScenario } from '@/test-utils/adwamuha-scenario';
 import { settleLists } from '@/test-utils/render-app';
 
-import type { DueMessage } from '@/features/adwamuha/state/AdwamuhaProvider';
+import type { DueMessage } from '@/features/adwamuha/logic/due-messages';
 import { addDays } from '@/features/adwamuha/logic/days';
 import { ProgressScreen } from '@/features/adwamuha/screens/ProgressScreen';
 import type { DayKey } from '@/data/models';

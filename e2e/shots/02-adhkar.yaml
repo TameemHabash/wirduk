@@ -33,7 +33,9 @@ name: Adhkar tab
 - extendedWaitUntil:
     visible: ${output.s['search.start']}
     timeout: 10000
-# Android's keyboard is not ours and changes between runs (capital letters or not).
+# Android's keyboard is not ours and changes between runs: hide it once it is fully up (a Back
+# press before that reaches the app, which leaves the search).
+- waitForAnimationToEnd
 - hideKeyboard
 - waitForAnimationToEnd
 - takeScreenshot: 07-search
@@ -42,6 +44,7 @@ name: Adhkar tab
 - extendedWaitUntil:
     visible: ${output.s['search.categories']}
     timeout: 5000
+- waitForAnimationToEnd
 - hideKeyboard
 - waitForAnimationToEnd
 - takeScreenshot: 08-search-results
