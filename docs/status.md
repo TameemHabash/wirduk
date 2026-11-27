@@ -61,8 +61,11 @@ The commit ids above (and any from before 2026-11-01) are in the private archive
 
 The owner asked for a full refactor before Google Play (2026-11-27): a known Expo structure,
 clean code, better tests, speed, a clean repo, a simple Claude Code setup, and **nothing the
-user sees changes**. The plan: `.claude/plans` on the owner's PC; the owner's answers: feature folders,
-Maestro, delete the old files, and keep the user's data (decided in RF2; `docs/decisions.md`).
+user sees changes**. The owner's answers: feature folders, Maestro, delete the old files, and keep
+the user's data (decided in RF2; `docs/decisions.md`).
+
+**Next: RF5. The plan for RF5–RF8 and how each RF runs: [refactor-plan.md](refactor-plan.md).
+One RF per session (owner, 2026-11-27): a new session says "continue the refactor".**
 
 RF0, done (2026-11-27):
 
