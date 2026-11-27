@@ -40,6 +40,15 @@ Rules and traps for working on it are in [../CLAUDE.md](../CLAUDE.md).
 | R4 | Redesign: «أدومها» (setup, «مساري» beads, step-back sheet, «لم أقطعها بعد», settings) | 🟢 Done | one commit 2026-11-26 |
 | R5 | Redesign: Settings (notifications card) and the other screens | 🟢 Done | one commit 2026-11-26 |
 | R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | 🟢 Done | one commit 2026-11-26 |
+| RF0 | Refactor: safety net (Maestro screen runs, baseline pictures, coverage and speed numbers) | 🟢 Done | one commit 2026-11-27 |
+| RF1 | Refactor: clean the repo and the PC (old files, history docs, stale references) | Not started | |
+| RF2 | Refactor: start the data from zero (one schema, content v1, no old-data code) | Not started | |
+| RF3 | Refactor: the new structure (feature folders, shared UI kit, layer rules) | Not started | |
+| RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | Not started | |
+| RF5 | Refactor: speed (reader, «أدومها» context, audio progress, shared loads) | Not started | |
+| RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | Not started | |
+| RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | Not started | |
+| RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | Not started | |
 | 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -49,6 +58,28 @@ The commit ids above (and any from before 2026-11-01) are in the private archive
 After milestone 8 (same day, from the owner's phone test): counts reset when leaving the reader,
 an "إتمام" button, the editor's count box, audio that repeats as many times as the count, and the
 "العدّ مع الصوت" setting (off by default then; on by default since 2026-10-31).
+
+## Refactor (RF0–RF8, from 2026-11-27)
+
+The owner asked for a full refactor before Google Play (2026-11-27): a known Expo structure,
+clean code, better tests, speed, a clean repo, a simple Claude Code setup, and **nothing the
+user sees changes**. The plan: `.claude/plans` on the owner's PC; the owner's answers: start the
+data from zero (testers uninstall once), feature folders, Maestro, delete the old files.
+
+RF0, done (2026-11-27):
+
+- Maestro 2.12.1 (in `%USERPROFILE%\.maestro`, analytics off). `e2e/shots.yaml` visits every
+  screen from a clean install on a release x86_64 build, in a fixed state (date 2026-11-27
+  09:00, quiet status bar, light, font 1.0); `scripts/dev/e2e.ps1` runs it,
+  `scripts/dev/compare-shots.ts` compares two runs and lists only the changed screens. Flows
+  find text by its key (`scripts/dev/e2e-strings.ts`): no typed Arabic.
+- Baseline of commit 22803cf: 49 screens in light, dark and font 1.3 (`.local/shots/baseline/`,
+  `-dark/`, `-big/`, not in git). Two runs of the same code give the same pictures (48 of 49;
+  the message after a ward is random by design: `e2e/shots-compare.json`).
+- `.local/baseline.md`: 845 tests, coverage statements 89.0%, branches 82.4%, functions 86.9%,
+  lines 91.1%; cold start median 609 ms; reader swipes 11.2% janky frames (emulator).
+- Found: a link to the reader already open (`wirduk://category/1?dhikr=1002` while category 1
+  is open) keeps the page it is on. Not changed (no behavior change); for the owner to decide.
 
 ## Where things are now
 

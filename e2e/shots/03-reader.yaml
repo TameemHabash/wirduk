@@ -1,0 +1,43 @@
+# The reader: the opening dhikr, a long dhikr with fadl and «المصدر» open, the finish screen.
+# Content ids: category 1 = morning, dhikr 1002 = long text with fadl and source (count 3),
+# category 4 = one dhikr said once.
+appId: com.wirduk.app
+name: Reader
+---
+- runScript: ../.generated/strings.js
+- openLink: wirduk://category/1
+- extendedWaitUntil:
+    visible: ${output.s['reader.completeLabel']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 09-reader-opening
+# A link to the reader already open keeps its page: leave it first.
+- back
+- openLink: wirduk://category/1?dhikr=1002
+- extendedWaitUntil:
+    visible: ${output.s['reader.completeLabel']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 10-reader-long-top
+- swipe:
+    start: 50%, 70%
+    end: 50%, 25%
+- waitForAnimationToEnd
+- takeScreenshot: 11-reader-long-bottom
+- tapOn: ${output.s['reader.sourceTitle']}
+- waitForAnimationToEnd
+- takeScreenshot: 12-reader-source-open
+- back
+- openLink: wirduk://category/4
+- extendedWaitUntil:
+    visible: ${output.s['reader.completeLabel']}
+    timeout: 10000
+- tapOn:
+    point: 50%, 45%
+- extendedWaitUntil:
+    visible: ${output.s['completion.home']}
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 13-completion
+- tapOn: ${output.s['completion.home']}

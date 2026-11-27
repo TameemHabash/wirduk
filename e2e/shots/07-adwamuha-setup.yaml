@@ -1,0 +1,48 @@
+# «أدومها» setup 1–4, starting at step 4 (so «عدّل الخطة» has steps done), with the morning
+# reminder turned on and the notification permission refused (the Settings card shows then).
+appId: com.wirduk.app
+name: Adwamuha setup
+---
+- runScript: ../.generated/strings.js
+- openLink: wirduk://adwamuha/intro
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.setup.enable']}
+    timeout: 10000
+- tapOn: ${output.s['adwamuha.setup.enable']}
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.setup.fromSome']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 30-setup-start
+- tapOn: ${output.s['adwamuha.setup.fromSome']}
+- tapOn: ${output.s['adwamuha.start.more']}
+- tapOn: ${output.s['adwamuha.start.more']}
+- waitForAnimationToEnd
+- takeScreenshot: 31-setup-start-step3
+- tapOn: ${output.s['adwamuha.setup.next']}
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.settingsScreen.orderTitle']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 32-setup-order
+- tapOn: ${output.s['adwamuha.setup.next']}
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.setup.go']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 33-setup-reminders
+# The switch has the ward's name as its label (the first match is the row's text).
+- tapOn:
+    text: ${output.s['adwamuha.wardTitle.morning']}
+    index: 1
+# «ابدأ مساري» asks for the permission (Android's own dialog).
+- tapOn: ${output.s['adwamuha.setup.go']}
+- extendedWaitUntil:
+    visible: "Don.t allow"
+    timeout: 10000
+- tapOn: "Don.t allow"
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 34-home-adwamuha

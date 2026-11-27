@@ -1,0 +1,59 @@
+# «أذكاري»: the empty screen, a new chapter, a new dhikr, the delete dialog, the tab after.
+appId: com.wirduk.app
+name: Own adhkar
+---
+- runScript: ../.generated/strings.js
+- openLink: wirduk://custom
+- extendedWaitUntil:
+    visible: ${output.s['custom.manageTitle']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 14-my-adhkar-empty
+- openLink: wirduk://custom/new
+- extendedWaitUntil:
+    visible: ${output.s['custom.categoryNamePlaceholder']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 15-chapter-new
+- tapOn: ${output.s['custom.categoryNamePlaceholder']}
+- inputText: E2E
+- hideKeyboard
+- tapOn: ${output.s['custom.create']}
+- extendedWaitUntil:
+    visible: ${output.s['custom.addDhikr']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 16-chapter-edit
+- tapOn: ${output.s['custom.addDhikr']}
+- extendedWaitUntil:
+    visible: ${output.s['custom.dhikrTextPlaceholder']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 17-dhikr-new
+- tapOn: ${output.s['custom.dhikrTextPlaceholder']}
+- inputText: E2E dhikr
+- hideKeyboard
+- tapOn: ${output.s['custom.save']}
+- extendedWaitUntil:
+    visible: ${output.s['custom.deleteCategory']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 18-chapter-with-dhikr
+- tapOn: ${output.s['custom.deleteCategory']}
+- extendedWaitUntil:
+    visible: ${output.s['custom.deleteCategoryConfirmBody']}
+    timeout: 5000
+- waitForAnimationToEnd
+- takeScreenshot: 19-dialog-delete-chapter
+- tapOn: ${output.s['common.cancel']}
+- openLink: wirduk://adhkar
+- runFlow:
+    when:
+      visible: ${output.s['search.clear']}
+    commands:
+      - tapOn: ${output.s['search.clear']}
+- extendedWaitUntil:
+    visible: ${output.s['home.allAdhkar']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 20-adhkar-with-mine

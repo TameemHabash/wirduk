@@ -1,0 +1,5 @@
+# The second part of the screen run, after scripts/dev/e2e.ps1 moved the date 7 days ahead.
+appId: com.wirduk.app
+name: All screens, a week later
+---
+- runFlow: shots/09-week-later.yaml

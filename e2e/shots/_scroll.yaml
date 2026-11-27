@@ -1,0 +1,10 @@
+# Scrolls down by half the screen with a slow drag (about 100 px/s, under Android's fling
+# speed): the page moves exactly as far as the finger, so two runs scroll the same.
+# (Maestro's `scroll` flings, and the distance changes from run to run.)
+appId: com.wirduk.app
+---
+- swipe:
+    start: 50%, 80%
+    end: 50%, 30%
+    duration: 12000
+- waitForAnimationToEnd

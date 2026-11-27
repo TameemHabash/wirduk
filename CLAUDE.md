@@ -54,16 +54,17 @@ milestones 10–15). Decisions: [docs/decisions.md](docs/decisions.md) (they win
 
 ## Commands
 
-| Command                                                              | Use                                                                                                                                                                                            |
-| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run verify`                                                     | typecheck + lint + content check + all tests. Run once before declaring done.                                                                                                                  |
-| `npx jest src/features/reader`                                       | Run only the tests you touched while working (faster, cheaper).                                                                                                                                |
-| `npx prettier --check <files>`                                       | Lint does not catch every format issue in new files.                                                                                                                                           |
-| `npm run content:build`                                              | Rebuild `assets/db/content.db` + generated docs after a content change.                                                                                                                        |
-| `npm run db:peek -- 1017 133006`                                     | Text, count, audio, source and fadl of adhkar, from `content.db`.                                                                                                                              |
-| `npm run dorar:receiver` / `dorar:apply`                             | Change a Dorar source or fadl: `scripts/dorar/README.md`.                                                                                                                                      |
-| `node scripts/content/apply-audio-sheet.ts ../wirduk-audio/audio/ar` | New recordings from the owner's sheet (`docs/audio/morning-evening-audio.csv`): checks, copies, writes `audioRecordings`. Then `make-audio-manifest.ts`, the content version, `content:build`. |
-| `npm run android`                                                    | Native dev build on the emulator (only after native changes: new module or plugin).                                                                                                            |
+| Command                                                              | Use                                                                                                                                                                                                |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run verify`                                                     | typecheck + lint + content check + all tests. Run once before declaring done.                                                                                                                      |
+| `npx jest src/features/reader`                                       | Run only the tests you touched while working (faster, cheaper).                                                                                                                                    |
+| `npx prettier --check <files>`                                       | Lint does not catch every format issue in new files.                                                                                                                                               |
+| `npm run content:build`                                              | Rebuild `assets/db/content.db` + generated docs after a content change.                                                                                                                            |
+| `npm run db:peek -- 1017 133006`                                     | Text, count, audio, source and fadl of adhkar, from `content.db`.                                                                                                                                  |
+| `npm run e2e:shots` then `npm run shots:compare`                     | Every screen on the emulator (Maestro, release build: `Install-E2eApk` from `scripts/dev/e2e.ps1` first), compared with `.local/shots/baseline`. Only changed screens are listed. `e2e/README.md`. |
+| `npm run dorar:receiver` / `dorar:apply`                             | Change a Dorar source or fadl: `scripts/dorar/README.md`.                                                                                                                                          |
+| `node scripts/content/apply-audio-sheet.ts ../wirduk-audio/audio/ar` | New recordings from the owner's sheet (`docs/audio/morning-evening-audio.csv`): checks, copies, writes `audioRecordings`. Then `make-audio-manifest.ts`, the content version, `content:build`.     |
+| `npm run android`                                                    | Native dev build on the emulator (only after native changes: new module or plugin).                                                                                                                |
 
 Reports sent from the app: `gh issue list -R TameemHabash/wirduk-reports`, `gh issue view N -R …`.
 A screenshot: `gh api repos/TameemHabash/wirduk-reports/contents/<path> --jq .content` (base64).
@@ -125,7 +126,7 @@ README.md is long: read only the section you need.
 - `src/features/counter/counter-store.ts` in-memory counts.
 - `src/components/Toast.tsx` the app's toast (`useToast().show({ message, icon, tone, onPress })`).
   `src/components/Dialog.tsx` the app's own dialog (`useDialog().show({ icon, tone, title, body,
-  content, actions })`, the action first, `cancel: true` on the one a tap outside runs); never
+content, actions })`, the action first, `cancel: true` on the one a tap outside runs); never
   Android's `Alert.alert` (redesign). Tests press it with `src/test-utils/dialog.ts`. Buttons:
   `Button` (`kind`: primary, secondary, soft, danger, plain; `size="small"`), `TextButton`,
   `IconTile`, `Segmented`; `AppText roomy` for a label in a box as wide as its content.

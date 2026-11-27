@@ -1,0 +1,40 @@
+# "Continue where I stopped": count twice, leave the app, start it again: the reader opens
+# where it was, with the restore toast. (Dhikr 1009 is said 7 times.)
+appId: com.wirduk.app
+name: Continue where I stopped
+---
+- runScript: ../.generated/strings.js
+- stopApp
+- launchApp:
+    permissions:
+      all: unset
+- extendedWaitUntil:
+    visible: ${output.s['home.start']}
+    timeout: 15000
+- openLink: wirduk://category/1?dhikr=1009
+- extendedWaitUntil:
+    visible: ${output.s['reader.completeLabel']}
+    timeout: 10000
+- tapOn:
+    point: 50%, 45%
+- tapOn:
+    point: 50%, 45%
+- pressKey: home
+- stopApp
+- launchApp:
+    permissions:
+      all: unset
+- extendedWaitUntil:
+    visible: ${output.s['settings.restored']}
+    timeout: 15000
+# The reader slides in and the toast rises; the toast stays 6 s. Maestro has no "sleep": a wait
+# for a text that never shows, marked optional, is a fixed pause of 1.5 s.
+- extendedWaitUntil:
+    visible: "e2e-pause-never-shown"
+    timeout: 1500
+    optional: true
+- takeScreenshot: 29-restore-toast
+# The toast would still cover the next screen for a moment.
+- extendedWaitUntil:
+    notVisible: ${output.s['settings.restored']}
+    timeout: 10000

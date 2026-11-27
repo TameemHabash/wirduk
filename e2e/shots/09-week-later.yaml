@@ -1,0 +1,24 @@
+# Run by scripts/dev/e2e.ps1 after it moves the emulator's date 7 days ahead: the same plan a
+# week later (the week grid filled with missed days, the end-of-week message).
+appId: com.wirduk.app
+name: A week later
+---
+- runScript: ../.generated/strings.js
+- stopApp
+- launchApp:
+    permissions:
+      all: unset
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 15000
+- waitForAnimationToEnd
+- takeScreenshot: 47-home-week-later
+- openLink: wirduk://adwamuha
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.progressTitle']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 48-progress-week-later
+- runFlow: _scroll.yaml
+- waitForAnimationToEnd
+- takeScreenshot: 49-progress-week-later-2

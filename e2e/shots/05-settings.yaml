@@ -1,0 +1,42 @@
+# Settings (all of it), audio downloads, About, report.
+appId: com.wirduk.app
+name: Settings and the other screens
+---
+- runScript: ../.generated/strings.js
+- openLink: wirduk://settings
+- extendedWaitUntil:
+    visible: ${output.s['settings.title']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 21-settings
+- runFlow: _scroll.yaml
+- waitForAnimationToEnd
+- takeScreenshot: 22-settings-2
+- runFlow: _scroll.yaml
+- waitForAnimationToEnd
+- takeScreenshot: 23-settings-3
+- runFlow: _scroll.yaml
+- waitForAnimationToEnd
+- takeScreenshot: 24-settings-4
+- openLink: wirduk://audio
+- extendedWaitUntil:
+    visible: ${output.s['audio.downloads.title']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 25-audio
+- openLink: wirduk://about
+- extendedWaitUntil:
+    visible: ${output.s['about.title']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 26-about
+- runFlow: _scroll.yaml
+- waitForAnimationToEnd
+- takeScreenshot: 27-about-2
+- openLink: wirduk://report
+- extendedWaitUntil:
+    visible: ${output.s['report.title']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 28-report
+- back

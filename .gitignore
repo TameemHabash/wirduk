@@ -45,6 +45,8 @@ yarn-error.*
 
 # tests
 coverage/
+# Maestro: the UI strings cut from common.json (scripts/dev/e2e-strings.ts).
+e2e/.generated/
 
 # Android signing / local machine
 *.keystore

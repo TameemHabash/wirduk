@@ -13,6 +13,8 @@
     "dorar:receiver": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dorar/receiver.ts",
     "dorar:apply": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dorar/apply-page.ts",
     "db:peek": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dev/peek-db.ts",
+    "e2e:shots": "powershell -NoProfile -ExecutionPolicy Bypass -Command \". ./scripts/dev/e2e.ps1; Invoke-E2e shots\"",
+    "shots:compare": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dev/compare-shots.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

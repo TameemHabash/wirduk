@@ -1,0 +1,48 @@
+# The «الأذكار» tab: the list, a favorite, the reorder screen and its dialog, search.
+appId: com.wirduk.app
+name: Adhkar tab
+---
+- runScript: ../.generated/strings.js
+- openLink: wirduk://adhkar
+- extendedWaitUntil:
+    visible: ${output.s['home.allAdhkar']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 03-adhkar
+- tapOn:
+    text: ${output.s['home.addFavorite']}
+    index: 0
+- runFlow: _scroll.yaml
+- waitForAnimationToEnd
+- takeScreenshot: 04-adhkar-scrolled
+- openLink: wirduk://reorder
+- extendedWaitUntil:
+    visible: ${output.s['home.restoreDefault']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 05-reorder
+- tapOn: ${output.s['home.restoreDefault']}
+- extendedWaitUntil:
+    visible: ${output.s['home.restoreConfirmBody']}
+    timeout: 5000
+- waitForAnimationToEnd
+- takeScreenshot: 06-dialog-restore-order
+- tapOn: ${output.s['common.cancel']}
+- back
+- openLink: wirduk://search
+- extendedWaitUntil:
+    visible: ${output.s['search.start']}
+    timeout: 10000
+# Android's keyboard is not ours and changes between runs (capital letters or not).
+- hideKeyboard
+- waitForAnimationToEnd
+- takeScreenshot: 07-search
+- tapOn: ${output.s['search.placeholder']}
+- inputText: ${output.raw['home.morningBadge']}
+- extendedWaitUntil:
+    visible: ${output.s['search.categories']}
+    timeout: 5000
+- hideKeyboard
+- waitForAnimationToEnd
+- takeScreenshot: 08-search-results
+- tapOn: ${output.s['search.clear']}

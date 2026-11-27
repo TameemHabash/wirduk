@@ -1,0 +1,13 @@
+# Every screen, in order, from a clean install (run with scripts/dev/e2e.ps1: Invoke-E2e shots).
+# The pictures are compared with an earlier run by scripts/dev/compare-shots.ts.
+appId: com.wirduk.app
+name: All screens
+---
+- runFlow: shots/01-first-run.yaml
+- runFlow: shots/02-adhkar.yaml
+- runFlow: shots/03-reader.yaml
+- runFlow: shots/04-custom.yaml
+- runFlow: shots/05-settings.yaml
+- runFlow: shots/06-restore.yaml
+- runFlow: shots/07-adwamuha-setup.yaml
+- runFlow: shots/08-adwamuha.yaml

@@ -1,0 +1,19 @@
+{
+  "_about": "Rules for scripts/dev/compare-shots.ts. varying: screens that change from run to run by design (shown, not counted). scrolled: screens taken right after a drag; a drag can land a few pixels apart, so each band of the picture may line up within maxShift pixels before it is compared. Every other screen is compared pixel by pixel.",
+  "maxShift": 12,
+  "varying": {
+    "37-ward-done.png": "the message after a ward is picked at random (owner, 2026-11-21: no repeats)"
+  },
+  "scrolled": [
+    "04-adhkar-scrolled.png",
+    "22-settings-2.png",
+    "23-settings-3.png",
+    "24-settings-4.png",
+    "27-about-2.png",
+    "39-progress-2.png",
+    "40-step-back-sheet.png",
+    "44-adwamuha-settings-2.png",
+    "45-adwamuha-settings-3.png",
+    "49-progress-week-later-2.png"
+  ]
+}

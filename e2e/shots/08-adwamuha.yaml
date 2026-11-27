@@ -1,0 +1,85 @@
+# «أدومها» in use: Home's message, the morning ward and its finish screen, «مساري», the step-back
+# sheet, «عدّل الخطة» with the steps done open, «أدومها» settings, Settings with the card.
+# The ward is read by tapping until its finish screen shows.
+appId: com.wirduk.app
+name: Adwamuha in use
+---
+- runScript: ../.generated/strings.js
+- runFlow:
+    when:
+      visible: ${output.s['adwamuha.message.ok']}
+    commands:
+      - tapOn: ${output.s['adwamuha.message.ok']}
+- waitForAnimationToEnd
+- takeScreenshot: 35-home-adwamuha-no-message
+- tapOn: ${output.s['adwamuha.openWard.morning']}
+- extendedWaitUntil:
+    visible: ${output.s['reader.completeLabel']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 36-ward
+- repeat:
+    while:
+      notVisible: ${output.s['completion.home']}
+    times: 30
+    commands:
+      - tapOn:
+          point: 50%, 45%
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: ${output.s['completion.home']}
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 37-ward-done
+- tapOn: ${output.s['completion.home']}
+- openLink: wirduk://adwamuha
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.progressTitle']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 38-progress
+- runFlow: _scroll.yaml
+- waitForAnimationToEnd
+- takeScreenshot: 39-progress-2
+- repeat:
+    while:
+      notVisible: ${output.s['adwamuha.rows.easeTitle']}
+    times: 6
+    commands:
+      - runFlow: _scroll.yaml
+- tapOn: ${output.s['adwamuha.rows.easeTitle']}
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.stepBack.break1']}
+    timeout: 5000
+- waitForAnimationToEnd
+- takeScreenshot: 40-step-back-sheet
+- back
+- openLink: wirduk://adwamuha/plan
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.plan.save']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 41-plan-editor
+- tapOn: ${output.s['adwamuha.plan.doneSteps']}
+- waitForAnimationToEnd
+- takeScreenshot: 42-plan-editor-done-open
+- back
+- openLink: wirduk://adwamuha/settings
+- extendedWaitUntil:
+    visible: ${output.s['owner.featureName']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 43-adwamuha-settings
+- runFlow: _scroll.yaml
+- waitForAnimationToEnd
+- takeScreenshot: 44-adwamuha-settings-2
+- runFlow: _scroll.yaml
+- waitForAnimationToEnd
+- takeScreenshot: 45-adwamuha-settings-3
+- openLink: wirduk://settings
+- extendedWaitUntil:
+    visible: ${output.s['settings.title']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 46-settings-adwamuha-on

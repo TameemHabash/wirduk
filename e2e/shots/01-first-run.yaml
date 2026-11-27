@@ -1,0 +1,20 @@
+# First launch of a clean install: «أدومها»'s setup opens by itself; «لاحقًا» goes to Home.
+appId: com.wirduk.app
+name: First run and Home
+---
+- runScript: ../.generated/strings.js
+# Maestro grants every permission by default; "unset" keeps a new phone's state (never asked).
+- launchApp:
+    permissions:
+      all: unset
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.setup.enable']}
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 01-setup-intro
+- tapOn: ${output.s['adwamuha.later']}
+- extendedWaitUntil:
+    visible: ${output.s['home.start']}
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: 02-home
