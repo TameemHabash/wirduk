@@ -2,9 +2,10 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react-
 
 import { DHIKR_FONT_SIZE } from '@/data/settings/settings';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
-import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
+import { mockRouter, setRouteParams } from '@/test-utils/mocks/router';
 
 import { FOCUS_MS, SettingsScreen } from './SettingsScreen';
+import { tr } from '@/test-utils/tr';
 
 describe('SettingsScreen', () => {
   it('opened from the restore toast: «المتابعة من حيث توقفت» lit for a few seconds', async () => {
@@ -14,7 +15,7 @@ describe('SettingsScreen', () => {
     expect(mockRouter.setParams).toHaveBeenCalledWith({ focus: '' });
     await act(async () => jest.advanceTimersByTime(300));
     const row = screen.getByTestId('row-highlight');
-    expect(within(row).getByLabelText('المتابعة من حيث توقفت')).toBeOnTheScreen();
+    expect(within(row).getByLabelText(tr('settings.restoreSession'))).toBeOnTheScreen();
     await act(async () => jest.advanceTimersByTime(FOCUS_MS));
     expect(screen.queryByTestId('row-highlight')).toBeNull();
     jest.useRealTimers();
@@ -22,9 +23,9 @@ describe('SettingsScreen', () => {
 
   it('has the reading switches, all on by default, and saves them', async () => {
     const { repos } = await renderWithApp(<SettingsScreen />);
-    const next = await screen.findByLabelText('اهتزاز عند الانتقال إلى الذكر التالي');
-    const awake = screen.getByLabelText('إبقاء الشاشة مضاءة أثناء قراءة الأذكار');
-    const restore = screen.getByLabelText('المتابعة من حيث توقفت');
+    const next = await screen.findByLabelText(tr('settings.nextDhikrVibration'));
+    const awake = screen.getByLabelText(tr('settings.keepScreenOn'));
+    const restore = screen.getByLabelText(tr('settings.restoreSession'));
     expect([next, awake, restore].map((s) => s.props.value)).toEqual([true, true, true]);
     await repos.session.save({ categoryId: 1, dhikrId: 1017, counts: {} });
     await fireEvent(next, 'valueChange', false);
@@ -44,7 +45,7 @@ describe('SettingsScreen', () => {
   it('changes the text size and saves it', async () => {
     const { repos } = await renderWithApp(<SettingsScreen />);
     expect(await screen.findByText('24')).toBeOnTheScreen();
-    await fireEvent.press(screen.getByLabelText('تكبير الخط'));
+    await fireEvent.press(screen.getByLabelText(tr('settings.increase')));
     expect(screen.getByText('26')).toBeOnTheScreen();
     await waitFor(async () => expect((await repos.settings.getAll()).dhikrFontSize).toBe(26));
   });
@@ -53,9 +54,9 @@ describe('SettingsScreen', () => {
     const repos = await createTestRepositories();
     await repos.settings.set('dhikrFontSize', DHIKR_FONT_SIZE.max);
     await renderWithApp(<SettingsScreen />, repos);
-    const bigger = await screen.findByLabelText('تكبير الخط');
+    const bigger = await screen.findByLabelText(tr('settings.increase'));
     expect(bigger).toBeDisabled();
-    expect(screen.getByLabelText('تصغير الخط')).toBeEnabled();
+    expect(screen.getByLabelText(tr('settings.decrease'))).toBeEnabled();
   });
 
   it('shows a live preview with real dhikr text', async () => {
@@ -66,9 +67,9 @@ describe('SettingsScreen', () => {
 
   it('picks a dhikr font (Amiri Quran by default) and saves it', async () => {
     const { repos } = await renderWithApp(<SettingsScreen />);
-    expect(await screen.findByRole('radio', { name: 'أميري قرآن' })).toBeSelected();
-    await fireEvent.press(screen.getByRole('radio', { name: 'شهرزاد' }));
-    expect(screen.getByRole('radio', { name: 'شهرزاد' })).toBeSelected();
+    expect(await screen.findByRole('radio', { name: tr('fonts.amiriQuran') })).toBeSelected();
+    await fireEvent.press(screen.getByRole('radio', { name: tr('fonts.scheherazade') }));
+    expect(screen.getByRole('radio', { name: tr('fonts.scheherazade') })).toBeSelected();
     await waitFor(async () =>
       expect((await repos.settings.getAll()).dhikrFont).toBe('scheherazade'),
     );
@@ -76,14 +77,14 @@ describe('SettingsScreen', () => {
 
   it('turns haptics off and saves it', async () => {
     const { repos } = await renderWithApp(<SettingsScreen />);
-    const toggle = await screen.findByLabelText('الاهتزاز الخفيف عند كل عدّة');
+    const toggle = await screen.findByLabelText(tr('settings.haptics'));
     await fireEvent(toggle, 'valueChange', false);
     await waitFor(async () => expect((await repos.settings.getAll()).hapticsEnabled).toBe(false));
   });
 
   it('turns the long vibration off (on by default) and saves it', async () => {
     const { repos } = await renderWithApp(<SettingsScreen />);
-    const toggle = await screen.findByLabelText('اهتزاز طويل عند إتمام الباب');
+    const toggle = await screen.findByLabelText(tr('settings.completionVibration'));
     expect(toggle.props.value).toBe(true);
     await fireEvent(toggle, 'valueChange', false);
     await waitFor(async () =>
@@ -93,7 +94,7 @@ describe('SettingsScreen', () => {
 
   it('turns the tick sound on (off by default) and saves it', async () => {
     const { repos } = await renderWithApp(<SettingsScreen />);
-    const toggle = await screen.findByLabelText('صوت خفيف عند كل عدّة');
+    const toggle = await screen.findByLabelText(tr('settings.tickSound'));
     expect(toggle.props.value).toBe(false);
     await fireEvent(toggle, 'valueChange', true);
     await waitFor(async () => expect((await repos.settings.getAll()).tickSound).toBe(true));
@@ -101,7 +102,7 @@ describe('SettingsScreen', () => {
 
   it('opens About', async () => {
     await renderWithApp(<SettingsScreen />);
-    await fireEvent.press(await screen.findByText('عن التطبيق'));
+    await fireEvent.press(await screen.findByText(tr('about.title')));
     expect(mockRouter.push).toHaveBeenCalledWith('/about');
   });
 });

@@ -2,13 +2,12 @@ import { act, waitFor } from '@testing-library/react-native';
 
 import DevClock from '@/app/dev-clock';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
-import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
+import { mockRouter, setRouteParams } from '@/test-utils/mocks/router';
 
 import { devNow, onDevClock, setDevClock } from './dev-clock';
 import { addDays } from '@/features/adwamuha/logic/days';
-import { startPlan } from '@/features/adwamuha/logic/progress';
 import { slotAt } from '@/features/adwamuha/logic/sessions';
-import { copyDefaultPlan } from '@/features/adwamuha/logic/ward';
+import { givenAdwamuha } from '@/test-utils/given';
 import { DEFAULT_WARD_TIMES } from '@/data/models';
 
 afterEach(() => {
@@ -34,13 +33,7 @@ describe('the dev clock (dev builds only, milestone 13)', () => {
     const today = new Date();
     // «أدومها»'s today: before the morning starts (04:00) it is still the day before.
     const day = slotAt(today, DEFAULT_WARD_TIMES).date;
-    await repos.adwamuha.save({
-      enabled: true,
-      plan: copyDefaultPlan(await repos.content.getDefaultPlan('ar')),
-      state: startPlan(1, day),
-      startedOn: day,
-      offSince: null,
-    });
+    await givenAdwamuha(repos, { startedOn: day });
     setRouteParams({ days: '8', hour: '20', read: '4' });
     // No `now`: the app's own clock, which the route moves.
     await renderWithApp(<DevClock />, repos);

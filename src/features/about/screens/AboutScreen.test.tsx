@@ -5,12 +5,13 @@ import { resources } from '@/i18n/resources';
 import { renderWithApp } from '@/test-utils/render-app';
 
 import { AboutScreen } from './AboutScreen';
+import { tr } from '@/test-utils/tr';
 
 describe('AboutScreen', () => {
   it('names the content, the sources, the audio and the fonts', async () => {
     await renderWithApp(<AboutScreen />);
     expect(await screen.findByText(/حصن المسلم/)).toBeOnTheScreen();
-    expect(screen.getByText('مصادر الأحاديث وفضلها من موقع الدرر السنية.')).toBeOnTheScreen();
+    expect(screen.getByText(tr('about.sources'))).toBeOnTheScreen();
     // The owner's sentence for the audio (2026-11-25/26), with the volunteer's thanks.
     expect(screen.getByText(resources.ar.common.about.audio)).toBeOnTheScreen();
     expect(screen.getByText(/حمد الدريهم/)).toBeOnTheScreen();

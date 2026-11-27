@@ -1,6 +1,6 @@
 /**
  * Edge cases of the brief §16 not covered elsewhere (milestone 13). No network, a full phone and
- * cut downloads are tested with the audio (audio-downloads, audio-screens) and the report
+ * cut downloads are tested with the audio (audio-downloads, reader-audio, AudioDownloadsScreen) and the report
  * (ReportScreen); a large system font is checked on the owner's phone.
  */
 import type { ReactElement } from 'react';
@@ -12,8 +12,7 @@ import { DHIKR_FONT_SIZE } from '@/data/settings/settings';
 import { AboutScreen } from '@/features/about/screens/AboutScreen';
 import { AdwamuhaSettingsScreen } from '@/features/adwamuha/screens/AdwamuhaSettingsScreen';
 import { addDays } from '@/features/adwamuha/logic/days';
-import { startPlan } from '@/features/adwamuha/logic/progress';
-import { copyDefaultPlan } from '@/features/adwamuha/logic/ward';
+import { givenAdwamuha } from '@/test-utils/given';
 import { PlanEditorScreen } from '@/features/adwamuha/screens/PlanEditorScreen';
 import { ProgressScreen } from '@/features/adwamuha/screens/ProgressScreen';
 import { SetupIntroScreen } from '@/features/adwamuha/screens/SetupIntroScreen';
@@ -33,7 +32,7 @@ import { ReportScreen } from '@/features/report/screens/ReportScreen';
 import { SettingsScreen } from '@/features/settings/screens/SettingsScreen';
 import { openShippedContentDb } from '@/test-utils/databases';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
-import { setRouteParams } from '@/test-utils/router-mock';
+import { setRouteParams } from '@/test-utils/mocks/router';
 import { COLORS, type ColorScheme } from '@/theme/colors';
 
 const DAY = '2026-03-04';
@@ -44,15 +43,10 @@ afterEach(async () => {
 });
 
 async function withAdwamuha(): Promise<Repositories> {
-  const repos = await createTestRepositories();
-  await repos.adwamuha.save({
-    enabled: true,
-    plan: copyDefaultPlan(await repos.content.getDefaultPlan('ar')),
-    state: startPlan(3, addDays(DAY, -10)),
+  return givenAdwamuha(await createTestRepositories(), {
+    step: 3,
     startedOn: addDays(DAY, -10),
-    offSince: null,
   });
-  return repos;
 }
 
 describe('the longest dhikr at the largest font size', () => {

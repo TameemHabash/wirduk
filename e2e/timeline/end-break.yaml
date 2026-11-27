@@ -1,0 +1,20 @@
+# The break ended early («أنهِ الاستراحة وعُد» on «مساري»): its line goes.
+appId: com.wirduk.app
+name: Timeline end the break
+---
+- runScript: ../.generated/strings.js
+- launchApp
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 20000
+- runFlow: _messages.yaml
+- openLink: wirduk://adwamuha
+- scrollUntilVisible:
+    element:
+      text: ${output.s['adwamuha.masari.endBreak']}
+    direction: DOWN
+    centerElement: true
+- tapOn: ${output.s['adwamuha.masari.endBreak']}
+- extendedWaitUntil:
+    notVisible: ${output.s['adwamuha.masari.breakUntil']}
+    timeout: 5000

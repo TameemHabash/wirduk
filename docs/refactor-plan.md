@@ -1,8 +1,8 @@
-# Refactor plan (RF6–RF8 still to do)
+# Refactor plan (RF7–RF8 still to do)
 
-The refactor the owner asked for on 2026-11-27 (`docs/status.md`, "Refactor"). RF0–RF5 are done
-(RF5's plan is kept below for the record; what was done is in `docs/status.md`). This file is the
-plan for the rest; delete it at the end of RF8.
+The refactor the owner asked for on 2026-11-27 (`docs/status.md`, "Refactor"). RF0–RF6 are done
+(RF5's and RF6's plans are kept below for the record; what was done is in `docs/status.md`). This
+file is the plan for the rest; delete it at the end of RF8.
 
 ## How each RF runs (owner's rules)
 
@@ -45,7 +45,7 @@ both after a shots run.
    test, the screen compare and the numbers stay good.
 7. Report the numbers before and after.
 
-## RF6 — Better tests
+## RF6 — Better tests — done
 
 - Test kit in `src/test-utils/`: `givenAdwamuha(repos, { step, … })` (replaces about 11 copies of
   "turn on «أدومها»"), named content ids (`fixtures/content.ts`), `tr('key')` to find UI text from

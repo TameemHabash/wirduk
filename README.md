@@ -331,12 +331,12 @@ shows only when `APP_CONFIG.report.endpoint` is set; deploy steps are in
 The design files are in `wirduk-logo/` (light and dark SVG).
 `npm run branding:build` turns the SVGs into every image the app uses:
 
-| File                                                         | Use                                                                 |
-| ------------------------------------------------------------ | ------------------------------------------------------------------- |
+| File                                                         | Use                                                                    |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------- |
 | `assets/branding/logo-{light,dark}.png`, `…-small.png`       | Logo inside the app (`src/components/ui/Logo.tsx` picks light or dark) |
-| `assets/icon.png`                                            | App icon (iOS and fallback): full square                            |
-| `assets/android-icon-{background,foreground,monochrome}.png` | Android adaptive icon and themed (one-color) icon                   |
-| `assets/splash-icon.png`, `assets/splash-icon-dark.png`      | Splash screen (set in `app.config.ts`)                              |
+| `assets/icon.png`                                            | App icon (iOS and fallback): full square                               |
+| `assets/android-icon-{background,foreground,monochrome}.png` | Android adaptive icon and themed (one-color) icon                      |
+| `assets/splash-icon.png`, `assets/splash-icon-dark.png`      | Splash screen (set in `app.config.ts`)                                 |
 
 After a logo change: run the script, check the images, then rebuild the native app
 (`npx expo prebuild --clean` + `npm run android`).
@@ -365,8 +365,17 @@ Two Jest projects (see `jest.config.js`):
   **real** repositories: the shipped `content.db` plus a fresh in-memory user database
   (`src/test-utils/render-app.tsx`). Native-only modules are mocked in `jest.setup.ui.ts`.
   In Testing Library 14, `render` and `fireEvent` are async: always `await` them.
-  Audio, recording, the file picker and the router are mocked with call records in
-  `src/test-utils/` (`audio-mock.ts`, `router-mock.ts`).
+- **The test kit** (`src/test-utils/`, RF6): `givenAdwamuha(repos, { step, startedOn })` and
+  `givenWardRead` set up the user's data; `tr('key')` finds UI text from `common.json` (tests
+  type no UI Arabic); `fixtures/content.ts` names the content ids (`DHIKR.hundredTimes`);
+  `reader.tsx` opens the reader and taps the counter; `mocks/` holds the stand-ins for audio
+  (what was heard: `recordingsHeard()`), the router (`tryToLeave()` runs the unsaved-changes
+  guard), notifications and lists. «أدومها» over days: `startScenario` and its day-by-day
+  scripts (`s.play('days 2-7: both wards')`).
+- Tests check behavior (what the user sees and hears, what is saved), not call counts or style
+  props (the colour, contrast and layout guards are the exception).
+- Coverage has a floor (`coverageThreshold` in `jest.config.js`); `npm run verify` runs with
+  coverage, so a drop fails it.
 - Lists render more rows on their own 50 ms timer. If a test changes a list's data at its end
   (for example adds a favorite), finish with `await settleLists()`, or React may warn about an
   update outside `act()`.

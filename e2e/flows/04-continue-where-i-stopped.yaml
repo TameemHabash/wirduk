@@ -1,0 +1,27 @@
+# "Continue where I stopped": count twice, leave the app, start it again: the reader opens at
+# the same dhikr with the same count, and says so. (Dhikr 1009 is said 7 times.)
+appId: com.wirduk.app
+name: Continue where I stopped
+---
+- runScript: ../.generated/strings.js
+- openLink: wirduk://category/1?dhikr=1009
+- extendedWaitUntil:
+    visible: ${output.raw['reader.counter'].replace('{{done}}', '0').replace('{{total}}', '7')}
+    timeout: 10000
+- tapOn:
+    point: 50%, 45%
+- tapOn:
+    point: 50%, 45%
+- pressKey: home
+- stopApp
+- launchApp:
+    permissions:
+      all: unset
+- extendedWaitUntil:
+    visible: ${output.s['settings.restored']}
+    timeout: 15000
+- assertVisible: ${output.raw['reader.counter'].replace('{{done}}', '2').replace('{{total}}', '7')}
+- extendedWaitUntil:
+    notVisible: ${output.s['settings.restored']}
+    timeout: 10000
+- back

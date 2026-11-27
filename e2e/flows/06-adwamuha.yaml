@@ -1,0 +1,58 @@
+# «أدومها»: the setup from the first step; Home's welcome; the morning ward read in the reader
+# to its finish screen; back on Home the morning is done and the evening comes later.
+# (The clock is 09:00, inside the morning's window.)
+appId: com.wirduk.app
+name: Adwamuha
+---
+- runScript: ../.generated/strings.js
+- openLink: wirduk://adwamuha/intro
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.setup.enable']}
+    timeout: 10000
+- tapOn: ${output.s['adwamuha.setup.enable']}
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.setup.fromFirst']}
+    timeout: 10000
+- tapOn: ${output.s['adwamuha.setup.fromFirst']}
+- tapOn: ${output.s['adwamuha.setup.next']}
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.settingsScreen.orderTitle']}
+    timeout: 10000
+- tapOn: ${output.s['adwamuha.setup.next']}
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.setup.go']}
+    timeout: 10000
+- tapOn: ${output.s['adwamuha.setup.go']}
+# Home: «وردك اليوم», with the welcome (and the stage's tip) to read first.
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 10000
+- assertVisible: ${output.s['adwamuha.message.ok']}
+- repeat:
+    while:
+      visible: ${output.s['adwamuha.message.ok']}
+    times: 4
+    commands:
+      - tapOn: ${output.s['adwamuha.message.ok']}
+      - waitForAnimationToEnd
+- tapOn: ${output.s['adwamuha.openWard.morning']}
+- extendedWaitUntil:
+    visible: ${output.s['reader.completeLabel']}
+    timeout: 10000
+- repeat:
+    while:
+      notVisible: ${output.s['completion.home']}
+    times: 30
+    commands:
+      - tapOn:
+          point: 50%, 45%
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: ${output.s['completion.home']}
+    timeout: 10000
+- tapOn: ${output.s['completion.home']}
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 10000
+- assertNotVisible: ${output.s['adwamuha.openWard.morning']}
+- assertVisible: ${output.s['adwamuha.startsAt']}

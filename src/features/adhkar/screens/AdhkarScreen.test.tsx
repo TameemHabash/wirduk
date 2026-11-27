@@ -3,11 +3,12 @@ import { fireEvent, screen } from '@testing-library/react-native';
 
 import { COLORS } from '@/theme/colors';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
-import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
+import { mockRouter, setRouteParams } from '@/test-utils/mocks/router';
 
 import { AdhkarScreen } from './AdhkarScreen';
+import { tr } from '@/test-utils/tr';
 
-const input = () => screen.getByPlaceholderText('ابحث بكلمة من الذكر أو اسم الباب');
+const input = () => screen.getByPlaceholderText(tr('search.placeholder'));
 
 /** The chapter rows' titles, in order (rows are labelled "title، count"). */
 function chapterTitles(): string[] {
@@ -21,7 +22,7 @@ function chapterTitles(): string[] {
 describe('the «الأذكار» tab', () => {
   it('has a large title and the search box on top', async () => {
     await renderWithApp(<AdhkarScreen />);
-    expect(screen.getByRole('header', { name: 'الأذكار' })).toBeOnTheScreen();
+    expect(screen.getByRole('header', { name: tr('search.adhkar') })).toBeOnTheScreen();
     expect(input()).toBeOnTheScreen();
   });
 
@@ -29,7 +30,7 @@ describe('the «الأذكار» tab', () => {
     const repos = await createTestRepositories();
     await repos.custom.createCategory('أدعيتي');
     await renderWithApp(<AdhkarScreen />, repos);
-    await screen.findByText('كل الأذكار');
+    await screen.findByText(tr('home.allAdhkar'));
     const titles = chapterTitles();
     expect(titles[0]).toBe('أدعيتي');
     expect(titles[1]).toBe('أذكار النوم');
@@ -56,7 +57,7 @@ describe('the «الأذكار» tab', () => {
 
   it('«تعديل الترتيب» opens the reorder screen', async () => {
     await renderWithApp(<AdhkarScreen />);
-    await fireEvent.press(await screen.findByText('تعديل الترتيب'));
+    await fireEvent.press(await screen.findByText(tr('home.editOrder')));
     expect(mockRouter.push).toHaveBeenCalledWith('/reorder');
   });
 
@@ -64,7 +65,7 @@ describe('the «الأذكار» tab', () => {
     const repos = await createTestRepositories();
     await repos.categoryOrder.save([5, 4, 3, 2]);
     await renderWithApp(<AdhkarScreen />, repos);
-    await screen.findByText('كل الأذكار');
+    await screen.findByText(tr('home.allAdhkar'));
     expect(chapterTitles().slice(0, 4)).toEqual([
       'دعاء الخروج من الخلاء',
       'دعاء دخول الخلاء',
@@ -77,19 +78,19 @@ describe('the «الأذكار» tab', () => {
 describe('search inside the tab', () => {
   it('a hint while the box is empty and focused, instead of the lists', async () => {
     await renderWithApp(<AdhkarScreen />);
-    await screen.findByText('كل الأذكار');
+    await screen.findByText(tr('home.allAdhkar'));
     await fireEvent(input(), 'focus');
-    expect(screen.getByText('اكتب كلمة للبحث. لا يهم التشكيل ولا الهمزات.')).toBeOnTheScreen();
-    expect(screen.queryByText('كل الأذكار')).toBeNull();
+    expect(screen.getByText(tr('search.start'))).toBeOnTheScreen();
+    expect(screen.queryByText(tr('home.allAdhkar'))).toBeNull();
     await fireEvent(input(), 'blur');
-    expect(screen.getByText('كل الأذكار')).toBeOnTheScreen();
+    expect(screen.getByText(tr('home.allAdhkar'))).toBeOnTheScreen();
   });
 
   it('finds chapters by title: results in place of the lists; opens them', async () => {
     await renderWithApp(<AdhkarScreen />);
     await fireEvent.changeText(input(), 'النوم');
-    expect(await screen.findByText('الأبواب')).toBeOnTheScreen();
-    expect(screen.queryByText('كل الأذكار')).toBeNull();
+    expect(await screen.findByText(tr('search.categories'))).toBeOnTheScreen();
+    expect(screen.queryByText(tr('home.allAdhkar'))).toBeNull();
     await fireEvent.press(screen.getAllByLabelText('أذكار النوم، 13 ذكرًا')[0]!);
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: '/category/[id]',
@@ -123,9 +124,9 @@ describe('search inside the tab', () => {
   it('clears the query and brings the lists back', async () => {
     await renderWithApp(<AdhkarScreen />);
     await fireEvent.changeText(input(), 'النوم');
-    await fireEvent.press(screen.getByLabelText('مسح البحث'));
+    await fireEvent.press(screen.getByLabelText(tr('search.clear')));
     expect(input().props.value).toBe('');
-    expect(await screen.findByText('كل الأذكار')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('home.allAdhkar'))).toBeOnTheScreen();
   });
 
   it('opened with ?focus=search (Home, wirduk://search): the keyboard comes up', async () => {

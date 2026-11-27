@@ -1,0 +1,14 @@
+# Opens the app and reads the ward of SESSION in the reader.
+appId: com.wirduk.app
+name: Timeline read a ward
+---
+- runScript: ../.generated/strings.js
+- launchApp
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 20000
+- runFlow: _messages.yaml
+- runFlow:
+    file: _read-ward.yaml
+    env:
+      SESSION: ${SESSION}

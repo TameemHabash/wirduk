@@ -1,0 +1,17 @@
+# The morning reminder tapped at 17:00, after the morning's time (owner, 2026-11-21): the ward
+# does not open; Home stays, with «انتهى وقت ورد الصباح.».
+appId: com.wirduk.app
+name: Timeline reminder tapped late
+---
+- runScript: ../.generated/strings.js
+- swipe:
+    start: 50%, 1%
+    end: 50%, 70%
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.morningReminder']}
+    timeout: 10000
+- tapOn: ${output.s['owner.labels.morningReminder']}
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.wardOver.morning']}
+    timeout: 20000
+- assertNotVisible: ${output.s['reader.completeLabel']}

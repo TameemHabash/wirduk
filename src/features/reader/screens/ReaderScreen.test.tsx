@@ -2,146 +2,133 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import * as Haptics from 'expo-haptics';
 
 import { counterStore } from '@/features/reader/state/counter-store';
-import { mockPlayers, tickPlayer } from '@/test-utils/audio-mock';
-import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
-import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
+import { CATEGORY, DHIKR } from '@/test-utils/fixtures/content';
+import { ticksHeard } from '@/test-utils/mocks/audio';
+import { mockRouter, setRouteParams } from '@/test-utils/mocks/router';
+import { counted, openChapter, openReader, position, tapCounter } from '@/test-utils/reader';
+import { renderWithApp } from '@/test-utils/render-app';
+import { tr } from '@/test-utils/tr';
 
 import { ReaderScreen } from './ReaderScreen';
 
-/** The counter, found by its spoken label "تم N من M". */
-const counter = () => screen.getByLabelText(/^تم \d+ من \d+$/);
-
-/** What a screen-reader user does: activate the counter. */
-async function tap() {
-  await fireEvent(counter(), 'accessibilityAction', { nativeEvent: { actionName: 'activate' } });
-}
-
-async function openCategory(id: number, dhikr?: number) {
-  const repos = await createTestRepositories();
-  const adhkar = await repos.content.listAdhkar(id, 'ar');
-  counterStore.resetMany(adhkar.map((d) => d.id)); // counters are app-wide memory
-  setRouteParams(dhikr ? { id: String(id), dhikr: String(dhikr) } : { id: String(id) });
-  const view = await renderWithApp(<ReaderScreen />, repos);
-  await screen.findByLabelText(/^تم \d+ من \d+$/);
-  return { repos, adhkar, view };
-}
-
-const completeButton = () => screen.getByLabelText('إتمام هذا الذكر والانتقال إلى التالي');
+const completeButton = () => screen.getByLabelText(tr('reader.completeLabel'));
+const finishScreenOf = (categoryId: number) => ({
+  pathname: '/category/[id]/done',
+  params: { id: String(categoryId) },
+});
 
 describe('ReaderScreen', () => {
-  it('shows the category, position and an empty counter', async () => {
-    const { adhkar } = await openCategory(2);
-    expect(screen.getByText('أذكار النوم')).toBeOnTheScreen();
-    expect(screen.getByText(`1 من ${adhkar.length}`)).toBeOnTheScreen();
-    expect(counter().props.accessibilityLabel).toBe(`تم 0 من ${adhkar[0]!.count}`);
+  it('shows the chapter, the place and an empty counter', async () => {
+    const { adhkar, repos } = await openChapter(CATEGORY.firstListed);
+    const title = (await repos.content.getCategory(CATEGORY.firstListed, 'ar'))!.title;
+    expect(screen.getByText(title)).toBeOnTheScreen();
+    expect(screen.getByText(position(1, adhkar.length))).toBeOnTheScreen();
+    expect(screen.getByLabelText(counted(0, adhkar[0]!.count))).toBeOnTheScreen();
   });
 
-  it('counts, gives light haptic feedback, and resets this dhikr only', async () => {
-    // أذكار الصباح, dhikr 17: سبحان الله وبحمده (100 times)
-    await openCategory(1, 1017);
-    expect(screen.getByText('18 من 24')).toBeOnTheScreen();
-    await tap();
-    await tap();
-    expect(counter().props.accessibilityLabel).toBe('تم 2 من 100');
+  it('opens at the dhikr of the link', async () => {
+    const { placeOf } = await openReader(DHIKR.hundredTimes);
+    expect(screen.getByText(placeOf(DHIKR.hundredTimes))).toBeOnTheScreen();
+  });
+
+  it('counts each tap, with a light vibration', async () => {
+    await openReader(DHIKR.hundredTimes);
+    await tapCounter();
+    await tapCounter();
+    expect(screen.getByLabelText(counted(2, 100))).toBeOnTheScreen();
     expect(Haptics.selectionAsync).toHaveBeenCalled();
-    await fireEvent.press(screen.getByLabelText('إعادة عدّ هذا الذكر'));
-    expect(counter().props.accessibilityLabel).toBe('تم 0 من 100');
+  });
+
+  it('«إعادة عدّ هذا الذكر» puts this dhikr back to zero', async () => {
+    await openReader(DHIKR.hundredTimes);
+    await tapCounter();
+    await fireEvent.press(screen.getByLabelText(tr('reader.reset')));
+    expect(screen.getByLabelText(counted(0, 100))).toBeOnTheScreen();
   });
 
   it('plays no tick sound by default', async () => {
-    await openCategory(1, 1017);
-    await tap();
-    expect(mockPlayers.filter((p) => p.play.mock.calls.length > 0)).toEqual([]);
+    await openReader(DHIKR.hundredTimes);
+    await tapCounter();
+    expect(ticksHeard()).toBe(0);
   });
 
   it('plays a short tick on each count when the setting is on', async () => {
-    const repos = await createTestRepositories();
-    await repos.settings.set('tickSound', true);
-    counterStore.reset(1017);
-    setRouteParams({ id: '1', dhikr: '1017' });
-    await renderWithApp(<ReaderScreen />, repos);
-    await screen.findByLabelText(/^تم \d+ من \d+$/);
-    await tap();
-    await tap();
-    await waitFor(() => expect(tickPlayer()?.play).toHaveBeenCalledTimes(2));
+    await openReader(DHIKR.hundredTimes, {
+      setup: (repos) => repos.settings.set('tickSound', true),
+    });
+    await tapCounter();
+    await tapCounter();
+    await waitFor(() => expect(ticksHeard()).toBe(2));
   });
 
   it('moves to the next dhikr by itself when the count is reached', async () => {
-    const { adhkar } = await openCategory(1); // first morning dhikr: count 1
+    const { adhkar } = await openChapter(CATEGORY.morning); // the opening: count 1
     expect(adhkar[0]!.count).toBe(1);
-    await tap();
-    await waitFor(() => expect(screen.getByText('2 من 24')).toBeOnTheScreen(), { timeout: 2000 });
-  });
-
-  it('never counts past the target', async () => {
-    await openCategory(1, 1001); // count 1
-    await tap();
-    await tap(); // during the pause before moving on
-    expect(counterStore.get(1001)).toBe(1);
-  });
-
-  it('opens the completion screen when the whole category is done', async () => {
-    await openCategory(4); // دعاء دخول الخلاء: one dhikr, count 1
-    await tap();
-    await waitFor(
-      () =>
-        expect(mockRouter.replace).toHaveBeenCalledWith({
-          pathname: '/category/[id]/done',
-          params: { id: '4' },
-        }),
-      { timeout: 2000 },
-    );
-  });
-
-  it('starts the category from zero after leaving the reader', async () => {
-    const { view } = await openCategory(1, 1017);
-    await tap();
-    expect(counter().props.accessibilityLabel).toBe('تم 1 من 100');
-    await view.unmount();
-    expect(counterStore.get(1017)).toBe(0);
-    setRouteParams({ id: '1', dhikr: '1017' });
-    await renderWithApp(<ReaderScreen />);
-    expect(await screen.findByLabelText('تم 0 من 100')).toBeOnTheScreen();
-  });
-
-  it('"complete" fills the count and moves to the next dhikr', async () => {
-    await openCategory(1, 1017); // سبحان الله وبحمده: 100 times
-    await tap();
-    await fireEvent.press(completeButton());
-    expect(counterStore.get(1017)).toBe(100);
-    expect(counter().props.accessibilityLabel).toBe('تم 100 من 100');
-    expect(completeButton().props.accessibilityState).toMatchObject({ disabled: true });
-    await waitFor(() => expect(screen.getByText('19 من 24')).toBeOnTheScreen(), {
+    await tapCounter();
+    await waitFor(() => expect(screen.getByText(position(2, adhkar.length))).toBeOnTheScreen(), {
       timeout: 2000,
     });
   });
 
-  it('"complete" on the last open dhikr opens the completion screen', async () => {
-    await openCategory(4); // one dhikr
-    await fireEvent.press(completeButton());
+  it('never counts past the target', async () => {
+    await openReader(DHIKR.ayatAlKursi); // count 1
+    await tapCounter();
+    await tapCounter(); // during the pause before moving on
+    expect(counterStore.get(DHIKR.ayatAlKursi)).toBe(1);
+  });
+
+  it('opens the finish screen when the whole chapter is done', async () => {
+    await openChapter(CATEGORY.oneDhikr);
+    await tapCounter();
     await waitFor(
-      () =>
-        expect(mockRouter.replace).toHaveBeenCalledWith({
-          pathname: '/category/[id]/done',
-          params: { id: '4' },
-        }),
+      () => expect(mockRouter.replace).toHaveBeenCalledWith(finishScreenOf(CATEGORY.oneDhikr)),
       { timeout: 2000 },
     );
   });
 
-  it('goes to the dhikr of a new link while the same chapter is open', async () => {
-    const { view } = await openCategory(1, 1017);
-    expect(screen.getByText('18 من 24')).toBeOnTheScreen();
-    // The link's dhikr is used once, then cleared, so the same link works again.
-    expect(mockRouter.setParams).toHaveBeenCalledWith({ dhikr: '' });
-    setRouteParams({ id: '1', dhikr: '1002' }); // wirduk://category/1?dhikr=1002
-    await view.rerender(<ReaderScreen />);
-    expect(await screen.findByText('3 من 24')).toBeOnTheScreen();
+  it('starts the chapter from zero after leaving the reader', async () => {
+    const { view } = await openReader(DHIKR.hundredTimes);
+    await tapCounter();
+    await view.unmount();
+    setRouteParams({ id: String(CATEGORY.morning), dhikr: String(DHIKR.hundredTimes) });
+    await renderWithApp(<ReaderScreen />);
+    expect(await screen.findByLabelText(counted(0, 100))).toBeOnTheScreen();
   });
 
-  it('shows a message for an unknown category', async () => {
+  it('«إتمام» fills the count and moves to the next dhikr', async () => {
+    const { adhkar, placeOf } = await openReader(DHIKR.hundredTimes);
+    await tapCounter();
+    await fireEvent.press(completeButton());
+    expect(screen.getByLabelText(counted(100, 100))).toBeOnTheScreen();
+    expect(completeButton()).toBeDisabled();
+    const next = adhkar[adhkar.findIndex((d) => d.id === DHIKR.hundredTimes) + 1]!;
+    await waitFor(() => expect(screen.getByText(placeOf(next.id))).toBeOnTheScreen(), {
+      timeout: 2000,
+    });
+  });
+
+  it('«إتمام» on the last open dhikr opens the finish screen', async () => {
+    await openChapter(CATEGORY.oneDhikr);
+    await fireEvent.press(completeButton());
+    await waitFor(
+      () => expect(mockRouter.replace).toHaveBeenCalledWith(finishScreenOf(CATEGORY.oneDhikr)),
+      { timeout: 2000 },
+    );
+  });
+
+  it('goes to the dhikr of a new link while the same chapter is open (owner, 2026-11-27)', async () => {
+    const { view, placeOf } = await openReader(DHIKR.hundredTimes);
+    // The link's dhikr is used once, then cleared, so the same link works again.
+    expect(mockRouter.setParams).toHaveBeenCalledWith({ dhikr: '' });
+    // wirduk://category/1?dhikr=1002
+    setRouteParams({ id: String(CATEGORY.morning), dhikr: String(DHIKR.threeQuls) });
+    await view.rerender(<ReaderScreen />);
+    expect(await screen.findByText(placeOf(DHIKR.threeQuls))).toBeOnTheScreen();
+  });
+
+  it('shows a message for an unknown chapter', async () => {
     setRouteParams({ id: '99999' });
     await renderWithApp(<ReaderScreen />);
-    expect(await screen.findByText('لم يُعثر على هذا الباب.')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('reader.notFound'))).toBeOnTheScreen();
   });
 });

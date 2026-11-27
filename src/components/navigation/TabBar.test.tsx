@@ -8,6 +8,7 @@ import { ToastProvider, useToast } from '@/components/ui/Toast';
 import { AppThemeProvider } from '@/theme/ThemeProvider';
 
 import { TabBar } from './TabBar';
+import { tr } from '@/test-utils/tr';
 
 const routes = ['index', 'adhkar', 'settings'].map((name) => ({
   key: `${name}-1`,
@@ -44,18 +45,18 @@ describe('TabBar', () => {
   it('shows the three tabs (owner, 2026-11-25), the open one selected', async () => {
     const { view } = renderBar(1);
     await view;
-    expect(screen.getByRole('tab', { name: 'الرئيسية' })).not.toBeSelected();
-    expect(screen.getByRole('tab', { name: 'الأذكار' })).toBeSelected();
-    expect(screen.getByRole('tab', { name: 'الإعدادات' })).not.toBeSelected();
+    expect(screen.getByRole('tab', { name: tr('tabs.home') })).not.toBeSelected();
+    expect(screen.getByRole('tab', { name: tr('search.adhkar') })).toBeSelected();
+    expect(screen.getByRole('tab', { name: tr('settings.title') })).not.toBeSelected();
   });
 
   it('a tap opens another tab; the open tab stays', async () => {
     const { view, navigation } = renderBar(0);
     await view;
-    await fireEvent.press(screen.getByRole('tab', { name: 'الإعدادات' }));
+    await fireEvent.press(screen.getByRole('tab', { name: tr('settings.title') }));
     expect(navigation.navigate).toHaveBeenCalledWith('settings', undefined);
     navigation.navigate.mockClear();
-    await fireEvent.press(screen.getByRole('tab', { name: 'الرئيسية' }));
+    await fireEvent.press(screen.getByRole('tab', { name: tr('tabs.home') }));
     expect(navigation.navigate).not.toHaveBeenCalled();
   });
 

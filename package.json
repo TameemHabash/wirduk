@@ -13,7 +13,9 @@
     "dorar:receiver": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dorar/receiver.ts",
     "dorar:apply": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dorar/apply-page.ts",
     "db:peek": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dev/peek-db.ts",
+    "e2e": "powershell -NoProfile -ExecutionPolicy Bypass -Command \". ./scripts/dev/e2e.ps1; Invoke-E2e flows\"",
     "e2e:shots": "powershell -NoProfile -ExecutionPolicy Bypass -Command \". ./scripts/dev/e2e.ps1; Invoke-E2e shots\"",
+    "e2e:timeline": "powershell -NoProfile -ExecutionPolicy Bypass -Command \". ./scripts/dev/e2e-timeline.ps1; Invoke-E2eTimeline\"",
     "shots:compare": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/dev/compare-shots.ts",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -21,7 +23,7 @@
     "lint": "expo lint",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p scripts",
-    "verify": "npm run typecheck && npm run lint && npm run content:check && jest --ci"
+    "verify": "npm run typecheck && npm run lint && npm run content:check && jest --ci --coverage --coverageReporters=text-summary"
   },
   "dependencies": {
     "@react-native-community/datetimepicker": "9.1.0",

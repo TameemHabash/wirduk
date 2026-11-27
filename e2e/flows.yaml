@@ -1,0 +1,11 @@
+# The user flows, each with its checks, on the release build from a clean install
+# (npm run e2e, or scripts/dev/e2e.ps1: Invoke-E2e flows). Pictures: shots.yaml.
+appId: com.wirduk.app
+name: User flows
+---
+- runFlow: flows/01-first-run.yaml
+- runFlow: flows/02-read-a-chapter.yaml
+- runFlow: flows/03-own-adhkar.yaml
+- runFlow: flows/04-continue-where-i-stopped.yaml
+- runFlow: flows/05-reminder.yaml
+- runFlow: flows/06-adwamuha.yaml

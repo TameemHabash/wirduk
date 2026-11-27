@@ -1,0 +1,38 @@
+# The morning reminder: turned on in Settings, Android asks for the permission once; allowed,
+# the switch stays on. Turned off again.
+appId: com.wirduk.app
+name: Morning reminder
+---
+- runScript: ../.generated/strings.js
+- openLink: wirduk://settings
+- extendedWaitUntil:
+    visible: ${output.s['settings.title']}
+    timeout: 10000
+# The reminders are further down (no picture here, so Maestro's own scroll is fine).
+- scrollUntilVisible:
+    element:
+      text: ${output.s['settings.morningReminder']}
+      checked: false
+    direction: DOWN
+    centerElement: true
+# The switch has the row's title as its label: `checked` picks the switch, not the text.
+- tapOn:
+    text: ${output.s['settings.morningReminder']}
+    checked: false
+- extendedWaitUntil:
+    visible: Allow
+    timeout: 10000
+- tapOn: Allow
+- extendedWaitUntil:
+    visible:
+      text: ${output.s['settings.morningReminder']}
+      checked: true
+    timeout: 5000
+- tapOn:
+    text: ${output.s['settings.morningReminder']}
+    checked: true
+- extendedWaitUntil:
+    visible:
+      text: ${output.s['settings.morningReminder']}
+      checked: false
+    timeout: 5000

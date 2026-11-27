@@ -1,22 +1,41 @@
 /**
  * Test-only stand-ins for expo-audio, expo-document-picker, the user's own
  * audio storage and the downloaded-audio storage (wired in jest.setup.ui.ts).
- * Tests read the calls and drive player events.
+ * Tests read what was heard (`recordingsHeard`, `ticksHeard`, `player.playing`)
+ * and drive player events (`player.emit`, `finishPlaying`).
  */
+import { act } from '@testing-library/react-native';
+
 import type { AudioStorage } from '@/features/audio/services/audio-downloads';
 import { audioFileName } from '@/features/audio/logic/audio-plan';
 
-import manifest from '../../content-source/audio-manifest.json';
+import manifest from '../../../content-source/audio-manifest.json';
 
 type StatusListener = (status: Record<string, unknown>) => void;
+
+/** The count tick: its source is the bundled tick.wav, which Jest turns into a number. */
+const TICK = 'tick';
+
+/** Every sound that started playing in this test, in order (a replay counts again). */
+const heard: string[] = [];
+
+const soundOf = (source: unknown): string =>
+  typeof source === 'number' ? TICK : String((source as { uri?: string } | null)?.uri ?? source);
 
 /** One player per `useAudioPlayer` call, like the real hook. */
 export function createMockPlayer(source: unknown) {
   const listeners = new Set<StatusListener>();
   const player = {
     source,
-    play: jest.fn(),
-    pause: jest.fn(),
+    /** Playing now (play, until a pause or the end of the sound). */
+    playing: false,
+    play: jest.fn(() => {
+      player.playing = true;
+      heard.push(soundOf(player.source));
+    }),
+    pause: jest.fn(() => {
+      player.playing = false;
+    }),
     seekTo: jest.fn(() => Promise.resolve()),
     replace: jest.fn((next: unknown) => {
       player.source = next;
@@ -29,6 +48,7 @@ export function createMockPlayer(source: unknown) {
     }),
     /** Sends a playback status update, like the native player. */
     emit(status: Record<string, unknown>) {
+      if (status.didJustFinish) player.playing = false;
       const full = { isLoaded: true, isBuffering: false, playing: false, ...status };
       for (const l of [...listeners]) l(full);
     },
@@ -41,17 +61,26 @@ export type MockPlayer = ReturnType<typeof createMockPlayer>;
 /** Every player created in the current test, in order. */
 export const mockPlayers: MockPlayer[] = [];
 
-/**
- * The count tick player: its source is the bundled tick.wav, which Jest
- * turns into a number (asset id), like Metro does.
- */
-export function tickPlayer(): MockPlayer | undefined {
-  return mockPlayers.find((p) => typeof p.source === 'number');
+/** The recordings heard in this test, in order (their file URIs; a replay counts again). */
+export function recordingsHeard(): string[] {
+  return heard.filter((s) => s !== TICK);
+}
+
+/** How many count ticks were heard in this test. */
+export function ticksHeard(): number {
+  return heard.filter((s) => s === TICK).length;
 }
 
 /** The player that was last given a recording to play. */
 export function recitationPlayer(): MockPlayer | undefined {
   return [...mockPlayers].reverse().find((p) => p.replace.mock.calls.length > 0);
+}
+
+/** The recording now playing comes to its end (as the native player reports it). */
+export async function finishPlaying(): Promise<void> {
+  const player = recitationPlayer();
+  if (!player) throw new Error('No recording was played');
+  await act(async () => player.emit({ didJustFinish: true }));
 }
 
 export const mockRecorder = {
@@ -143,8 +172,12 @@ class MockAudioStorage implements AudioStorage {
 
 export const mockAudioStorage = new MockAudioStorage();
 
+/** Where a downloaded recording of the book is played from (as in `recordingsHeard`). */
+export const recordingUri = (fileName: string) => mockAudioStorage.uri('ar', fileName);
+
 export function resetAudioMocks(): void {
   mockPlayers.length = 0;
+  heard.length = 0;
   mockRecorder.uri = 'file:///cache/recording-1.m4a';
   recorderState.isRecording = false;
   recorderState.durationMillis = 0;

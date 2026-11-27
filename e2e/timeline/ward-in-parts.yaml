@@ -1,0 +1,29 @@
+# The ward read in parts (09:00): the first dhikr counted, the reader left; opened again in its
+# window, the ward goes on at the dhikr not read yet (2 of 2 at step 1).
+appId: com.wirduk.app
+name: Timeline ward in parts
+---
+- runScript: ../.generated/strings.js
+- launchApp
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 20000
+- runFlow: _messages.yaml
+- tapOn: ${output.s['adwamuha.openWard.morning']}
+- extendedWaitUntil:
+    visible: ${output.raw['reader.position'].replace('{{current}}', '1').replace('{{total}}', '2')}
+    timeout: 10000
+- tapOn:
+    point: 50%, 45%
+- extendedWaitUntil:
+    visible: ${output.raw['reader.position'].replace('{{current}}', '2').replace('{{total}}', '2')}
+    timeout: 5000
+- back
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 10000
+- tapOn: ${output.s['adwamuha.openWard.morning']}
+- extendedWaitUntil:
+    visible: ${output.raw['reader.position'].replace('{{current}}', '2').replace('{{total}}', '2')}
+    timeout: 10000
+- back

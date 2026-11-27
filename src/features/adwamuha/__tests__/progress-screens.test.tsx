@@ -4,15 +4,14 @@ import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/screens/HomeScreen';
 import { afterMessages } from '@/test-utils/adwamuha-messages';
 import { dialogButtons, openDialog, pressInDialog } from '@/test-utils/dialog';
+import { givenAdwamuha, givenDaysRead, givenWardRead } from '@/test-utils/given';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
-import { mockRouter } from '@/test-utils/router-mock';
+import { mockRouter } from '@/test-utils/mocks/router';
 
 import { addDays } from '@/features/adwamuha/logic/days';
-import { startPlan } from '@/features/adwamuha/logic/progress';
-import { copyDefaultPlan } from '@/features/adwamuha/logic/ward';
 import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
 import { ProgressScreen } from '@/features/adwamuha/screens/ProgressScreen';
-import type { Session } from '@/data/models';
+import { tr } from '@/test-utils/tr';
 
 const DAY = '2026-02-10';
 /** A local time on 2026-02-10 (day 10) or the next day (11). */
@@ -25,37 +24,17 @@ const stepText = (step: number) =>
 
 /** The feature on: the default plan at step 1, started `daysAgo` days before DAY. */
 async function withPlan(daysAgo = 0, enabled = true): Promise<Repositories> {
-  const repos = await createTestRepositories();
-  const plan = copyDefaultPlan(await repos.content.getDefaultPlan('ar'));
-  const startedOn = addDays(DAY, -daysAgo);
-  await repos.adwamuha.save({
+  return givenAdwamuha(await createTestRepositories(), {
+    startedOn: addDays(DAY, -daysAgo),
     enabled,
-    plan,
-    state: startPlan(1, startedOn),
-    startedOn,
-    offSince: null,
   });
-  return repos;
 }
 
-async function read(repos: Repositories, date: string, session: Session) {
-  await repos.adwamuha.addRecord({
-    date,
-    session,
-    completedAt: 1,
-    late: false,
-    source: 'reader',
-    step: 1,
-  });
-}
+const read = givenWardRead;
 
 /** Both wards on each of the `n` days before DAY. */
-async function readDaysBefore(repos: Repositories, n: number) {
-  for (let i = 1; i <= n; i++) {
-    await read(repos, addDays(DAY, -i), 'morning');
-    await read(repos, addDays(DAY, -i), 'evening');
-  }
-}
+const readDaysBefore = (repos: Repositories, n: number) =>
+  givenDaysRead(repos, addDays(DAY, -n), addDays(DAY, -1));
 
 // Home's list draws more rows on a timer: let it finish inside the test.
 afterEach(async () => {
@@ -65,7 +44,7 @@ afterEach(async () => {
 describe('Home: «وردك اليوم»', () => {
   it('is not there while the feature is off', async () => {
     await renderWithApp(<HomeScreen />, await withPlan(0, false), { now: at(7) });
-    await screen.findByText('المفضلة');
+    await screen.findByText(tr('home.favorites'));
     expect(screen.queryByText(OWNER_TEXTS.labels.todayWard)).toBeNull();
   });
 
@@ -78,9 +57,9 @@ describe('Home: «وردك اليوم»', () => {
     expect(screen.getByLabelText('المساء: لم يحن بعد')).toBeOnTheScreen();
     expect(screen.getByText('ذكران في وردك')).toBeOnTheScreen();
     // The full adhkar stay below, quiet (no "الآن"), under «الصباح والمساء» (owner, 2026-10-30).
-    expect(screen.getByText('الصباح والمساء')).toBeOnTheScreen();
-    expect(screen.queryByText('الآن')).toBeNull();
-    await fireEvent.press(screen.getByText('افتح ورد الصباح'));
+    expect(screen.getByText(tr('adwamuha.home.fullAdhkar'))).toBeOnTheScreen();
+    expect(screen.queryByText(tr('home.now'))).toBeNull();
+    await fireEvent.press(screen.getByText(tr('adwamuha.openWard.morning')));
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: '/adwamuha/ward/[session]',
       params: { session: 'morning' },
@@ -92,7 +71,7 @@ describe('Home: «وردك اليوم»', () => {
     await read(repos, DAY, 'morning');
     await renderWithApp(<HomeScreen />, repos, { now: at(9) });
     expect(await screen.findByText('يبدأ ورد المساء الساعة 4:00 م')).toBeOnTheScreen();
-    expect(screen.getByText('تم')).toBeOnTheScreen();
+    expect(screen.getByText(tr('common.done'))).toBeOnTheScreen();
   });
 
   it("both wards done: only the owner's prayer, no button", async () => {
@@ -105,18 +84,18 @@ describe('Home: «وردك اليوم»', () => {
     await renderWithApp(<HomeScreen />, repos, { now: at(19) });
     expect(await screen.findByText(prayer)).toBeOnTheScreen();
     expect(screen.getByLabelText('المساء: تم')).toBeOnTheScreen();
-    expect(screen.queryByText('افتح ورد المساء')).toBeNull();
+    expect(screen.queryByText(tr('adwamuha.openWard.evening'))).toBeNull();
     expect(screen.queryByText(/في وردك$/)).toBeNull();
   });
 
   it('13:00 with the morning not done: still the morning ward (it counts, late)', async () => {
     await renderWithApp(<HomeScreen />, await withPlan(), { now: at(13) });
-    expect(await screen.findByText('افتح ورد الصباح')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.openWard.morning'))).toBeOnTheScreen();
   });
 
   it("01:30: last night's evening ward if not done", async () => {
     await renderWithApp(<HomeScreen />, await withPlan(), { now: at(1, 30, 11) });
-    expect(await screen.findByText('افتح ورد المساء')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.openWard.evening'))).toBeOnTheScreen();
   });
 
   it('opens «مساري»', async () => {
@@ -173,12 +152,12 @@ describe('«مساري»', () => {
     expect(await screen.findByText(`المرحلة الأولى · ${stage1}`)).toBeOnTheScreen();
     // The first week (31 January – 6 February) had 4 mornings but no evening: not good yet.
     expect(screen.getByText('الأسابيع المكتملة في هذه الخطوة: 0 من 4')).toBeOnTheScreen();
-    expect(screen.queryByText('يُحسب هذا الأسبوع من بدء خطوتك.')).toBeNull();
+    expect(screen.queryByText(tr('adwamuha.masariHelp.stepWeekNote'))).toBeNull();
     expect(screen.getByText(OWNER_TEXTS.hadith.text)).toBeOnTheScreen();
-    expect(screen.getByText('تتبّع الأسبوع')).toBeOnTheScreen();
+    expect(screen.getByText(tr('adwamuha.masari.weekTitle'))).toBeOnTheScreen();
     // This calendar week (from Saturday, the setting's default): Saturday to Monday so far,
     // the same days as the dots.
-    expect(screen.getByText('هدف هذا الأسبوع · شرط الانتقال')).toBeOnTheScreen();
+    expect(screen.getByText(tr('adwamuha.masari.goalMoveOn'))).toBeOnTheScreen();
     // A line before the goal (owner, 2026-10-30).
     expect(screen.getByTestId('goal-divider')).toBeOnTheScreen();
     expect(screen.getByLabelText('الصباح: 3 من 4')).toBeOnTheScreen();
@@ -194,10 +173,10 @@ describe('«مساري»', () => {
     const repos = await withPlan(1);
     await read(repos, addDays(DAY, -1), 'morning');
     await renderWithApp(<ProgressScreen />, repos, { now: at(7) });
-    expect(await screen.findByText('هدف هذا الأسبوع · شرط الانتقال')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.masari.goalMoveOn'))).toBeOnTheScreen();
     expect(screen.getByLabelText('الصباح: 1 من 4')).toBeOnTheScreen();
     expect(screen.getByLabelText('المساء: 0 من 4')).toBeOnTheScreen();
-    expect(screen.getByText('يُحسب هذا الأسبوع من بدء خطوتك.')).toBeOnTheScreen();
+    expect(screen.getByText(tr('adwamuha.masariHelp.stepWeekNote'))).toBeOnTheScreen();
     expect(screen.queryByText(/^هدفك: ٤ أيام من ٧/)).toBeNull();
   });
 
@@ -214,7 +193,7 @@ describe('«مساري»', () => {
     const repos = await withPlan(3);
     await read(repos, addDays(DAY, -1), 'evening');
     await renderWithApp(<ProgressScreen />, repos, { now: at(7) });
-    await fireEvent.press(await screen.findByText('قرأتُ وردي بدون التطبيق'));
+    await fireEvent.press(await screen.findByText(tr('adwamuha.masari.readOutside')));
     // Today's evening has not begun; yesterday's evening was read in the app.
     expect(screen.getByLabelText('ورد الصباح، اليوم')).toBeOnTheScreen();
     expect(screen.getByLabelText('ورد الصباح، أمس')).toBeOnTheScreen();
@@ -230,9 +209,9 @@ describe('«مساري»', () => {
     await fireEvent.press(
       await screen.findByLabelText('اليوم، الصباح: سجّلتَه بنفسك، اضغط للإلغاء'),
     );
-    expect(openDialog().getByText('إلغاء التسجيل؟')).toBeOnTheScreen();
-    expect(dialogButtons()).toEqual(['ألغِ التسجيل', 'إلغاء']);
-    await pressInDialog('ألغِ التسجيل');
+    expect(openDialog().getByText(tr('adwamuha.masariHelp.undoTitle'))).toBeOnTheScreen();
+    expect(dialogButtons()).toEqual([tr('adwamuha.masariHelp.undo'), tr('common.cancel')]);
+    await pressInDialog(tr('adwamuha.masariHelp.undo'));
     await waitFor(async () =>
       expect((await repos.adwamuha.listRecords()).some((r) => r.date === DAY)).toBe(false),
     );
@@ -244,14 +223,14 @@ describe('«مساري»', () => {
     await fireEvent.press(await screen.findByLabelText('الاثنين، المساء: سجّل أمس'));
     expect(screen.getByText('سجّل المساء أمس')).toBeOnTheScreen();
     expect(screen.getByText('قرأتَ ورد المساء يوم الاثنين من حفظك؟')).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText('نعم، سجّله'));
+    await fireEvent.press(screen.getByText(tr('adwamuha.masari.yesterdayConfirm')));
     await waitFor(async () =>
       expect(await repos.adwamuha.listRecords()).toContainEqual(
         expect.objectContaining({ date: addDays(DAY, -1), session: 'evening', source: 'manual' }),
       ),
     );
     await fireEvent.press(screen.getByLabelText('الأحد، الصباح: لم يُقرأ'));
-    expect(await screen.findByText('يمكن التسجيل لليوم أو أمس فقط')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.masari.olderDay'))).toBeOnTheScreen();
   });
 
   it('nothing left to record: a kind line', async () => {
@@ -260,13 +239,13 @@ describe('«مساري»', () => {
     await read(repos, addDays(DAY, -1), 'morning');
     await read(repos, addDays(DAY, -1), 'evening');
     await renderWithApp(<ProgressScreen />, repos, { now: at(9) });
-    await fireEvent.press(await screen.findByText('قرأتُ وردي بدون التطبيق'));
+    await fireEvent.press(await screen.findByText(tr('adwamuha.masari.readOutside')));
     expect(screen.getByText(/^لا شيء لتسجيله/)).toBeOnTheScreen();
   });
 
   it('says so when the feature is off', async () => {
     await renderWithApp(<ProgressScreen />, await withPlan(0, false), { now: at(7) });
-    expect(await screen.findByText('«أدومها» غير مفعّلة.')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.notOn'))).toBeOnTheScreen();
   });
 });
 
@@ -279,7 +258,7 @@ describe('«مساري» (redesign)', () => {
     expect(screen.queryByText(/^افتح ورد/)).toBeNull();
     await fireEvent.press(screen.getByText(OWNER_TEXTS.labels.editPlan));
     expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/plan');
-    await fireEvent.press(screen.getByText('خفّف وردك أو خذ استراحة'));
+    await fireEvent.press(screen.getByText(tr('adwamuha.rows.easeTitle')));
     expect(await screen.findByText(OWNER_TEXTS.labels.lifeChange)).toBeOnTheScreen();
   });
 });

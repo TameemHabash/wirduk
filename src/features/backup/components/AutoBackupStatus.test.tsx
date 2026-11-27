@@ -4,6 +4,7 @@ import { renderWithApp } from '@/test-utils/render-app';
 
 import * as auto from '@/features/backup/services/auto-backup';
 import { AutoBackupStatus } from './AutoBackupStatus';
+import { tr } from '@/test-utils/tr';
 
 // As on Android: the phone can tell when it last backed the app up.
 jest.mock('@/features/backup/services/auto-backup', () => ({
@@ -14,7 +15,7 @@ jest.mock('@/features/backup/services/auto-backup', () => ({
 const openSettings = jest.mocked(auto.openBackupSettings);
 
 const DAY = 24 * 60 * 60 * 1000;
-const ENABLE = 'تفعيل النسخ الاحتياطي في الهاتف';
+const ENABLE = tr('backup.enableAuto');
 
 describe("Android's automatic backup, as the user sees it", () => {
   it('looks off when it never ran, or not for 30 days', () => {
@@ -36,17 +37,13 @@ describe("Android's automatic backup, as the user sees it", () => {
     expect(await screen.findByText(/^لم ينسخ الهاتف بيانات التطبيق/)).toBeOnTheScreen();
     await fireEvent.press(screen.getByText(ENABLE));
     expect(openSettings).toHaveBeenCalled();
-    expect(screen.queryByText('ابحث في إعدادات الهاتف عن «النسخ الاحتياطي» وفعّله.')).toBeNull();
+    expect(screen.queryByText(tr('backup.findInSettings'))).toBeNull();
   });
 
   it('a phone without that screen: its Settings open, and the app says what to look for', async () => {
     openSettings.mockResolvedValue('settings');
     await renderWithApp(<AutoBackupStatus at={Date.now() - 40 * DAY} />);
     await fireEvent.press(await screen.findByText(ENABLE));
-    await waitFor(() =>
-      expect(
-        screen.getByText('ابحث في إعدادات الهاتف عن «النسخ الاحتياطي» وفعّله.'),
-      ).toBeOnTheScreen(),
-    );
+    await waitFor(() => expect(screen.getByText(tr('backup.findInSettings'))).toBeOnTheScreen());
   });
 });

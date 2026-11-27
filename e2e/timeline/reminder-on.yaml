@@ -1,0 +1,33 @@
+# «أدومها» settings: the morning reminder on (at its default time, 6:00). Maestro's launchApp
+# grants the permission, so Android does not ask. The app then goes to the background with Home:
+# never stopApp here, a force stop cancels the app's alarms (the reminder would not ring).
+appId: com.wirduk.app
+name: Timeline reminder on
+---
+- runScript: ../.generated/strings.js
+- launchApp
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 20000
+- runFlow: _messages.yaml
+- openLink: wirduk://adwamuha/settings
+- scrollUntilVisible:
+    element:
+      text: ${output.s['adwamuha.settingsScreen.remindersTitle']}
+    direction: DOWN
+    centerElement: true
+- runFlow:
+    when:
+      visible:
+        text: ${output.s['adwamuha.wardTitle.morning']}
+        checked: false
+    commands:
+      - tapOn:
+          text: ${output.s['adwamuha.wardTitle.morning']}
+          checked: false
+- extendedWaitUntil:
+    visible:
+      text: ${output.s['adwamuha.wardTitle.morning']}
+      checked: true
+    timeout: 5000
+- pressKey: home

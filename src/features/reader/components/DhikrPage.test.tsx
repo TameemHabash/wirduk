@@ -7,6 +7,7 @@ import type { Dhikr } from '@/data/models';
 import { renderWithApp } from '@/test-utils/render-app';
 
 import { DhikrPage } from './DhikrPage';
+import { tr } from '@/test-utils/tr';
 
 const dhikr = (source: Dhikr['source']): Dhikr => ({
   id: 1017,
@@ -39,12 +40,12 @@ describe('DhikrPage — fadl and source', () => {
     expect(screen.getByLabelText('الفضل: حطت خطاياه')).toBeOnTheScreen();
     // Folded until «المصدر» is tapped.
     expect(screen.queryByText(/^المصدر:/)).toBeNull();
-    const fold = screen.getByRole('button', { name: 'المصدر' });
+    const fold = screen.getByRole('button', { name: tr('reader.sourceTitle') });
     expect(fold.props.accessibilityState).toMatchObject({ expanded: false });
     await fireEvent(fold, 'accessibilityAction', { nativeEvent: { actionName: 'activate' } });
     expect(screen.getByText('المصدر: صحيح البخاري (6405) — الراوي: أبو هريرة')).toBeOnTheScreen();
     expect(screen.getByText('الحكم: صحيح — البخاري')).toBeOnTheScreen();
-    const link = screen.getByRole('link', { name: 'عرض في الدرر السنية' });
+    const link = screen.getByRole('link', { name: tr('reader.openOnDorar') });
     await fireEvent(link, 'accessibilityAction', { nativeEvent: { actionName: 'activate' } });
     expect(open).toHaveBeenCalledWith('https://dorar.net/hadith/sharh/123');
     open.mockRestore();
@@ -52,7 +53,7 @@ describe('DhikrPage — fadl and source', () => {
 
   it('shows nothing extra when there is no source', async () => {
     await renderWithApp(<DhikrPage dhikr={dhikr(null)} />);
-    expect(screen.queryByRole('button', { name: 'المصدر' })).toBeNull();
+    expect(screen.queryByRole('button', { name: tr('reader.sourceTitle') })).toBeNull();
     expect(screen.queryByRole('link')).toBeNull();
   });
 
@@ -63,7 +64,7 @@ describe('DhikrPage — fadl and source', () => {
       />,
     );
     expect(screen.getByText('حطت خطاياه')).toBeOnTheScreen();
-    expect(screen.queryByRole('button', { name: 'المصدر' })).toBeNull();
+    expect(screen.queryByRole('button', { name: tr('reader.sourceTitle') })).toBeNull();
   });
 
   it('folds again when the page is no longer on screen', async () => {
@@ -78,9 +79,13 @@ describe('DhikrPage — fadl and source', () => {
       );
     }
     await renderWithApp(<Host />);
-    await fireEvent(screen.getByRole('button', { name: 'المصدر' }), 'accessibilityAction', {
-      nativeEvent: { actionName: 'activate' },
-    });
+    await fireEvent(
+      screen.getByRole('button', { name: tr('reader.sourceTitle') }),
+      'accessibilityAction',
+      {
+        nativeEvent: { actionName: 'activate' },
+      },
+    );
     expect(screen.getByText('المصدر: مصدر')).toBeOnTheScreen();
     await fireEvent.press(screen.getByText('next'));
     expect(screen.queryByText('المصدر: مصدر')).toBeNull();

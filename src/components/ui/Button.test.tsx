@@ -7,6 +7,7 @@ import { AppThemeProvider } from '@/theme/ThemeProvider';
 import { AppText } from './AppText';
 import { Button } from './Button';
 import { TextButton } from './TextButton';
+import { tr } from '@/test-utils/tr';
 
 async function renderButton(props: Partial<Parameters<typeof Button>[0]> = {}) {
   const onPress = jest.fn();
@@ -24,20 +25,20 @@ const flat = (node: { props: { style?: unknown } }) =>
 describe('Button', () => {
   it('shows its title and calls onPress', async () => {
     const onPress = await renderButton();
-    await fireEvent.press(screen.getByRole('button', { name: 'إضافة صور' }));
+    await fireEvent.press(screen.getByRole('button', { name: tr('report.addScreenshots') }));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
   it('does nothing when disabled', async () => {
     const onPress = await renderButton({ disabled: true });
-    expect(screen.getByRole('button', { name: 'إضافة صور' })).toBeDisabled();
-    await fireEvent.press(screen.getByRole('button', { name: 'إضافة صور' }));
+    expect(screen.getByRole('button', { name: tr('report.addScreenshots') })).toBeDisabled();
+    await fireEvent.press(screen.getByRole('button', { name: tr('report.addScreenshots') }));
     expect(onPress).not.toHaveBeenCalled();
   });
 
   it('lets the title use the whole button width (no wrap from a short measure, reports#2)', async () => {
     await renderButton();
-    expect(flat(screen.getByText('إضافة صور'))).toMatchObject({
+    expect(flat(screen.getByText(tr('report.addScreenshots')))).toMatchObject({
       alignSelf: 'stretch',
       textAlign: 'center',
     });
@@ -51,13 +52,15 @@ describe('Button', () => {
     ['plain', 'transparent', COLORS.light.textMuted],
   ] as const)('a %s button has its own fill and text color', async (kind, fill, text) => {
     await renderButton({ kind });
-    expect(flat(screen.getByRole('button', { name: 'إضافة صور' })).backgroundColor).toBe(fill);
-    expect(flat(screen.getByText('إضافة صور')).color).toBe(text);
+    expect(
+      flat(screen.getByRole('button', { name: tr('report.addScreenshots') })).backgroundColor,
+    ).toBe(fill);
+    expect(flat(screen.getByText(tr('report.addScreenshots'))).color).toBe(text);
   });
 
   it('a small one is 40 high and only as wide as its title (with room)', async () => {
     await renderButton({ size: 'small' });
-    expect(flat(screen.getByRole('button', { name: 'إضافة صور' }))).toMatchObject({
+    expect(flat(screen.getByRole('button', { name: tr('report.addScreenshots') }))).toMatchObject({
       minHeight: 40,
       alignSelf: 'flex-start',
     });
@@ -72,9 +75,9 @@ describe('TextButton', () => {
         <TextButton title="حذف الباب" icon="trash" tone="danger" onPress={onPress} />
       </AppThemeProvider>,
     );
-    await fireEvent.press(screen.getByRole('button', { name: 'حذف الباب' }));
+    await fireEvent.press(screen.getByRole('button', { name: tr('custom.deleteCategory') }));
     expect(onPress).toHaveBeenCalledTimes(1);
-    expect(flat(screen.getByText('حذف الباب')).color).toBe(COLORS.light.danger);
+    expect(flat(screen.getByText(tr('custom.deleteCategory'))).color).toBe(COLORS.light.danger);
   });
 });
 
@@ -85,7 +88,7 @@ describe('AppText roomy', () => {
         <AppText roomy>غير مفعّلة</AppText>
       </AppThemeProvider>,
     );
-    const text = () => screen.getByText('غير مفعّلة');
+    const text = () => screen.getByText(tr('adwamuha.settings.off'));
     expect(flat(text()).minWidth).toBeUndefined();
     await fireEvent(text(), 'layout', { nativeEvent: { layout: { width: 80.4, height: 20 } } });
     expect(flat(text()).minWidth).toBe(87);

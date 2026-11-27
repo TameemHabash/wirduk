@@ -14,6 +14,7 @@ import {
   useDialog,
   type DialogOptions,
 } from './Dialog';
+import { tr } from '@/test-utils/tr';
 
 function Opener({ options }: { options: DialogOptions }) {
   const dialog = useDialog();
@@ -36,16 +37,18 @@ describe('Dialog', () => {
     await open({
       icon: 'trash',
       tone: 'danger',
-      title: 'حذف هذا الذكر؟',
+      title: tr('custom.deleteDhikrConfirmTitle'),
       body: 'لا يمكن التراجع.',
       actions: [
-        { label: 'حذف', kind: 'danger' },
-        { label: 'إلغاء', cancel: true },
+        { label: tr('custom.delete'), kind: 'danger' },
+        { label: tr('common.cancel'), cancel: true },
       ],
     });
-    expect(openDialog().getByRole('header', { name: 'حذف هذا الذكر؟' })).toBeOnTheScreen();
+    expect(
+      openDialog().getByRole('header', { name: tr('custom.deleteDhikrConfirmTitle') }),
+    ).toBeOnTheScreen();
     expect(openDialog().getByText('لا يمكن التراجع.')).toBeOnTheScreen();
-    expect(dialogButtons()).toEqual(['حذف', 'إلغاء']);
+    expect(dialogButtons()).toEqual([tr('custom.delete'), tr('common.cancel')]);
   });
 
   it('runs the chosen action once and closes', async () => {
@@ -55,11 +58,11 @@ describe('Dialog', () => {
       icon: 'trash',
       title: 'حذف؟',
       actions: [
-        { label: 'حذف', kind: 'danger', onPress: remove },
-        { label: 'إلغاء', cancel: true, onPress: cancel },
+        { label: tr('custom.delete'), kind: 'danger', onPress: remove },
+        { label: tr('common.cancel'), cancel: true, onPress: cancel },
       ],
     });
-    await pressInDialog('حذف');
+    await pressInDialog(tr('custom.delete'));
     expect(remove).toHaveBeenCalledTimes(1);
     expect(cancel).not.toHaveBeenCalled();
     expect(screen.queryByTestId('dialog')).toBeNull();
@@ -72,8 +75,8 @@ describe('Dialog', () => {
       icon: 'trash',
       title: 'حذف؟',
       actions: [
-        { label: 'حذف', onPress: remove },
-        { label: 'إلغاء', cancel: true, onPress: cancel },
+        { label: tr('custom.delete'), onPress: remove },
+        { label: tr('common.cancel'), cancel: true, onPress: cancel },
       ],
     });
     await dismissDialog();
@@ -86,24 +89,24 @@ describe('Dialog', () => {
     await open({
       icon: 'info',
       tone: 'gold',
-      title: 'تجاهل التغييرات؟',
+      title: tr('custom.discardTitle'),
       actions: [
-        { label: 'متابعة التعديل', cancel: true },
-        { label: 'تجاهل', destructive: true },
-        { label: 'حذف', kind: 'danger' },
+        { label: tr('custom.keepEditing'), cancel: true },
+        { label: tr('custom.discard'), destructive: true },
+        { label: tr('custom.delete'), kind: 'danger' },
       ],
     });
     const color = (label: string) =>
       StyleSheet.flatten(openDialog().getByText(label).props.style).color as string;
-    expect(color('متابعة التعديل')).toBe(COLORS.light.onPrimary);
-    expect(color('تجاهل')).toBe(COLORS.light.danger);
-    expect(color('حذف')).toBe(COLORS.light.onDanger);
+    expect(color(tr('custom.keepEditing'))).toBe(COLORS.light.onPrimary);
+    expect(color(tr('custom.discard'))).toBe(COLORS.light.danger);
+    expect(color(tr('custom.delete'))).toBe(COLORS.light.onDanger);
   });
 
   it('shows extra content between the text and the buttons', async () => {
     await open({
       icon: 'sprout',
-      title: 'قبل أن تحفظ',
+      title: tr('adwamuha.plan.confirmTitle'),
       content: <Text>الحديث</Text>,
       actions: [{ label: 'أبقِ الخطة', cancel: true }],
     });
@@ -117,8 +120,16 @@ describe('Dialog', () => {
         <Button
           title="افتح"
           onPress={() => {
-            dialog.show({ icon: 'info', title: 'الأول', actions: [{ label: 'حسنًا' }] });
-            dialog.show({ icon: 'info', title: 'الثاني', actions: [{ label: 'حسنًا' }] });
+            dialog.show({
+              icon: 'info',
+              title: 'الأول',
+              actions: [{ label: tr('adwamuha.message.ok') }],
+            });
+            dialog.show({
+              icon: 'info',
+              title: 'الثاني',
+              actions: [{ label: tr('adwamuha.message.ok') }],
+            });
           }}
         />
       );
@@ -149,7 +160,7 @@ describe('Dialog', () => {
           {after}
         </>
       ),
-      actions: [{ label: 'حذف' }],
+      actions: [{ label: tr('custom.delete') }],
     });
     expect(openDialog().getByText('حذف أدعيتي؟')).toBeOnTheScreen();
     expect(StyleSheet.flatten(openDialog().getByText('أدعيتي').props.style).color).toBe(

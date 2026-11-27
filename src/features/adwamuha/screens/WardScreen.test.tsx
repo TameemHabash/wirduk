@@ -6,15 +6,15 @@ import { counterStore } from '@/features/reader/state/counter-store';
 import { momentSnippets, snippetOf } from '@/test-utils/adwamuha-messages';
 import { startScenario } from '@/test-utils/adwamuha-scenario';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
-import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
+import { mockRouter, setRouteParams } from '@/test-utils/mocks/router';
 
 import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { addDays } from '@/features/adwamuha/logic/days';
 import { messagePool } from '@/features/adwamuha/logic/messages';
-import { startPlan } from '@/features/adwamuha/logic/progress';
-import { copyDefaultPlan } from '@/features/adwamuha/logic/ward';
+import { givenAdwamuha } from '@/test-utils/given';
 import { WardDoneScreen } from './WardDoneScreen';
 import { WardScreen } from './WardScreen';
+import { tr } from '@/test-utils/tr';
 
 const DAY = '2026-01-15';
 /** A local time on 2026-01-15. */
@@ -22,18 +22,14 @@ const at =
   (hh: number, mm = 0) =>
   () =>
     new Date(2026, 0, 15, hh, mm);
-const completeButton = () => screen.getByLabelText('إتمام هذا الذكر والانتقال إلى التالي');
+const completeButton = () => screen.getByLabelText(tr('reader.completeLabel'));
 
 /** The feature on, at `step` (from the default plan), and nothing read yet. */
 async function withPlan(step = 1, enabled = true) {
-  const repos = await createTestRepositories();
-  const plan = copyDefaultPlan(await repos.content.getDefaultPlan('ar'));
-  await repos.adwamuha.save({
-    enabled,
-    plan,
-    state: startPlan(step, DAY),
+  const repos = await givenAdwamuha(await createTestRepositories(), {
+    step,
     startedOn: DAY,
-    offSince: null,
+    enabled,
   });
   counterStore.resetMany([1901, 1012, 1013, 1005, 133901, 133012]);
   return repos;
@@ -44,7 +40,7 @@ describe('the Adwamuha ward in the reader', () => {
     const repos = await withPlan(1);
     setRouteParams({ session: 'morning' });
     await renderWithApp(<WardScreen />, repos, { now: at(7) });
-    expect(await screen.findByText('ورد الصباح')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.wardTitle.morning'))).toBeOnTheScreen();
     expect(screen.getByText('1 من 2')).toBeOnTheScreen();
   });
 
@@ -53,7 +49,7 @@ describe('the Adwamuha ward in the reader', () => {
     setRouteParams({ session: 'evening' });
     await renderWithApp(<WardScreen />, repos, { now: at(18) });
     expect(await screen.findByText('1 من 4')).toBeOnTheScreen();
-    expect(screen.getByText('ورد المساء')).toBeOnTheScreen();
+    expect(screen.getByText(tr('adwamuha.wardTitle.evening'))).toBeOnTheScreen();
   });
 
   it('records the day when finished in its window (on time), then shows the prayer', async () => {
@@ -161,8 +157,8 @@ describe('the Adwamuha ward in the reader', () => {
   });
 
   it.each([
-    ['morning', 17, 'انتهى وقت ورد الصباح.'],
-    ['evening', 9, 'انتهى وقت ورد المساء.'],
+    ['morning', 17, tr('adwamuha.wardOver.morning')],
+    ['evening', 9, tr('adwamuha.wardOver.evening')],
   ] as const)(
     'outside its window the %s ward does not open: back to Home with a note (owner, 2026-11-21)',
     async (session, hh, note) => {
@@ -179,7 +175,7 @@ describe('the Adwamuha ward in the reader', () => {
     const repos = await withPlan(1);
     setRouteParams({ session: 'morning', rest: '1' });
     await renderWithApp(<WardScreen />, repos, { now: at(7) });
-    expect(await screen.findByText('ورد الصباح')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.wardTitle.morning'))).toBeOnTheScreen();
     expect(screen.getByText('1 من 2')).toBeOnTheScreen();
   });
 
@@ -187,7 +183,7 @@ describe('the Adwamuha ward in the reader', () => {
     const repos = await withPlan(1, false);
     setRouteParams({ session: 'morning' });
     await renderWithApp(<WardScreen />, repos, { now: at(7) });
-    expect(await screen.findByText('«أدومها» غير مفعّلة.')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.notOn'))).toBeOnTheScreen();
   });
 });
 
@@ -239,8 +235,8 @@ describe('after a ward', () => {
     expect(await repos.adwamuha.listPicks('wardDone')).toHaveLength(1);
     expect(screen.getByText(/^اكتفِ اليوم بوردك/)).toBeOnTheScreen();
     expect(screen.queryByText(/باقي/)).toBeNull();
-    expect(screen.getByText('العودة إلى الرئيسية')).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText('العودة إلى الرئيسية'));
+    expect(screen.getByText(tr('completion.home'))).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText(tr('completion.home')));
     expect(mockRouter.dismissTo).toHaveBeenCalledWith('/');
   });
 
@@ -265,16 +261,14 @@ describe('after a ward', () => {
     const texts = await repos.content.listAdwamuhaTexts('ar');
     const prayer = texts.find((t) => t.id === 'owner:bothDone')!.text;
     expect(screen.queryByText(prayer)).toBeNull();
-    expect(screen.getByText('العودة إلى الرئيسية')).toBeOnTheScreen();
+    expect(screen.getByText(tr('completion.home'))).toBeOnTheScreen();
   });
 
   it('says plainly when the ward did not count', async () => {
     const repos = await withPlan(1);
     setRouteParams({ session: 'morning', counted: '0' });
     await renderWithApp(<WardDoneScreen />, repos, { now: at(17) });
-    expect(
-      await screen.findByText('أتممتَ الورد، لكنه لا يُحسب لليوم لأن وقته ليس الآن.'),
-    ).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.notCounted'))).toBeOnTheScreen();
     expect(await repos.adwamuha.listPicks('wardDone')).toEqual([]); // no message used up
   });
 

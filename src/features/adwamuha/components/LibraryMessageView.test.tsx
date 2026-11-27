@@ -5,6 +5,7 @@ import type { AdwamuhaMessage } from '@/data/models';
 import { renderWithApp } from '@/test-utils/render-app';
 
 import { LibraryMessageView } from './LibraryMessageView';
+import { tr } from '@/test-utils/tr';
 
 const hadith: AdwamuhaMessage = {
   id: 'h-test',
@@ -37,7 +38,7 @@ describe('a message after a ward (redesign)', () => {
     await renderWithApp(<LibraryMessageView message={hadith} />);
     expect(screen.getByText('نص الحديث للاختبار')).toBeOnTheScreen();
     expect(screen.queryByText(/راوٍ/)).toBeNull();
-    const fold = screen.getByRole('button', { name: 'المصدر' });
+    const fold = screen.getByRole('button', { name: tr('reader.sourceTitle') });
     await fireEvent(fold, 'accessibilityAction', { nativeEvent: { actionName: 'activate' } });
     expect(screen.getByText(/راوٍ/)).toBeOnTheScreen();
     expect(screen.getByText(/صحيح/)).toBeOnTheScreen();
@@ -49,6 +50,6 @@ describe('a message after a ward (redesign)', () => {
   it('a verse stays as it is: its surah and verse under it, nothing folded', async () => {
     await renderWithApp(<LibraryMessageView message={verse} />);
     expect(screen.getByText(/البقرة/)).toBeOnTheScreen();
-    expect(screen.queryByRole('button', { name: 'المصدر' })).toBeNull();
+    expect(screen.queryByRole('button', { name: tr('reader.sourceTitle') })).toBeNull();
   });
 });

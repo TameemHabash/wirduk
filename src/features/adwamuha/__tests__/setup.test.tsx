@@ -4,13 +4,13 @@ import { APP_CONFIG } from '@/config/app-config';
 import { resources } from '@/i18n/resources';
 import type { Repositories } from '@/data/DataProvider';
 import { HomeScreen } from '@/features/home/screens/HomeScreen';
-import { notificationState, pickTime } from '@/test-utils/notifications-mock';
+import { notificationState, pickTime } from '@/test-utils/mocks/notifications';
 import { dialogButtons, openDialog, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
-import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
+import { givenAdwamuha } from '@/test-utils/given';
+import { mockRouter, setRouteParams } from '@/test-utils/mocks/router';
 
 import { addDays } from '@/features/adwamuha/logic/days';
-import { startPlan } from '@/features/adwamuha/logic/progress';
 import { copyDefaultPlan, wardDhikrIds } from '@/features/adwamuha/logic/ward';
 import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
 import { ProgressScreen } from '@/features/adwamuha/screens/ProgressScreen';
@@ -19,6 +19,7 @@ import { SetupIntroScreen } from '@/features/adwamuha/screens/SetupIntroScreen';
 import { SetupOrderScreen } from '@/features/adwamuha/screens/SetupOrderScreen';
 import { SetupRemindersScreen } from '@/features/adwamuha/screens/SetupRemindersScreen';
 import { SetupStartScreen } from '@/features/adwamuha/screens/SetupStartScreen';
+import { tr } from '@/test-utils/tr';
 
 const BADGE = resources.ar.common.adwamuha.setup.title;
 
@@ -30,16 +31,12 @@ const at = (hh: number) => () => new Date(2026, 2, 4, hh, 0);
 
 /** `newInstall`: the setup not seen yet for this version. */
 async function withPlan(enabled: boolean, newInstall = false): Promise<Repositories> {
-  const repos = await createTestRepositories({ newInstall });
-  const plan = copyDefaultPlan(await repos.content.getDefaultPlan('ar'));
-  await repos.adwamuha.save({
-    enabled,
-    plan,
-    state: startPlan(2, addDays(DAY, -10)),
+  return givenAdwamuha(await createTestRepositories({ newInstall }), {
+    step: 2,
     startedOn: addDays(DAY, -10),
+    enabled,
     offSince: enabled ? null : DAY,
   });
-  return repos;
 }
 
 afterEach(async () => {
@@ -58,7 +55,7 @@ describe('when the setup shows', () => {
     const repos = await createTestRepositories();
     await repos.adwamuha.markShown(setupShownKey());
     await renderWithApp(<HomeScreen />, repos, { now: at(9) });
-    await screen.findByText('المفضلة');
+    await screen.findByText(tr('home.favorites'));
     expect(mockRouter.push).not.toHaveBeenCalledWith('/adwamuha/intro');
   });
 
@@ -85,7 +82,7 @@ describe('the «أدومها» badge next to the settings button (owner, 2026-11
     await renderWithApp(<HomeScreen />, repos, { now: at(9) });
     await fireEvent.press(await screen.findByRole('button', { name: BADGE }));
     expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/intro');
-    expect(screen.getByLabelText('ابحث في الأذكار')).toBeOnTheScreen();
+    expect(screen.getByLabelText(tr('home.searchPlaceholder'))).toBeOnTheScreen();
   });
 
   it('also when it was turned off', async () => {
@@ -104,23 +101,27 @@ describe('setup 1: what «أدومها» is', () => {
   it('the hadith, three points (the owner’s «النية لكل يوم» kept), «فعّل أدومها» and «لاحقًا»', async () => {
     await renderWithApp(<SetupIntroScreen />, undefined, { now: at(9) });
     expect(await screen.findByText(OWNER_TEXTS.hadith.text)).toBeOnTheScreen();
-    expect(screen.getByText('ابنِ وردك خطوةً خطوة')).toBeOnTheScreen();
+    expect(screen.getByText(tr('adwamuha.setup.title'))).toBeOnTheScreen();
     expect(screen.getByText(/^النية لكل يوم، /)).toBeOnTheScreen();
     expect(screen.getByLabelText('الشاشة 1 من 4')).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText('فعّل أدومها'));
+    await fireEvent.press(screen.getByText(tr('adwamuha.setup.enable')));
     expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/start');
-    await fireEvent.press(screen.getByText('لاحقًا'));
+    await fireEvent.press(screen.getByText(tr('adwamuha.later')));
     expect(mockRouter.back).toHaveBeenCalled();
   });
 
   it('turned off before: continue where they stopped, or start again', async () => {
     const repos = await withPlan(false);
     await renderWithApp(<SetupIntroScreen />, repos, { now: at(9) });
-    await fireEvent.press(await screen.findByText('فعّل أدومها'));
-    expect(openDialog().getByText('متابعة «أدومها»')).toBeOnTheScreen();
+    await fireEvent.press(await screen.findByText(tr('adwamuha.setup.enable')));
+    expect(openDialog().getByText(tr('adwamuha.continue.title'))).toBeOnTheScreen();
     // Continuing is the main button, then start again, then cancel (redesign).
-    expect(dialogButtons()).toEqual(['أكمل من حيث توقفت', 'ابدأ من جديد', 'إلغاء']);
-    await pressInDialog('أكمل من حيث توقفت');
+    expect(dialogButtons()).toEqual([
+      tr('adwamuha.continue.continue'),
+      tr('adwamuha.continue.restart'),
+      tr('common.cancel'),
+    ]);
+    await pressInDialog(tr('adwamuha.continue.continue'));
     await waitFor(async () => expect((await repos.adwamuha.load())?.enabled).toBe(true));
     expect(mockRouter.dismissTo).toHaveBeenCalledWith('/');
   });
@@ -133,22 +134,22 @@ describe('setup 2: where to start', () => {
     // «ابدأ», not «أبدأ» (owner, 2026-10-30).
     const first = await screen.findByRole('radio', { name: /^ابدأ من أول خطوة/ });
     expect(first.props.accessibilityState).toMatchObject({ selected: true });
-    expect(screen.queryByLabelText('خطوة أكثر')).toBeNull();
-    await fireEvent.press(screen.getByText('التالي'));
+    expect(screen.queryByLabelText(tr('adwamuha.start.more'))).toBeNull();
+    await fireEvent.press(screen.getByText(tr('adwamuha.setup.next')));
     expect(mockRouter.push).toHaveBeenLastCalledWith({
       pathname: '/adwamuha/order',
       params: { step: '1' },
     });
 
-    await fireEvent.press(screen.getByText('أحافظ على بعضها'));
+    await fireEvent.press(screen.getByText(tr('adwamuha.setup.fromSome')));
     expect(screen.getByText('الخطوة 2 من 24')).toBeOnTheScreen();
-    expect(screen.getByLabelText('خطوة أقل')).toBeDisabled();
+    expect(screen.getByLabelText(tr('adwamuha.start.fewer'))).toBeDisabled();
     // The preview: the first words of the morning ward, from the database.
     const opening = (await repos.content.getDhikr(1901, 'ar'))!;
     expect(screen.getByText(firstWords(opening.text))).toBeOnTheScreen();
-    await fireEvent.press(screen.getByLabelText('خطوة أكثر'));
+    await fireEvent.press(screen.getByLabelText(tr('adwamuha.start.more')));
     expect(screen.getByText('الخطوة 3 من 24')).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText('التالي'));
+    await fireEvent.press(screen.getByText(tr('adwamuha.setup.next')));
     expect(mockRouter.push).toHaveBeenLastCalledWith({
       pathname: '/adwamuha/order',
       params: { step: '3' },
@@ -158,8 +159,9 @@ describe('setup 2: where to start', () => {
   it('every dhikr of the step shows, two of them by the owner’s names (owner, 2026-10-30)', async () => {
     const repos = await createTestRepositories();
     await renderWithApp(<SetupStartScreen />, repos, { now: at(9) });
-    await fireEvent.press(await screen.findByText('أحافظ على بعضها'));
-    for (let i = 2; i < 8; i++) await fireEvent.press(screen.getByLabelText('خطوة أكثر'));
+    await fireEvent.press(await screen.findByText(tr('adwamuha.setup.fromSome')));
+    for (let i = 2; i < 8; i++)
+      await fireEvent.press(screen.getByLabelText(tr('adwamuha.start.more')));
     expect(screen.getByText('الخطوة 8 من 24')).toBeOnTheScreen();
     const plan = copyDefaultPlan(await repos.content.getDefaultPlan('ar'));
     const ids = wardDhikrIds(plan, 8, 'morning');
@@ -191,14 +193,14 @@ describe('setup 3: the ward order (owner, 2026-10-30)', () => {
     const repos = await createTestRepositories();
     setRouteParams({ step: '6' }); // the opening and 6 adhkar
     await renderWithApp(<SetupOrderScreen />, repos, { now: at(9) });
-    expect(await screen.findByText('مثال لوردك الآن:')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('adwamuha.settingsScreen.previewTitle'))).toBeOnTheScreen();
     expect(screen.getByLabelText('الشاشة 3 من 4')).toBeOnTheScreen();
     const plan = await screen.findByRole('radio', { name: /^ترتيب الخطة\. ننصح به\. / });
     expect(plan.props.accessibilityState).toMatchObject({ selected: true });
     // All of it first, with the owner's names.
     expect(await screen.findByText(KURSI)).toBeOnTheScreen();
     expect(screen.getByText(QULS)).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText('عرض أقل'));
+    await fireEvent.press(screen.getByText(tr('adwamuha.orderHelp.showLess')));
     expect(screen.queryByText(KURSI)).toBeNull();
     await fireEvent.press(screen.getByText('عرض الورد كله (7)'));
     expect(screen.getByText(KURSI)).toBeOnTheScreen();
@@ -206,7 +208,7 @@ describe('setup 3: the ward order (owner, 2026-10-30)', () => {
     await fireEvent.press(screen.getByRole('radio', { name: /^ترتيب الأبواب/ }));
     await waitFor(async () => expect((await repos.settings.getAll()).wardOrder).toBe('category'));
     expect(await screen.findByText(/^ترتيب الخطة أسهل للالتزام/)).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText('التالي'));
+    await fireEvent.press(screen.getByText(tr('adwamuha.setup.next')));
     expect(mockRouter.push).toHaveBeenLastCalledWith({
       pathname: '/adwamuha/reminders',
       params: { step: '6' },
@@ -220,13 +222,13 @@ describe('setup 4: the reminders, then the path begins', () => {
     const repos = await createTestRepositories();
     setRouteParams({ step: '3' });
     await renderWithApp(<SetupRemindersScreen />, repos, { now: at(9) });
-    const morning = await screen.findByLabelText('ورد الصباح');
+    const morning = await screen.findByLabelText(tr('adwamuha.wardTitle.morning'));
     expect(morning.props.value).toBe(true);
-    expect(screen.getByLabelText('ورد المساء').props.value).toBe(true);
+    expect(screen.getByLabelText(tr('adwamuha.wardTitle.evening')).props.value).toBe(true);
     // A new time for the morning.
     await fireEvent.press(screen.getByLabelText('تغيير وقت ورد الصباح، الوقت الآن 6:00 ص'));
     await act(async () => pickTime(7, 0));
-    await fireEvent.press(screen.getByText('ابدأ مساري'));
+    await fireEvent.press(screen.getByText(tr('adwamuha.setup.go')));
     await waitFor(() => expect(mockRouter.dismissTo).toHaveBeenCalledWith('/'));
     expect(notificationState.asked).toBe(1);
     const settings = await repos.settings.getAll();
@@ -247,9 +249,13 @@ describe('setup 4: the reminders, then the path begins', () => {
     const repos = await createTestRepositories();
     setRouteParams({ step: '1' });
     await renderWithApp(<SetupRemindersScreen />, repos, { now: at(9) });
-    await fireEvent(await screen.findByLabelText('ورد الصباح'), 'valueChange', false);
-    await fireEvent(screen.getByLabelText('ورد المساء'), 'valueChange', false);
-    await fireEvent.press(screen.getByText('ابدأ مساري'));
+    await fireEvent(
+      await screen.findByLabelText(tr('adwamuha.wardTitle.morning')),
+      'valueChange',
+      false,
+    );
+    await fireEvent(screen.getByLabelText(tr('adwamuha.wardTitle.evening')), 'valueChange', false);
+    await fireEvent.press(screen.getByText(tr('adwamuha.setup.go')));
     await waitFor(() => expect(mockRouter.dismissTo).toHaveBeenCalledWith('/'));
     expect(notificationState.asked).toBe(0);
     const settings = await repos.settings.getAll();
@@ -265,7 +271,7 @@ describe('setup 4: the reminders, then the path begins', () => {
     const repos = await createTestRepositories();
     setRouteParams({ step: '1' });
     await renderWithApp(<SetupRemindersScreen />, repos, { now: at(9) });
-    await fireEvent.press(await screen.findByText('ابدأ مساري'));
+    await fireEvent.press(await screen.findByText(tr('adwamuha.setup.go')));
     await waitFor(() => expect(mockRouter.dismissTo).toHaveBeenCalledWith('/'));
     expect((await repos.settings.getAll()).morningReminder.enabled).toBe(false);
     expect((await repos.adwamuha.load())?.enabled).toBe(true);
@@ -276,7 +282,7 @@ describe('setup 4: the reminders, then the path begins', () => {
     const repos = await createTestRepositories();
     setRouteParams({ step: '1' });
     await renderWithApp(<SetupRemindersScreen />, repos, { now: at(20) });
-    await fireEvent.press(await screen.findByText('ابدأ مساري'));
+    await fireEvent.press(await screen.findByText(tr('adwamuha.setup.go')));
     await waitFor(async () =>
       expect((await repos.adwamuha.load())?.state).toMatchObject({
         stepStartedIn: 'evening',

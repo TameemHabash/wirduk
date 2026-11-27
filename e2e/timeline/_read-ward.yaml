@@ -1,0 +1,22 @@
+# Reads the ward of SESSION (morning / evening) in the reader, from Home to its finish screen.
+appId: com.wirduk.app
+---
+- tapOn: ${output.s['adwamuha.openWard.' + SESSION]}
+- extendedWaitUntil:
+    visible: ${output.s['reader.completeLabel']}
+    timeout: 10000
+- repeat:
+    while:
+      notVisible: ${output.s['completion.home']}
+    times: 30
+    commands:
+      - tapOn:
+          point: 50%, 45%
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: ${output.s['completion.home']}
+    timeout: 10000
+- tapOn: ${output.s['completion.home']}
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 10000

@@ -1,9 +1,10 @@
 import { fireEvent, screen } from '@testing-library/react-native';
 
-import { mockRouter } from '@/test-utils/router-mock';
+import { mockRouter } from '@/test-utils/mocks/router';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
 
 import { HomeScreen } from './HomeScreen';
+import { tr } from '@/test-utils/tr';
 
 /** Fakes only the clock (Date), so promises and timers behave normally. */
 function setClock(hour: number) {
@@ -36,15 +37,15 @@ describe('HomeScreen («الرئيسية»)', () => {
   it('shows the logo without the name beside it; screen readers hear the name as the heading', async () => {
     setClock(8);
     await renderWithApp(<HomeScreen />);
-    expect(await screen.findByRole('header', { name: 'وِرْدُك' })).toBeOnTheScreen();
-    expect(screen.queryByText('وِرْدُك')).toBeNull();
+    expect(await screen.findByRole('header', { name: tr('home.title') })).toBeOnTheScreen();
+    expect(screen.queryByText(tr('home.title'))).toBeNull();
   });
 
   it('in the morning: the golden morning card «الآن» with «ابدأ», the evening as a small row', async () => {
     setClock(8);
     await renderWithApp(<HomeScreen />);
     expect(await screen.findByLabelText(/^أذكار الصباح، 24 ذكرًا، الآن$/)).toBeOnTheScreen();
-    expect(screen.getByText('ابدأ')).toBeOnTheScreen();
+    expect(screen.getByText(tr('home.start'))).toBeOnTheScreen();
     expect(screen.getByLabelText(/^أذكار المساء، 22 ذكرًا$/)).toBeOnTheScreen();
   });
 
@@ -68,17 +69,15 @@ describe('HomeScreen («الرئيسية»)', () => {
   it('has no chapter list: the chapters are in the «الأذكار» tab', async () => {
     setClock(8);
     await renderWithApp(<HomeScreen />);
-    await screen.findByText('المفضلة');
-    expect(screen.queryByText('كل الأذكار')).toBeNull();
+    await screen.findByText(tr('home.favorites'));
+    expect(screen.queryByText(tr('home.allAdhkar'))).toBeNull();
     expect(screen.queryByLabelText('أذكار النوم، 13 ذكرًا')).toBeNull();
   });
 
   it('no favorites yet: a hint on how to add one', async () => {
     setClock(8);
     await renderWithApp(<HomeScreen />);
-    expect(
-      await screen.findByText('اضغط النجمة بجانب أي باب في «الأذكار» ليظهر هنا.'),
-    ).toBeOnTheScreen();
+    expect(await screen.findByText(tr('home.favoritesEmpty'))).toBeOnTheScreen();
   });
 
   it('shows the favorites as tiles that open their chapter', async () => {
@@ -98,14 +97,14 @@ describe('HomeScreen («الرئيسية»)', () => {
   it('«أدومها» off: its gold badge opens the setup', async () => {
     setClock(8);
     await renderWithApp(<HomeScreen />);
-    await fireEvent.press(await screen.findByRole('button', { name: 'ابنِ وردك خطوةً خطوة' }));
+    await fireEvent.press(await screen.findByRole('button', { name: tr('adwamuha.setup.title') }));
     expect(mockRouter.push).toHaveBeenCalledWith('/adwamuha/intro');
   });
 
   it('the search button opens the adhkar tab with the keyboard up', async () => {
     setClock(8);
     await renderWithApp(<HomeScreen />);
-    await fireEvent.press(await screen.findByLabelText('ابحث في الأذكار'));
+    await fireEvent.press(await screen.findByLabelText(tr('home.searchPlaceholder')));
     expect(mockRouter.navigate).toHaveBeenCalledWith({
       pathname: '/adhkar',
       params: { focus: 'search' },

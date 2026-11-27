@@ -1,0 +1,10 @@
+# Reads Home's messages, if any («حسنًا» on each).
+appId: com.wirduk.app
+---
+- repeat:
+    while:
+      visible: ${output.s['adwamuha.message.ok']}
+    times: 5
+    commands:
+      - tapOn: ${output.s['adwamuha.message.ok']}
+      - waitForAnimationToEnd

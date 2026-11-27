@@ -2,19 +2,20 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { APP_CONFIG } from '@/config/app-config';
 import { SettingsScreen } from '@/features/settings/screens/SettingsScreen';
-import { mockPicker } from '@/test-utils/audio-mock';
+import { mockPicker } from '@/test-utils/mocks/audio';
 import { renderWithApp } from '@/test-utils/render-app';
-import { mockRouter } from '@/test-utils/router-mock';
+import { mockRouter } from '@/test-utils/mocks/router';
 
 import { freeStorageBytes } from '@/features/report/services/free-space';
 import { formatBytes, formatScreen } from '@/features/report/services/report';
 import { DETAIL_KEYS } from '@/features/report/logic/report-protocol';
 import { ReportScreen } from './ReportScreen';
 import { shrinkImage } from '@/features/report/services/shrink-image';
+import { tr } from '@/test-utils/tr';
 
 const ENDPOINT = 'https://relay.test';
 const TEXT = 'العداد لا يتحرك بعد الضغط';
-const SEND = 'إرسال';
+const SEND = tr('report.send');
 
 type Sent = { description: string; details: Record<string, string>; images: unknown[] };
 
@@ -42,7 +43,7 @@ afterEach(() => {
 async function openWith(text?: string) {
   await renderWithApp(<ReportScreen />);
   if (text !== undefined) {
-    await fireEvent.changeText(await screen.findByLabelText('وصف المشكلة'), text);
+    await fireEvent.changeText(await screen.findByLabelText(tr('report.description')), text);
   }
 }
 
@@ -61,15 +62,15 @@ describe('Report details — formats', () => {
 describe('Report an issue — Settings', () => {
   it('has the row only once the relay exists, and it opens the report screen', async () => {
     await renderWithApp(<SettingsScreen />);
-    await fireEvent.press(await screen.findByText('الإبلاغ عن مشكلة'));
+    await fireEvent.press(await screen.findByText(tr('report.title')));
     expect(mockRouter.push).toHaveBeenCalledWith('/report');
   });
 
   it('has no row without a relay', async () => {
     jest.replaceProperty(APP_CONFIG.report, 'endpoint', null);
     await renderWithApp(<SettingsScreen />);
-    await screen.findByText('سياسة الخصوصية');
-    expect(screen.queryByText('الإبلاغ عن مشكلة')).toBeNull();
+    await screen.findByText(tr('settings.privacy'));
+    expect(screen.queryByText(tr('report.title'))).toBeNull();
   });
 });
 
@@ -84,9 +85,9 @@ describe('Report an issue — screen', () => {
 
   it('shows the details before sending, sends the report, thanks the user and goes back', async () => {
     await openWith(`  ${TEXT}  `);
-    expect(screen.getByText('إصدار المحتوى')).toBeOnTheScreen();
+    expect(screen.getByText(tr('report.detail.contentVersion'))).toBeOnTheScreen();
     expect(screen.getByText(String(APP_CONFIG.content.version))).toBeOnTheScreen();
-    expect(screen.getByText('حجم الخط')).toBeOnTheScreen();
+    expect(screen.getByText(tr('report.detail.dhikrFontSize'))).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: SEND }));
     await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
@@ -97,14 +98,14 @@ describe('Report an issue — screen', () => {
       details: { contentVersion: String(APP_CONFIG.content.version), dhikrFontSize: '24' },
       images: [],
     });
-    expect(await screen.findByText('وصل البلاغ، شكرًا لك')).toBeOnTheScreen();
+    expect(await screen.findByText(tr('report.sent'))).toBeOnTheScreen();
   });
 
   it('shows and sends the screen size, the phone text size and the free storage', async () => {
     await openWith(TEXT);
-    expect(screen.getByText('الشاشة')).toBeOnTheScreen();
-    expect(screen.getByText('حجم خط الهاتف')).toBeOnTheScreen();
-    expect(screen.getByText('المساحة المتاحة')).toBeOnTheScreen();
+    expect(screen.getByText(tr('report.detail.screen'))).toBeOnTheScreen();
+    expect(screen.getByText(tr('report.detail.fontScale'))).toBeOnTheScreen();
+    expect(screen.getByText(tr('report.detail.freeStorage'))).toBeOnTheScreen();
     expect(screen.getByText('12.3 GB')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: SEND }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
@@ -120,7 +121,7 @@ describe('Report an issue — screen', () => {
   it('leaves out the free storage when the phone does not say', async () => {
     jest.mocked(freeStorageBytes).mockReturnValueOnce(null);
     await openWith(TEXT);
-    expect(screen.queryByText('المساحة المتاحة')).toBeNull();
+    expect(screen.queryByText(tr('report.detail.freeStorage'))).toBeNull();
     await fireEvent.press(screen.getByRole('button', { name: SEND }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(sent().details).not.toHaveProperty('freeStorage');
@@ -128,7 +129,7 @@ describe('Report an issue — screen', () => {
 
   it('can leave the details out', async () => {
     await openWith(TEXT);
-    await fireEvent(screen.getByLabelText('إرسال هذه المعلومات مع البلاغ'), 'valueChange', false);
+    await fireEvent(screen.getByLabelText(tr('report.includeDetails')), 'valueChange', false);
     await fireEvent.press(screen.getByRole('button', { name: SEND }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(sent().details).toEqual({});
@@ -140,7 +141,7 @@ describe('Report an issue — screen', () => {
       assets: [{ uri: 'file:///a.png' }, { uri: 'file:///b.png' }],
     });
     await openWith(TEXT);
-    await fireEvent.press(screen.getByRole('button', { name: 'إضافة صور' }));
+    await fireEvent.press(screen.getByRole('button', { name: tr('report.addScreenshots') }));
     expect(await screen.findByLabelText('صورة 2')).toBeOnTheScreen();
     expect(shrinkImage).toHaveBeenCalledWith('file:///a.png');
 
@@ -157,11 +158,11 @@ describe('Report an issue — screen', () => {
       assets: [1, 2, 3, 4, 5].map((n) => ({ uri: `file:///${n}.png` })),
     });
     await openWith(TEXT);
-    await fireEvent.press(screen.getByRole('button', { name: 'إضافة صور' }));
+    await fireEvent.press(screen.getByRole('button', { name: tr('report.addScreenshots') }));
     expect(await screen.findByLabelText('صورة 4')).toBeOnTheScreen();
     expect(screen.queryByLabelText('صورة 5')).toBeNull();
     expect(screen.getByText('يمكن إرفاق 4 صور فقط، فأُضيفت الأولى منها.')).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'إضافة صور' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: tr('report.addScreenshots') })).toBeDisabled();
   });
 
   it('says when a picture cannot be used', async () => {
@@ -171,15 +172,15 @@ describe('Report an issue — screen', () => {
     });
     jest.mocked(shrinkImage).mockResolvedValueOnce(null);
     await openWith(TEXT);
-    await fireEvent.press(screen.getByRole('button', { name: 'إضافة صور' }));
-    expect(await screen.findByText('تعذّر تجهيز بعض الصور. جرّب صورة أخرى.')).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole('button', { name: tr('report.addScreenshots') }));
+    expect(await screen.findByText(tr('report.imageError'))).toBeOnTheScreen();
     expect(screen.queryByLabelText('صورة 1')).toBeNull();
   });
 
   it.each([
-    ['offline', 'تعذّر الإرسال. تأكد من الاتصال بالإنترنت ثم حاول مرة أخرى.'],
-    ['rate-limited', 'أُرسلت بلاغات كثيرة الآن. حاول مرة أخرى بعد دقيقة.'],
-    ['failed', 'تعذّر الإرسال الآن. حاول مرة أخرى لاحقًا.'],
+    ['offline', tr('report.errors.offline')],
+    ['rate-limited', tr('report.errors.rate-limited')],
+    ['failed', tr('report.errors.failed')],
   ])('explains a failure (%s) and stays on the screen', async (kind, message) => {
     if (kind === 'offline') fetchMock.mockRejectedValue(new TypeError('Network request failed'));
     else if (kind === 'rate-limited') answer(429, { ok: false, error: 'rate-limited' });

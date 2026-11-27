@@ -61,6 +61,7 @@ milestones 10–15). Decisions: [docs/decisions.md](docs/decisions.md) (they win
 | `npx prettier --check <files>`                                       | Lint does not catch every format issue in new files.                                                                                                                                               |
 | `npm run content:build`                                              | Rebuild `assets/db/content.db` + generated docs after a content change.                                                                                                                            |
 | `npm run db:peek -- 1017 133006`                                     | Text, count, audio, source and fadl of adhkar, from `content.db`.                                                                                                                                  |
+| `npm run e2e` / `npm run e2e:timeline`                               | The user flows with checks (~3 min) / «أدومها» over 40 days with the emulator's date moved (~30 min). Release build first (`Install-E2eApk`). `e2e/README.md`.                                     |
 | `npm run e2e:shots` then `npm run shots:compare`                     | Every screen on the emulator (Maestro, release build: `Install-E2eApk` from `scripts/dev/e2e.ps1` first), compared with `.local/shots/baseline`. Only changed screens are listed. `e2e/README.md`. |
 | `npm run dorar:receiver` / `dorar:apply`                             | Change a Dorar source or fadl: `scripts/dorar/README.md`.                                                                                                                                          |
 | `node scripts/content/apply-audio-sheet.ts ../wirduk-audio/audio/ar` | New recordings from the owner's sheet (`docs/audio/morning-evening-audio.csv`): checks, copies, writes `audioRecordings`. Then `make-audio-manifest.ts`, the content version, `content:build`.     |
@@ -272,7 +273,10 @@ content, actions })`, the action first, `cancel: true` on the one a tap outside 
   (PowerShell `>` breaks binary data). adb typing: `input keyboard text 'Word%sWord'` (Latin only).
 - Tests (RNTL 14): `render` and `fireEvent` are async, always `await`. In the ui project
   `useFocusEffect` runs as a plain effect. After changing a list's data at the end of a test,
-  `await settleLists()`.
+  `await settleLists()`. Use the test kit (README "Tests"): `givenAdwamuha`, `tr('key')` (no
+  typed UI Arabic), `DHIKR.*` / `CATEGORY.*`, `openReader`, `recordingsHeard()`, `tryToLeave()`.
+  Check behavior, not call counts. `docs/adwamuha/states.md` is checked by a test: a renamed or
+  split test file must be renamed there too.
 - «أدومها» over days and weeks: `startScenario` (`src/test-utils/adwamuha-scenario.tsx`) drives
   the real provider with a fake clock (`live`, `away`, `run`, `show`); whole plans in
   `logic/plan-walk.test.ts` (pure, seconds). A scenario through React costs ~0.1 s per day: keep
@@ -284,7 +288,7 @@ content, actions })`, the action first, `cancel: true` on the one a tap outside 
 - ui tests run as iOS. `jest.replaceProperty(Platform, 'OS', 'android')` works (Android-only code
   such as notification channels), but then a `Switch` has no `value` prop: read switches as iOS.
   expo-notifications, the time picker and `shrink-image.ts` are mocked in `jest.setup.ui.ts`
-  (`src/test-utils/notifications-mock.ts`: `notificationState`, `tapNotification`, `pickTime`).
+  (`src/test-utils/mocks/notifications.ts`: `notificationState`, `tapNotification`, `pickTime`).
 - A new route file (e.g. `src/app/report.tsx`): `tsc` rejects `router.push('/report')` until
   Metro has run once and rewritten `.expo/types/router.d.ts` (typed routes). A new folder
   `index.tsx` added while Metro runs came out as `/adwamuha/index`: stop Metro, delete

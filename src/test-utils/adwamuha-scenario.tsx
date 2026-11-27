@@ -10,7 +10,7 @@ import { act } from '@testing-library/react-native';
 
 import type { Repositories } from '@/data/DataProvider';
 import { type AdwamuhaValue, useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
-import { addDays } from '@/features/adwamuha/logic/days';
+import { addDays, daysBetween } from '@/features/adwamuha/logic/days';
 import { type ProgressView, useProgress } from '@/features/adwamuha/hooks/useProgress';
 import type { DayKey, Session, Weekday } from '@/data/models';
 
@@ -58,6 +58,21 @@ export interface Scenario {
   ): Promise<void>;
   /** The same days, but the app is opened only at the end (20:00 of the last day). */
   away(days: number, plan?: (date: DayKey, index: number) => DayPlan): Promise<void>;
+  /**
+   * Lives the days of a short script, one line per day or run of days, counted from the
+   * scenario's first day (day 1):
+   *
+   *     day 1: both wards              (today: read in the app, morning then evening)
+   *     days 2-7: both wards           (the app opened each evening at 20:00)
+   *     days 8-20: none, app closed    (stored as the reader would; opened on day 20 only)
+   *     day 21: morning late, evening
+   *
+   * Wards: `both wards`, `morning`, `evening`, `none`, each may end with `late`. Lines must
+   * follow each other (the next day each time). `#` starts a note.
+   */
+  play(script: string): Promise<void>;
+  /** The date of day `n` of the scenario (day 1 is the first). */
+  day(n: number): DayKey;
   /** The events the app logged, as `kind:step`. */
   events(): Promise<string[]>;
   /** Renders a real screen now, with the same data and clock (e.g. Home, «مساري»). */
@@ -65,6 +80,20 @@ export interface Scenario {
 }
 
 const EVERY_DAY: DayPlan = { morning: true, evening: true };
+
+/** A script line's wards: «both wards», «morning late, evening», «none»… */
+function wardsOf(parts: string[], line: string): DayPlan {
+  const plan: DayPlan = { morning: false, evening: false };
+  for (const part of parts) {
+    const [what, late] = part.split(/\s+/) as [string, string | undefined];
+    const value: WardDay = late === 'late' ? 'late' : true;
+    if (part === 'none') continue;
+    if (what === 'both') plan.morning = plan.evening = part.endsWith('late') ? 'late' : true;
+    else if (what === 'morning' || what === 'evening') plan[what] = value;
+    else throw new Error(`Script: unknown wards "${part}" in "${line}"`);
+  }
+  return plan;
+}
 
 /** Lets effects and the reads they start finish (e.g. a saved extension). */
 async function settle() {
@@ -171,6 +200,37 @@ export async function startScenario({
         await store(date, plan(date, i));
       }
       await setTime(date, 20);
+    },
+    day: (n) => addDays(day, n - 1),
+    async play(script) {
+      for (const raw of script.split('\n')) {
+        const line = raw.replace(/#.*$/, '').trim();
+        if (!line) continue;
+        const m = /^days? (\d+)(?:-(\d+))?: (.+)$/.exec(line);
+        if (!m) throw new Error(`Script: cannot read "${line}"`);
+        const from = Number(m[1]);
+        const to = Number(m[2] ?? m[1]);
+        const parts = m[3]!.split(',').map((p) => p.trim());
+        const closed = parts.includes('app closed');
+        const plan = wardsOf(
+          parts.filter((p) => p !== 'app closed'),
+          line,
+        );
+        const next = daysBetween(day, scenario.today) + 2;
+        if (from === next - 1 && to === from) {
+          // Today: read in the app (the morning now, the evening at 18:00).
+          if (plan.morning) await scenario.read('morning');
+          if (plan.evening) {
+            await setTime(scenario.today, 18);
+            await scenario.read('evening');
+          }
+          continue;
+        }
+        if (from !== next) throw new Error(`Script: "${line}" — the next day is day ${next}`);
+        const count = to - from + 1;
+        if (closed) await scenario.away(count, () => plan);
+        else await scenario.live(count, () => plan);
+      }
     },
     async events() {
       return (await repos.adwamuha.listEvents()).map((e) => `${e.kind}:${e.step ?? ''}`);

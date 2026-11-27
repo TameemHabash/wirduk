@@ -36,4 +36,9 @@ module.exports = {
     },
   ],
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.test.{ts,tsx}', '!src/app/**'],
+  // RF6 (2026-11-27): never below this (RF0 was 89.0 / 82.4 / 86.9 / 91.1). `npm run verify`
+  // runs with coverage, so a drop fails it.
+  coverageThreshold: {
+    global: { statements: 90, branches: 82.5, functions: 88, lines: 92 },
+  },
 };

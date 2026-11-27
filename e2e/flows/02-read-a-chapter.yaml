@@ -1,0 +1,36 @@
+# Reading: each tap counts; at the count the reader moves on by itself; the last dhikr of a
+# chapter opens the finish screen; «العودة إلى الرئيسية» goes Home.
+# Content: dhikr 1013 is said 3 times; chapter 4 has one dhikr, said once.
+appId: com.wirduk.app
+name: Read a chapter
+---
+- runScript: ../.generated/strings.js
+- openLink: wirduk://category/1?dhikr=1013
+- extendedWaitUntil:
+    visible: ${output.raw['reader.counter'].replace('{{done}}', '0').replace('{{total}}', '3')}
+    timeout: 10000
+- tapOn:
+    point: 50%, 45%
+- assertVisible: ${output.raw['reader.counter'].replace('{{done}}', '1').replace('{{total}}', '3')}
+- tapOn:
+    point: 50%, 45%
+- tapOn:
+    point: 50%, 45%
+# The next dhikr, from zero.
+- extendedWaitUntil:
+    visible: ${output.raw['reader.counter'].replace('{{done}}', '0').replace('{{total}}', '.*')}
+    timeout: 5000
+- assertNotVisible: ${output.raw['reader.counter'].replace('{{done}}', '3').replace('{{total}}', '3')}
+- openLink: wirduk://category/4
+- extendedWaitUntil:
+    visible: ${output.s['reader.completeLabel']}
+    timeout: 10000
+- tapOn:
+    point: 50%, 45%
+- extendedWaitUntil:
+    visible: ${output.s['completion.line1']}
+    timeout: 10000
+- tapOn: ${output.s['completion.home']}
+- extendedWaitUntil:
+    visible: ${output.s['home.start']}
+    timeout: 10000

@@ -9,15 +9,16 @@ import {
   pickTime,
   responseFor,
   tapNotification,
-} from '@/test-utils/notifications-mock';
+} from '@/test-utils/mocks/notifications';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
-import { mockRouter } from '@/test-utils/router-mock';
+import { mockRouter } from '@/test-utils/mocks/router';
 
 import { useReminderSync } from '@/features/reminders/hooks/useReminders';
+import { tr } from '@/test-utils/tr';
 
-const MORNING = 'التذكير بأذكار الصباح';
-const EVENING = 'التذكير بأذكار المساء';
-const DENIED = 'الإشعارات غير مسموحة لوِرْدُك. اضغط هنا لفتح إعدادات التطبيق والسماح بها.';
+const MORNING = tr('settings.morningReminder');
+const EVENING = tr('settings.eveningReminder');
+const DENIED = tr('settings.notificationsDenied');
 
 /** Settings plus the root sync, the way the app has them. */
 function SettingsWithSync() {
@@ -48,12 +49,13 @@ describe('Reminders — settings', () => {
 
   it('schedules nothing and adds no channel while both are off', async () => {
     asAndroid();
+    // A reminder left from before (turned off since): the sync takes it away.
+    notificationState.scheduled.set('reminder-morning', {
+      identifier: 'reminder-morning',
+    } as never);
     await renderWithApp(<SettingsWithSync />);
     await screen.findByLabelText(MORNING);
-    await waitFor(() =>
-      expect(mockNotifications.cancelScheduledNotificationAsync).toHaveBeenCalledTimes(2),
-    );
-    expect(notificationState.scheduled.size).toBe(0);
+    await waitFor(() => expect(notificationState.scheduled.size).toBe(0));
     // No channel in the phone's settings until a reminder is used.
     expect(notificationState.channels.size).toBe(0);
   });
@@ -65,10 +67,12 @@ describe('Reminders — settings', () => {
     await waitFor(() => expect(scheduled('reminder-morning')).toBeDefined());
     expect(notificationState.asked).toBe(1);
     expect(scheduled('reminder-morning')).toMatchObject({
-      content: { title: 'أذكار الصباح', data: { categoryId: 1 } },
+      content: { title: tr('reminders.morningTitle'), data: { categoryId: 1 } },
       trigger: { type: 'daily', hour: 6, minute: 0, channelId: 'reminders' },
     });
-    expect(notificationState.channels.get('reminders')).toMatchObject({ name: 'التذكير بالأذكار' });
+    expect(notificationState.channels.get('reminders')).toMatchObject({
+      name: tr('reminders.channel'),
+    });
     expect((await repos.settings.getAll()).morningReminder).toEqual({
       enabled: true,
       time: '06:00',
@@ -79,7 +83,7 @@ describe('Reminders — settings', () => {
     await fireEvent(screen.getByLabelText(EVENING), 'valueChange', true);
     await waitFor(() => expect(scheduled('reminder-evening')).toBeDefined());
     expect(scheduled('reminder-evening')).toMatchObject({
-      content: { title: 'أذكار المساء', data: { categoryId: 133 } },
+      content: { title: tr('reminders.eveningTitle'), data: { categoryId: 133 } },
       trigger: { hour: 17, minute: 0 },
     });
     expect(notificationState.asked).toBe(1);
@@ -166,15 +170,17 @@ describe('Reminders — settings', () => {
     expect(notificationState.scheduled.size).toBe(0);
     await fireEvent.press(screen.getByText(DENIED));
     expect(openSettings).toHaveBeenCalled();
-
-    // "Never ask again": no question, the same message.
-    await fireEvent(screen.getByLabelText(EVENING), 'valueChange', true);
-    // (The notifications card checks the permission too.)
-    await waitFor(() =>
-      expect(mockNotifications.getPermissionsAsync.mock.calls.length).toBeGreaterThanOrEqual(2),
-    );
-    expect(notificationState.asked).toBe(1);
     openSettings.mockRestore();
+  });
+
+  it('after "never ask again": no question; the reminder stays off', async () => {
+    notificationState.permission = { granted: false, canAskAgain: false };
+    const { repos } = await renderWithApp(<SettingsWithSync />);
+    await fireEvent(await screen.findByLabelText(EVENING), 'valueChange', true);
+    expect((await screen.findAllByText(DENIED)).length).toBeGreaterThan(0);
+    expect(notificationState.asked).toBe(0);
+    expect(screen.getByLabelText(EVENING).props.value).toBe(false);
+    expect((await repos.settings.getAll()).eveningReminder.enabled).toBe(false);
   });
 });
 
@@ -221,7 +227,7 @@ describe('Reminders — a tap opens the adhkar', () => {
 
   it('opens the evening adhkar on a tap while the app runs', async () => {
     await renderWithApp(<HomeScreen />);
-    await screen.findByText('المفضلة');
+    await screen.findByText(tr('home.favorites'));
     tapNotification(133);
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: '/category/[id]',
@@ -232,7 +238,7 @@ describe('Reminders — a tap opens the adhkar', () => {
   it('ignores a notification that is not a reminder', async () => {
     notificationState.lastResponse = responseFor(null);
     await renderWithApp(<HomeScreen />);
-    await screen.findByText('المفضلة');
+    await screen.findByText(tr('home.favorites'));
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 });

@@ -1,0 +1,20 @@
+# A day read outside the app (fast): at 20:00, «مساري» → «قرأتُ وردي بدون التطبيق» → today's
+# morning, then today's evening (each tap records one and closes the sheet).
+appId: com.wirduk.app
+name: Timeline mark today
+---
+- runScript: ../.generated/strings.js
+- launchApp
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 20000
+- runFlow: _messages.yaml
+- openLink: wirduk://adwamuha
+- runFlow:
+    file: _mark-one.yaml
+    env:
+      SESSION: morning
+- runFlow:
+    file: _mark-one.yaml
+    env:
+      SESSION: evening

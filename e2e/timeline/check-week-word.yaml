@@ -1,0 +1,11 @@
+# The end of a good week: Home has its word (a message with «حسنًا»).
+appId: com.wirduk.app
+name: Timeline week word
+---
+- runScript: ../.generated/strings.js
+- launchApp
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 20000
+- assertVisible: ${output.s['adwamuha.message.ok']}
+- runFlow: _messages.yaml

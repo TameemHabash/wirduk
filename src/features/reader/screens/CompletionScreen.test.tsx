@@ -3,10 +3,11 @@ import { fireEvent, screen } from '@testing-library/react-native';
 
 import { counterStore } from '@/features/reader/state/counter-store';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
-import { mockRouter, setRouteParams } from '@/test-utils/router-mock';
+import { mockRouter, setRouteParams } from '@/test-utils/mocks/router';
 
 import { CompletionScreen } from './CompletionScreen';
 import { COLORS } from '@/theme/colors';
+import { tr } from '@/test-utils/tr';
 
 describe('CompletionScreen', () => {
   beforeEach(() => {
@@ -15,8 +16,8 @@ describe('CompletionScreen', () => {
 
   it('shows the blessing and the finished category', async () => {
     await renderWithApp(<CompletionScreen />);
-    expect(screen.getByText('بارك الله فيك')).toBeOnTheScreen();
-    expect(screen.getByText('وتقبّل عملك')).toBeOnTheScreen();
+    expect(screen.getByText(tr('completion.line1'))).toBeOnTheScreen();
+    expect(screen.getByText(tr('completion.line2'))).toBeOnTheScreen();
     // The chapter's name without «», bold and teal (owner, 2026-11-25).
     expect(await screen.findByText('أتممت دعاء دخول الخلاء')).toBeOnTheScreen();
     expect(screen.queryByText(/«/)).toBeNull();
@@ -47,7 +48,7 @@ describe('CompletionScreen', () => {
     counterStore.tap(4001, 1);
     await renderWithApp(<CompletionScreen />);
     await screen.findByText('أتممت دعاء دخول الخلاء');
-    await fireEvent.press(screen.getByText('العودة إلى الرئيسية'));
+    await fireEvent.press(screen.getByText(tr('completion.home')));
     expect(counterStore.get(4001)).toBe(0);
     expect(mockRouter.dismissTo).toHaveBeenCalledWith('/');
   });
@@ -56,7 +57,7 @@ describe('CompletionScreen', () => {
     counterStore.tap(4001, 1);
     await renderWithApp(<CompletionScreen />);
     await screen.findByText('أتممت دعاء دخول الخلاء');
-    await fireEvent.press(screen.getByText('إعادة الأذكار'));
+    await fireEvent.press(screen.getByText(tr('completion.again')));
     expect(counterStore.get(4001)).toBe(0);
     expect(mockRouter.replace).toHaveBeenCalledWith({
       pathname: '/category/[id]',

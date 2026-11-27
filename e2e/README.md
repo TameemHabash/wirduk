@@ -7,11 +7,19 @@ the same pictures.
 
 | File                    | What it does                                                     |
 | ----------------------- | ---------------------------------------------------------------- |
+| `flows.yaml`            | The user flows, each with checks (`npm run e2e`).                |
+| `flows/*.yaml`          | The parts of `flows.yaml` (each can run alone).                  |
+| `timeline/*.yaml`       | Small flows for the «أدومها» timeline (`npm run e2e:timeline`).  |
 | `shots.yaml`            | Every screen, in order, from a clean install; a picture of each. |
 | `shots-week-later.yaml` | The same plan 7 days later (run after the date moves).           |
 | `shots/*.yaml`          | The parts of `shots.yaml` (each can run alone).                  |
 | `shots-compare.json`    | Rules for the compare (scrolled screens, screens that vary).     |
 | `.generated/strings.js` | The UI strings, cut from `common.json` (not in git).             |
+
+Three kinds of runs (RF6): **flows** check what a user does (a chapter read to its finish
+screen, own adhkar, continue where I stopped, a reminder and its permission, «أدومها» set up and
+a ward read); **the timeline** lives «أدومها» over 40 days by moving the emulator's date (below);
+**shots** take a picture of every screen for the compare.
 
 Flows never hold typed Arabic: they find text by its key, e.g.
 `tapOn: ${output.s['adwamuha.setup.enable']}` (a pattern) or
@@ -26,6 +34,7 @@ the PATH (`%USERPROFILE%\.maestro\bin`), JDK 17.
 ```powershell
 . .\scripts\dev\e2e.ps1
 Install-E2eApk                      # release x86_64 build + install (-NoBuild to skip the build)
+Invoke-E2e flows                    # the user flows and their checks (npm run e2e), ~3 min
 Invoke-E2e shots -Name latest       # pictures -> .local/shots/latest/
 Invoke-E2e shots -Name dark -Dark   # dark theme
 Invoke-E2e shots -Name big -FontScale 1.3
@@ -49,6 +58,28 @@ Two runs of the same code give the same pictures, with these rules:
 
 To work on one part: `Invoke-E2e shots -Name dev -Flow 03-reader -NoReset` (keeps the app's
 data, so run the parts before it first).
+
+## The «أدومها» timeline (`npm run e2e:timeline`, about 30 minutes)
+
+`scripts/dev/e2e-timeline.ps1` (`Invoke-E2eTimeline`) starts from a clean install on Saturday
+2026-11-28 and moves the emulator's date day by day (`adb root`, `date`). The days with nothing to
+check are read "outside the app" on «مساري» (two taps), so each takes a few seconds. Checks:
+
+| Day        | What is checked                                                              |
+| ---------- | ---------------------------------------------------------------------------- |
+| 1          | Setup from step 1; «وردك اليوم», step 1 of 24, the welcome; both wards read  |
+| 7 (Friday) | The end of the first good week: Home has its word                            |
+| 28         | The 4th good week: «جاهز لإضافة الذكر التالي؟»; «أبقِني أسبوعًا آخر»         |
+| 34         | No question before 7 days                                                    |
+| 35         | The question again; «أضِف الذكر التالي»: step 2                              |
+| 36, 37     | A break of a week (its line on «مساري»), ended early                         |
+| 38         | «ارجع إلى الخطوة 1»                                                          |
+| 39         | The ward read in parts: opened again, it goes on at the dhikr not read       |
+| 40         | The morning reminder rings at 6:00, tapped at 17:00: «انتهى وقت ورد الصباح.» |
+
+A failed check stops the run and names the day; Maestro's output is in `.local/timeline/_run`.
+The flows take variables (`-e SESSION=morning`, `-e ACTION=keep`). Maestro's `launchApp`
+grants the permissions here (the reminder rings without Android's question).
 
 ## Speed (after a shots run, so the app has data)
 

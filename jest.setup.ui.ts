@@ -3,9 +3,9 @@ import 'react-native-gesture-handler/jestSetup';
 
 import '@/i18n';
 
-import { resetAudioMocks } from '@/test-utils/audio-mock';
-import { resetNotificationMocks } from '@/test-utils/notifications-mock';
-import { resetRouterMock } from '@/test-utils/router-mock';
+import { resetAudioMocks } from '@/test-utils/mocks/audio';
+import { resetNotificationMocks } from '@/test-utils/mocks/notifications';
+import { resetRouterMock } from '@/test-utils/mocks/router';
 
 // Reanimated 4 runs on react-native-worklets; both ship their own mocks.
 jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'));
@@ -20,15 +20,15 @@ jest.mock(
   () => require('react-native-safe-area-context/jest/mock').default,
 );
 
-// Lists draw every row at once in tests (src/test-utils/simple-lists.tsx): the real ones draw
+// Lists draw every row at once in tests (src/test-utils/mocks/lists.tsx): the real ones draw
 // more rows on a 50 ms timer, which sometimes fired after a test had ended.
 jest.mock('react-native/Libraries/Lists/FlatList', () => ({
   __esModule: true,
-  default: require('@/test-utils/simple-lists').FlatList,
+  default: require('@/test-utils/mocks/lists').FlatList,
 }));
 jest.mock('react-native/Libraries/Lists/SectionList', () => ({
   __esModule: true,
-  default: require('@/test-utils/simple-lists').SectionList,
+  default: require('@/test-utils/mocks/lists').SectionList,
 }));
 
 // Native pager: render all pages; setPage reports the change like the real one.
@@ -84,7 +84,7 @@ jest.mock('react-native-reorderable-list', () => {
 });
 
 jest.mock('expo-router', () => {
-  const { mockRouter, getRouteParams, mockNavigation } = require('@/test-utils/router-mock');
+  const { mockRouter, getRouteParams, mockNavigation } = require('@/test-utils/mocks/router');
   const React = require('react');
   return {
     useRouter: () => mockRouter,
@@ -100,7 +100,7 @@ jest.mock('expo-router', () => {
 });
 
 jest.mock('expo-audio', () => {
-  const m = require('@/test-utils/audio-mock');
+  const m = require('@/test-utils/mocks/audio');
   const React = require('react');
   return {
     // One player per hook call; a new `source` argument replaces the old one.
@@ -126,15 +126,15 @@ jest.mock('expo-audio', () => {
   };
 });
 
-jest.mock('expo-document-picker', () => require('@/test-utils/audio-mock').mockPicker);
+jest.mock('expo-document-picker', () => require('@/test-utils/mocks/audio').mockPicker);
 
 jest.mock(
   './src/features/custom/services/custom-audio',
-  () => require('@/test-utils/audio-mock').mockCustomAudio,
+  () => require('@/test-utils/mocks/audio').mockCustomAudio,
 );
 
 jest.mock('./src/features/audio/services/expo-audio-storage', () => ({
-  expoAudioStorage: require('@/test-utils/audio-mock').mockAudioStorage,
+  expoAudioStorage: require('@/test-utils/mocks/audio').mockAudioStorage,
 }));
 
 jest.mock('expo-haptics', () => ({
@@ -162,10 +162,13 @@ jest.mock('./src/features/report/services/free-space', () => ({
   freeStorageBytes: jest.fn(() => 12.3 * 1024 ** 3),
 }));
 
-jest.mock('expo-notifications', () => require('@/test-utils/notifications-mock').mockNotifications);
+jest.mock(
+  'expo-notifications',
+  () => require('@/test-utils/mocks/notifications').mockNotifications,
+);
 jest.mock(
   '@react-native-community/datetimepicker',
-  () => require('@/test-utils/notifications-mock').mockDateTimePicker,
+  () => require('@/test-utils/mocks/notifications').mockDateTimePicker,
 );
 
 beforeEach(() => {

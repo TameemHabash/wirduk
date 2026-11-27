@@ -3,13 +3,14 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { SESSION_MAX_AGE_MS } from '@/data/session';
 import { counterStore } from '@/features/reader/state/counter-store';
 import { HomeScreen } from '@/features/home/screens/HomeScreen';
-import { notificationState, responseFor } from '@/test-utils/notifications-mock';
+import { notificationState, responseFor } from '@/test-utils/mocks/notifications';
 import { createTestRepositories, renderWithApp, settleLists } from '@/test-utils/render-app';
-import { mockRouter } from '@/test-utils/router-mock';
+import { mockRouter } from '@/test-utils/mocks/router';
 
 import { newAppStart } from './useSessionRestore';
+import { tr } from '@/test-utils/tr';
 
-const RESTORED = 'استُعيدت آخر حالة، ويمكنك إيقاف ذلك من الإعدادات';
+const RESTORED = tr('settings.restored');
 const SAVED = { categoryId: 1, dhikrId: 1017, counts: { '1017': 40, '1013': 3 } };
 /** «أدومها»'s clock in the morning ward's window. */
 const MORNING = () => new Date(2026, 0, 15, 7, 0);

@@ -2,11 +2,13 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { BackupError, type BackupSummary } from '@/data/backup/backup-db';
 import { dismissDialog, openDialog, pressInDialog } from '@/test-utils/dialog';
+import { givenAdwamuha } from '@/test-utils/given';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
 
 import { BackupNote } from '@/features/backup/components/BackupNote';
 import { BackupSettings } from '@/features/backup/components/BackupSettings';
 import * as files from '@/features/backup/services/backup-files';
+import { tr } from '@/test-utils/tr';
 
 jest.mock('@/features/backup/services/backup-files', () => ({
   makeBackupFile: jest.fn(),
@@ -44,12 +46,12 @@ describe('Settings → «النسخ الاحتياطي»', () => {
     });
     const repos = await createTestRepositories();
     await renderWithApp(<BackupSettings />, repos);
-    expect(await screen.findByText('لم تحفظ نسخة في ملف بعد.')).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText('حفظ نسخة احتياطية'));
+    expect(await screen.findByText(tr('backup.lastFileNever'))).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText(tr('backup.save')));
     expect(await screen.findByText('آخر نسخة في ملف: 25/10/2026')).toBeOnTheScreen();
     expect(mocked.shareBackupFile).toHaveBeenCalledWith(
       'file:///cache/wirduk-backup-2026-10-25.wirduk',
-      'احفظ النسخة الاحتياطية في مكان آمن',
+      tr('backup.shareTitle'),
     );
     expect(await repos.backup.fileSavedAt()).toBe(summary.createdAt);
   });
@@ -57,21 +59,21 @@ describe('Settings → «النسخ الاحتياطي»', () => {
   it('says so when the file cannot be made', async () => {
     mocked.makeBackupFile.mockRejectedValue(new Error('disk full'));
     await renderWithApp(<BackupSettings />);
-    await fireEvent.press(await screen.findByText('حفظ نسخة احتياطية'));
-    expect(await screen.findByText('تعذّر حفظ النسخة. حاول مرة أخرى.')).toBeOnTheScreen();
+    await fireEvent.press(await screen.findByText(tr('backup.save')));
+    expect(await screen.findByText(tr('backup.errors.saveFailed'))).toBeOnTheScreen();
   });
 
   it('restores a picked file after showing what is in it', async () => {
     mocked.pickBackupFile.mockResolvedValue(summary);
     const repos = await createTestRepositories();
     await renderWithApp(<BackupSettings />, repos);
-    await fireEvent.press(await screen.findByText('استعادة نسخة احتياطية'));
+    await fireEvent.press(await screen.findByText(tr('backup.restore')));
     await waitFor(() => expect(screen.getByTestId('dialog')).toBeOnTheScreen());
-    expect(openDialog().getByText('استعادة هذه النسخة؟')).toBeOnTheScreen();
+    expect(openDialog().getByText(tr('backup.confirmTitle'))).toBeOnTheScreen();
     expect(openDialog().getByText(/نسخة 25\/10\/2026/)).toBeOnTheScreen();
     expect(openDialog().getByText(/أذكارك الخاصة: 3/)).toBeOnTheScreen();
     expect(openDialog().getByText(/خطوتك في «أدومها»: 4/)).toBeOnTheScreen();
-    await pressInDialog('استعادة');
+    await pressInDialog(tr('backup.confirm'));
     await waitFor(() =>
       expect(mocked.restorePickedBackup).toHaveBeenCalledWith(repos.backup, summary),
     );
@@ -80,8 +82,8 @@ describe('Settings → «النسخ الاحتياطي»', () => {
   it('cancelling leaves everything as it was', async () => {
     mocked.pickBackupFile.mockResolvedValue(summary);
     await renderWithApp(<BackupSettings />);
-    await fireEvent.press(await screen.findByText('استعادة نسخة احتياطية'));
-    await pressInDialog('إلغاء');
+    await fireEvent.press(await screen.findByText(tr('backup.restore')));
+    await pressInDialog(tr('common.cancel'));
     await waitFor(() => expect(mocked.discardPickedBackup).toHaveBeenCalled());
     expect(mocked.restorePickedBackup).not.toHaveBeenCalled();
     expect(screen.queryByTestId('dialog')).toBeNull();
@@ -90,7 +92,7 @@ describe('Settings → «النسخ الاحتياطي»', () => {
   it('a tap outside the dialog cancels too', async () => {
     mocked.pickBackupFile.mockResolvedValue(summary);
     await renderWithApp(<BackupSettings />);
-    await fireEvent.press(await screen.findByText('استعادة نسخة احتياطية'));
+    await fireEvent.press(await screen.findByText(tr('backup.restore')));
     await waitFor(() => expect(screen.getByTestId('dialog')).toBeOnTheScreen());
     await dismissDialog();
     await waitFor(() => expect(mocked.discardPickedBackup).toHaveBeenCalled());
@@ -98,13 +100,13 @@ describe('Settings → «النسخ الاحتياطي»', () => {
   });
 
   it.each([
-    ['not-backup', 'هذا الملف ليس نسخة احتياطية من وِرْدُك.'],
-    ['newer', 'هذه النسخة من إصدار أحدث من التطبيق. حدّث التطبيق ثم حاول مرة أخرى.'],
-    ['damaged', 'الملف تالف ولا يمكن استعادته.'],
+    ['not-backup', tr('backup.errors.not-backup')],
+    ['newer', tr('backup.errors.newer')],
+    ['damaged', tr('backup.errors.damaged')],
   ] as const)('a %s file: a clear message, nothing changed', async (problem, message) => {
     mocked.pickBackupFile.mockRejectedValue(new BackupError(problem, 'x'));
     await renderWithApp(<BackupSettings />);
-    await fireEvent.press(await screen.findByText('استعادة نسخة احتياطية'));
+    await fireEvent.press(await screen.findByText(tr('backup.restore')));
     expect(await screen.findByText(message)).toBeOnTheScreen();
     expect(mocked.restorePickedBackup).not.toHaveBeenCalled();
   });
@@ -116,15 +118,7 @@ describe('the gentle note on Home', () => {
 
   /** «أدومها» on since `startedOn`. */
   async function withAdwamuhaSince(startedOn: string) {
-    const repos = await createTestRepositories();
-    await repos.adwamuha.save({
-      enabled: true,
-      plan: { opening: { morning: 1901, evening: 133901 }, steps: [] } as never,
-      state: {} as never,
-      startedOn,
-      offSince: null,
-    });
-    return repos;
+    return givenAdwamuha(await createTestRepositories(), { startedOn });
   }
 
   it('shows after 30 days with no backup, once', async () => {
@@ -132,7 +126,7 @@ describe('the gentle note on Home', () => {
     await renderWithApp(<BackupNote now={now} />, repos);
     expect(await screen.findByText(NOTE)).toBeOnTheScreen();
     expect(await repos.backup.noteShownAt()).toBe(now());
-    await fireEvent.press(screen.getByText('لاحقًا'));
+    await fireEvent.press(screen.getByText(tr('backup.note.later')));
     expect(screen.queryByText(NOTE)).toBeNull();
   });
 

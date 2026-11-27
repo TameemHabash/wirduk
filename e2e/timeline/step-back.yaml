@@ -1,0 +1,25 @@
+# «طرأ عليّ ظرف» → «ارجع إلى الخطوة 1» (from step 2): «مساري» is at step 1 again.
+appId: com.wirduk.app
+name: Timeline step back
+---
+- runScript: ../.generated/strings.js
+- launchApp
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 20000
+- runFlow: _messages.yaml
+- openLink: wirduk://adwamuha
+- scrollUntilVisible:
+    element:
+      text: ${output.s['adwamuha.rows.easeTitle']}
+    direction: DOWN
+    centerElement: true
+- tapOn: ${output.s['adwamuha.rows.easeTitle']}
+- extendedWaitUntil:
+    visible: ${output.raw['adwamuha.stepBack.toStep'].replace('{{step}}', '1')}
+    timeout: 5000
+- tapOn: ${output.raw['adwamuha.stepBack.toStep'].replace('{{step}}', '1')}
+- launchApp
+- extendedWaitUntil:
+    visible: ${output.raw['owner.labels.stepOf'].replace('{{step}}', '1').replace('{{total}}', '24')}
+    timeout: 20000

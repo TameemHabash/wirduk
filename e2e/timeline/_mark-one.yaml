@@ -1,0 +1,16 @@
+# On «مساري»: records today's ward of SESSION from «قرأتُ وردي بدون التطبيق».
+appId: com.wirduk.app
+---
+- scrollUntilVisible:
+    element:
+      text: ${output.s['adwamuha.masari.readOutside']}
+    direction: DOWN
+    centerElement: true
+- tapOn: ${output.s['adwamuha.masari.readOutside']}
+- extendedWaitUntil:
+    visible: ${output.s['adwamuha.masari.pickTitle']}
+    timeout: 5000
+- tapOn: ${output.s['adwamuha.wardTitle.' + SESSION] + '.*' + output.s['adwamuha.masari.todayWord']}
+- extendedWaitUntil:
+    notVisible: ${output.s['adwamuha.masari.pickTitle']}
+    timeout: 5000

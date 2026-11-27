@@ -2,7 +2,8 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import { dialogButtons, openDialog, pressInDialog } from '@/test-utils/dialog';
 import { createTestRepositories, renderWithApp } from '@/test-utils/render-app';
-import { mockNavigation, mockRouter } from '@/test-utils/router-mock';
+import { left, mockRouter, tryToLeave } from '@/test-utils/mocks/router';
+import { tr } from '@/test-utils/tr';
 
 import { ReorderScreen } from './ReorderScreen';
 
@@ -35,8 +36,8 @@ const move = (from: number, to: number) =>
 describe('«تعديل الترتيب» (saved only with «حفظ»)', () => {
   it('the bar: close, the title, «حفظ» off until a change', async () => {
     await renderWithApp(<ReorderScreen />);
-    expect(await screen.findByRole('header', { name: 'تعديل الترتيب' })).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'حفظ' })).toBeDisabled();
+    expect(await screen.findByRole('header', { name: tr('home.editOrder') })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: tr('custom.save') })).toBeDisabled();
     expect(screen.getByLabelText('اسحب لتغيير ترتيب «أذكار النوم»')).toBeOnTheScreen();
   });
 
@@ -46,7 +47,7 @@ describe('«تعديل الترتيب» (saved only with «حفظ»)', () => {
     await screen.findByLabelText('اسحب لتغيير ترتيب «أذكار النوم»');
     await move(0, 1);
     expect(await repos.categoryOrder.get()).toEqual([]);
-    await fireEvent.press(screen.getByRole('button', { name: 'حفظ' }));
+    await fireEvent.press(screen.getByRole('button', { name: tr('custom.save') }));
     await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
     const saved = await repos.categoryOrder.get();
     expect(saved?.slice(0, 2)).toEqual([3, 2]);
@@ -56,28 +57,37 @@ describe('«تعديل الترتيب» (saved only with «حفظ»)', () => {
     await renderWithApp(<ReorderScreen />);
     await screen.findByLabelText('اسحب لتغيير ترتيب «أذكار النوم»');
     await move(0, 1);
-    const calls = mockNavigation.addListener.mock.calls as unknown as [
-      string,
-      (e: object) => void,
-    ][];
-    const listener = calls.at(-1)![1];
-    const event = { preventDefault: jest.fn(), data: { action: { type: 'GO_BACK' } } };
-    await act(async () => listener(event));
-    expect(event.preventDefault).toHaveBeenCalled();
-    expect(openDialog().getByText('تجاهل التغييرات؟')).toBeOnTheScreen();
+    expect(await tryToLeave()).toBe(false);
+    expect(openDialog().getByText(tr('custom.discardTitle'))).toBeOnTheScreen();
     // Keeping on is the main button (the safe one).
-    expect(dialogButtons()).toEqual(['متابعة التعديل', 'تجاهل']);
-    await pressInDialog('تجاهل');
-    expect(mockNavigation.dispatch).toHaveBeenCalledWith({ type: 'GO_BACK' });
+    expect(dialogButtons()).toEqual([tr('custom.keepEditing'), tr('custom.discard')]);
+  });
+
+  it('«تجاهل» leaves without saving', async () => {
+    const repos = await createTestRepositories();
+    await renderWithApp(<ReorderScreen />, repos);
+    await screen.findByLabelText('اسحب لتغيير ترتيب «أذكار النوم»');
+    await move(0, 1);
+    await tryToLeave();
+    await pressInDialog(tr('custom.discard'));
+    expect(left).toEqual([{ type: 'GO_BACK' }]);
+    expect(await repos.categoryOrder.get()).toEqual([]);
+  });
+
+  it('leaving with no change asks nothing', async () => {
+    await renderWithApp(<ReorderScreen />);
+    await screen.findByLabelText('اسحب لتغيير ترتيب «أذكار النوم»');
+    expect(await tryToLeave()).toBe(true);
+    expect(screen.queryByTestId('dialog')).toBeNull();
   });
 
   it('«استعادة الترتيب الافتراضي» asks first, then restores and goes back', async () => {
     const repos = await createTestRepositories();
     await repos.categoryOrder.save([5, 4, 3, 2]);
     await renderWithApp(<ReorderScreen />, repos);
-    await fireEvent.press(await screen.findByText('استعادة الترتيب الافتراضي'));
-    expect(dialogButtons()).toEqual(['استعادة', 'إلغاء']);
-    await pressInDialog('استعادة');
+    await fireEvent.press(await screen.findByText(tr('home.restoreDefault')));
+    expect(dialogButtons()).toEqual([tr('home.restore'), tr('common.cancel')]);
+    await pressInDialog(tr('home.restore'));
     await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
     expect(await repos.categoryOrder.get()).toEqual([]);
   });

@@ -1,0 +1,37 @@
+# The step has its good weeks: Home asks «جاهز لإضافة الذكر التالي؟». ACTION=keep answers
+# «أبقِني أسبوعًا آخر» (the question goes); ACTION=add answers «أضِف الذكر التالي» (step 2).
+appId: com.wirduk.app
+name: Timeline question
+---
+- runScript: ../.generated/strings.js
+- launchApp
+- extendedWaitUntil:
+    visible: ${output.s['owner.labels.todayWard']}
+    timeout: 20000
+- runFlow: _messages.yaml
+- scrollUntilVisible:
+    element:
+      text: ${output.s['owner.labels.readyQuestion']}
+    direction: DOWN
+    centerElement: true
+- runFlow:
+    when:
+      true: ${ACTION == 'keep'}
+    commands:
+      - tapOn: ${output.s['owner.labels.keepWeek']}
+      - extendedWaitUntil:
+          notVisible: ${output.s['owner.labels.readyQuestion']}
+          timeout: 5000
+- runFlow:
+    when:
+      true: ${ACTION == 'add'}
+    commands:
+      - tapOn: ${output.s['owner.labels.addNext']}
+      - extendedWaitUntil:
+          notVisible: ${output.s['owner.labels.readyQuestion']}
+          timeout: 5000
+      - runFlow: _messages.yaml
+      - scrollUntilVisible:
+          element:
+            text: ${output.raw['owner.labels.stepOf'].replace('{{step}}', '2').replace('{{total}}', '24')}
+          direction: UP

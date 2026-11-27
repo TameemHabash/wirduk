@@ -48,7 +48,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | RF3 | Refactor: the new structure (feature folders, shared UI kit, layer rules) | 🟢 Done | two commits 2026-11-27 |
 | RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | 🟢 Done | one commit 2026-11-27 |
 | RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | 🟢 Done | one commit 2026-11-27 |
-| RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | Not started | |
+| RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | 🟢 Done | one commit 2026-11-27 |
 | RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | Not started | |
 | RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | Not started | |
 | 14 | Google Play (waits for the redesign) | Not started | |
@@ -64,7 +64,7 @@ clean code, better tests, speed, a clean repo, a simple Claude Code setup, and *
 user sees changes**. The owner's answers: feature folders, Maestro, delete the old files, and keep
 the user's data (decided in RF2; `docs/decisions.md`).
 
-**Next: RF6. The plan for RF6–RF8 and how each RF runs: [refactor-plan.md](refactor-plan.md).
+**Next: RF7. The plan for RF7–RF8 and how each RF runs: [refactor-plan.md](refactor-plan.md).
 One RF per session (owner, 2026-11-27): a new session says "continue the refactor".**
 
 RF0, done (2026-11-27):
@@ -179,6 +179,52 @@ RF5, done (2026-11-27): speed. Rules for new code: `docs/architecture.md`, "Spee
   function in Jest's workers). 174 functions compile today, 10 are skipped (try/finally and
   the like; skipped code simply runs as written).
 
+RF6, done (2026-11-27): better tests. No app code changed (so no screen compare).
+
+- Test kit in `src/test-utils/` (README, "Tests"): `givenAdwamuha`, `givenWardRead`,
+  `givenDaysRead` (`given.ts`; the 11 copies of "turn on «أدومها»" are gone); `tr('key')`,
+  `trPattern`, `trList` (`tr.ts`; 396 typed UI strings in 30 test files replaced by a script; the
+  owner's words stay exact); `fixtures/content.ts` (named content ids, checked against
+  `content.db`); `reader.tsx` (`openReader`, `openChapter`, `tapCounter`, `counted`, `position`);
+  `app-state.ts`; `clock.ts`; and `mocks/` (audio, router, notifications, lists). The audio
+  stand-in records what was heard (`recordingsHeard()`, `ticksHeard()`, `player.playing`); the
+  router one runs a screen's unsaved-changes guard (`tryToLeave()`, `left`).
+- Behavior, not call counts: the reader audio tests check the recordings heard, in order; the
+  reminders what is scheduled; the editors what happens when the user leaves. Calls to native
+  modules (keep awake, vibration, lock screen) stay: they are the app's outside edge. The colour,
+  contrast and Galaxy layout guards stay. Long tests became one behavior per test.
+- Split by what they test: `audio-screens` → `reader-audio`, `audio-settings`,
+  `AudioDownloadsScreen`; `custom-screens` → `CategoryEditorScreen`, `DhikrEditorScreen`,
+  `MyAdhkarScreen`, `custom-in-adhkar-tab`, `custom-in-reader`; `settings-reminders` →
+  `AdwamuhaSettingsScreen`, `AdwamuhaSettings`, `ward-reminders`; `stepback-plan` → `step-back`,
+  `PlanEditorScreen`; `reader-extras` → `reader-source`, `reader-vibration`, `reader-screen-off`,
+  `useKeepScreenOn`, `useSaveReaderSession`; `user-repositories` → one file per repository.
+- New tests: the app start (`open-databases.test.ts`: first install through a temporary file, a
+  damaged copy, old versions, one database failing closes the other, a retry); leaving the
+  editors and the reorder screen with unsaved changes.
+- «أدومها» over time, three layers: (1) `states-doc.test.ts` checks `docs/adwamuha/states.md`
+  (every state names a test, every file named exists, every scenario label is a test's title; it
+  found 13 old file names and 4 labels); (2) the scenarios are day-by-day scripts
+  (`s.play('days 2-27: both wards, app closed')`), and the rules for every day of a whole plan are
+  in pure logic (`plan-walk`, now also a week's word every Friday): 34 s → 17 s; (3) the emulator
+  timeline (`npm run e2e:timeline`, `scripts/dev/e2e-timeline.ps1`, ~30 min): a clean install,
+  the emulator's date moved over 40 days, checks on day 1, the end of week 1, the 4th good week
+  and «أبقِني أسبوعًا آخر», the question back 7 days later, «أضِف الذكر التالي», a break and its
+  end, a step back, the ward read in parts, and the morning reminder tapped at 17:00. Days 1–39
+  passed in one run; day 40 failed once (the flow force-stopped the app, which cancels its
+  alarms: now it leaves with Home) and passed after the fix.
+- Maestro flows with checks (`npm run e2e`, `e2e/flows/`): first run, a chapter read to its finish
+  screen, own adhkar, continue where I stopped, a reminder and Android's question, «أدومها» set
+  up and a ward read. All 6 pass from a clean install (~3 min).
+- Numbers (RF0 → RF6): tests 845 → 1038; the whole Jest run 37 s → about 22 s (with
+  coverage); coverage statements 89.0 → 90.1%, branches 82.4 → 83.0%, functions 86.9 → 88.4%,
+  lines 91.1 → 92.2%. Jest now has a floor (90 / 82.5 / 88 / 92) and `npm run verify` runs with
+  coverage, so a drop fails it.
+- Found (old, not changed, the owner decides): on a fresh install (Android 13+), Settings shows
+  the card «الإشعارات غير مسموحة» before the app ever asked. Android reports "denied" before the
+  first question; the code meant "not yet asked does not count" (`useNotificationsDenied`). The
+  baseline pictures of the old code show it too (22-settings-2).
+
 ## Where things are now
 
 - **Content:** version **13** (`APP_CONFIG.content.version`; v9 added "times said per recording";
@@ -207,7 +253,9 @@ RF5, done (2026-11-27): speed. Rules for new code: `docs/architecture.md`, "Spee
   - The next APK installs over the old one: the data is kept (decisions, 2026-11-27). Before
     Google Play: the Play build is signed with another key, so testers uninstall then (a backup
     file keeps their data).
-- **Tests:** 845 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
+- **Tests:** 1038 (Jest: logic + ui, and the relay in `workers/`), with a coverage floor;
+  6 Maestro user flows (`npm run e2e`) and the «أدومها» timeline (`npm run e2e:timeline`).
+  `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
   `AdwamuhaMessagePicks`, the message each ward got, 2026-11-21).
 
