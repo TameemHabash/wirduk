@@ -236,6 +236,16 @@ export function Reader({
     else pagerRef.current?.setPage(i);
   }, []);
 
+  // The link's dhikr picks the start page above. A new link to this screen while it is open
+  // (wirduk://category/1?dhikr=1002 with chapter 1 open) only gives it new params: go to that
+  // dhikr (owner, 2026-11-27). The param is cleared after use, so the same link works again.
+  useEffect(() => {
+    if (startDhikrId === undefined) return;
+    router.setParams({ dhikr: '' });
+    const i = ids.indexOf(startDhikrId);
+    if (i >= 0) moveTo(i);
+  }, [startDhikrId, ids, moveTo, router]);
+
   /**
    * After the dhikr at `from` is complete: a short pause, then the next open
    * dhikr or the completion screen. With the screen off it happens at once

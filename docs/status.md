@@ -13,7 +13,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | 1 | Project skeleton | 🟢 Done | c6c8128 |
 | 2 | Content pipeline (JSON → prebuilt SQLite, overrides, change log) | 🟢 Done | 21ebd66, 494704e |
 | 3 | Data layer (repositories, user.db migrations, FTS search) | 🟢 Done | e3f3b5e |
-| 4 | Design direction ("paper and ink", `docs/design/proposal.html`) | 🟢 Done | 8e17a54, bf6e03d |
+| 4 | Design direction ("paper and ink"; replaced by the redesign R1–R6) | 🟢 Done | 8e17a54, bf6e03d |
 | 5 | Core screens (home, reader, completion, search, settings, about) | 🟢 Done | 8f34aaf |
 | 6 | Fonts (checked on device at size 40) | 🟢 Done | 5508ce3 |
 | — | Extras: rename to Wirduk, long vibration, tick sound, own adhkar, new logo, icon, splash | 🟢 Done | ff76f70, e1d18fb, 391994d, e83040a |
@@ -77,7 +77,9 @@ RF0, done (2026-11-27):
 - `.local/baseline.md`: 845 tests, coverage statements 89.0%, branches 82.4%, functions 86.9%,
   lines 91.1%; cold start median 609 ms; reader swipes 11.2% janky frames (emulator).
 - Found: a link to the reader already open (`wirduk://category/1?dhikr=1002` while category 1
-  is open) keeps the page it is on. Not changed (no behavior change); for the owner to decide.
+  is open) kept the page it was on. The owner said fix it (2026-11-27): the reader now goes to
+  the link's dhikr (`ReaderScreen.tsx`, also the «أدومها» ward), and the param is cleared after
+  use, so the same link works again.
 - Owner (2026-11-27): the «الأذكار» tab is slow to open since the redesign: fix it in RF5. Likely
   cause: it draws all 131 chapters at once (a plain `ScrollView`, an SVG star per row), and
   reloads them on every visit with new objects, so every row draws again.
@@ -143,8 +145,6 @@ RF1, done (2026-11-27):
   design; on the link (APK of e3b69e2), to check on the phone.
 - **The week rule** (2026-11-14: a step of N weeks needs N good weeks, 4 mornings and 4
   evenings each, not in a row) is Claude's advice, asked for by the owner: confirm or change it.
-- **A link to the reader already open** keeps the page it is on (found in RF0, above): fix it
-  or leave it?
 
 Not checked yet (from R6): the system font at 2.0 and the finish screen's animation on a
 device. Setup 1–4 and the editors are now in the Maestro screen run (RF0).

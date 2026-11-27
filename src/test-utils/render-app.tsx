@@ -78,7 +78,7 @@ export async function renderWithApp(
   if (options.weekStartsOn !== undefined) {
     await repositories.settings.set('weekStart', options.weekStartsOn);
   }
-  const result = await render(
+  const app = (screen: ReactElement) => (
     <SafeAreaProvider>
       <AppThemeProvider initialPreference={options.theme}>
         <RepositoriesProvider repos={repositories}>
@@ -86,16 +86,22 @@ export async function renderWithApp(
             <AdwamuhaProvider now={options.now}>
               <AudioProvider>
                 <ToastProvider>
-                  <DialogProvider>{ui}</DialogProvider>
+                  <DialogProvider>{screen}</DialogProvider>
                 </ToastProvider>
               </AudioProvider>
             </AdwamuhaProvider>
           </SettingsProvider>
         </RepositoriesProvider>
       </AppThemeProvider>
-    </SafeAreaProvider>,
+    </SafeAreaProvider>
   );
-  return { ...result, repos: repositories };
+  const result = await render(app(ui));
+  return {
+    ...result,
+    /** Draws the screen again inside the same app (state kept), e.g. after new route params. */
+    rerender: (next: ReactElement) => result.rerender(app(next)),
+    repos: repositories,
+  };
 }
 
 /**

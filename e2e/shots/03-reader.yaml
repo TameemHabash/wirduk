@@ -11,8 +11,7 @@ name: Reader
     timeout: 10000
 - waitForAnimationToEnd
 - takeScreenshot: 09-reader-opening
-# A link to the reader already open keeps its page: leave it first.
-- back
+# A link to the reader already open moves it to the link's dhikr (owner, 2026-11-27).
 - openLink: wirduk://category/1?dhikr=1002
 - extendedWaitUntil:
     visible: ${output.s['reader.completeLabel']}

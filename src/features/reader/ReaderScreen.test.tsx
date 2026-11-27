@@ -129,6 +129,16 @@ describe('ReaderScreen', () => {
     );
   });
 
+  it('goes to the dhikr of a new link while the same chapter is open', async () => {
+    const { view } = await openCategory(1, 1017);
+    expect(screen.getByText('18 من 24')).toBeOnTheScreen();
+    // The link's dhikr is used once, then cleared, so the same link works again.
+    expect(mockRouter.setParams).toHaveBeenCalledWith({ dhikr: '' });
+    setRouteParams({ id: '1', dhikr: '1002' }); // wirduk://category/1?dhikr=1002
+    await view.rerender(<ReaderScreen />);
+    expect(await screen.findByText('3 من 24')).toBeOnTheScreen();
+  });
+
   it('shows a message for an unknown category', async () => {
     setRouteParams({ id: '99999' });
     await renderWithApp(<ReaderScreen />);
