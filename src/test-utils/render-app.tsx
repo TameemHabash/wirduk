@@ -19,6 +19,7 @@ import { FavoritesRepository } from '@/data/repositories/favorites-repository';
 import { SessionRepository } from '@/data/repositories/session-repository';
 import { SettingsRepository } from '@/data/repositories/settings-repository';
 import { SettingsProvider } from '@/data/settings/SettingsProvider';
+import { CategoriesProvider } from '@/features/adhkar/state/CategoriesProvider';
 import { AdwamuhaProvider } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { setupShownKey } from '@/features/adwamuha/logic/setup';
 import { AudioProvider } from '@/features/audio/state/AudioProvider';
@@ -83,9 +84,11 @@ export async function renderWithApp(
           <SettingsProvider>
             <AdwamuhaProvider now={options.now}>
               <AudioProvider>
-                <ToastProvider>
-                  <DialogProvider>{screen}</DialogProvider>
-                </ToastProvider>
+                <CategoriesProvider>
+                  <ToastProvider>
+                    <DialogProvider>{screen}</DialogProvider>
+                  </ToastProvider>
+                </CategoriesProvider>
               </AudioProvider>
             </AdwamuhaProvider>
           </SettingsProvider>

@@ -7,7 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { useToast } from '@/components/ui/Toast';
 import { SESSION_OF_CATEGORY } from '@/config/categories';
 import { useSettings } from '@/data/settings/SettingsProvider';
-import { useAdwamuhaOptional } from '@/features/adwamuha/state/AdwamuhaProvider';
+import {
+  useAdwamuhaActionsOptional,
+  useAdwamuhaStatusOptional,
+} from '@/features/adwamuha/state/AdwamuhaProvider';
 import { closedWardText } from '@/features/adwamuha/logic/closed-ward';
 import { closedWard } from '@/features/adwamuha/logic/sessions';
 import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
@@ -42,7 +45,7 @@ let syncing: Promise<void> = Promise.resolve();
 export function useReminderSync(): void {
   const { settings } = useSettings();
   const { t } = useTranslation();
-  const adwamuhaOn = useAdwamuhaOptional()?.enabled ?? false;
+  const adwamuhaOn = useAdwamuhaStatusOptional()?.enabled ?? false;
   const { morningReminder: morning, eveningReminder: evening } = settings;
   useEffect(() => {
     const reminders = {
@@ -66,13 +69,14 @@ export function useNotificationTaps(): void {
   const toast = useToast();
   const { t } = useTranslation();
   const { settings } = useSettings();
-  const adwamuha = useAdwamuhaOptional();
-  const adwamuhaReady = adwamuha?.ready ?? true;
-  const adwamuhaOn = adwamuha?.enabled ?? false;
+  const status = useAdwamuhaStatusOptional();
+  const actions = useAdwamuhaActionsOptional();
+  const adwamuhaReady = status?.ready ?? true;
+  const adwamuhaOn = status?.enabled ?? false;
   // Read at the tap, not effect dependencies: the day's records, the clock, the times, the toast.
-  const latest = useRef({ adwamuha, settings, toast, t });
+  const latest = useRef({ actions, settings, toast, t });
   useEffect(() => {
-    latest.current = { adwamuha, settings, toast, t };
+    latest.current = { actions, settings, toast, t };
   });
 
   // The tap that opened the app: noted at once (it wins over "continue where I
@@ -95,7 +99,8 @@ export function useNotificationTaps(): void {
       void Notifications.clearLastNotificationResponseAsync().catch(() => undefined);
       const session = SESSION_OF_CATEGORY[categoryId];
       if (adwamuhaOn && session) {
-        const { adwamuha: now, settings: set, toast: notice, t: tr } = latest.current;
+        const { actions: acts, settings: set, toast: notice, t: tr } = latest.current;
+        const now = acts?.current();
         const today = now?.slot().date;
         if (now?.records.some((r) => r.date === today && r.session === session)) {
           // Already read today: Home's «وردك اليوم» shows it; no need to open the ward again.

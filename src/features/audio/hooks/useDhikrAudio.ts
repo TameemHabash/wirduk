@@ -8,7 +8,7 @@ import { useSettings } from '@/data/settings/SettingsProvider';
 import { customAudioUri } from '@/features/custom/services/custom-audio';
 
 import { type AudioErrorKind, classifyError } from '@/features/audio/logic/audio-plan';
-import { useAudio } from '@/features/audio/state/AudioProvider';
+import { useAudioActions } from '@/features/audio/state/AudioProvider';
 
 export type DhikrAudioPhase = 'idle' | 'loading' | 'playing' | 'paused';
 
@@ -82,7 +82,7 @@ export interface DhikrAudio {
 export function useDhikrAudio({ categoryTitle, adhkar, onPlayed, playsFor }: Options): DhikrAudio {
   const { t } = useTranslation();
   const { settings } = useSettings();
-  const { downloads, lang, notifyChanged } = useAudio();
+  const { downloads, lang, notifyChanged } = useAudioActions();
   const player = useAudioPlayer(null);
 
   const [activeId, setActiveId] = useState<number | null>(null);

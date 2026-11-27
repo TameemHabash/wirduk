@@ -7,7 +7,7 @@ import { isCustomId } from '@/data/models/custom-ids';
 import { useRepositories } from '@/data/DataProvider';
 import { isFresh } from '@/data/session';
 import { useSettings } from '@/data/settings/SettingsProvider';
-import { useAdwamuhaOptional } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { useAdwamuhaActionsOptional } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { recordSlot } from '@/features/adwamuha/logic/sessions';
 import { counterStore } from '@/features/reader/state/counter-store';
 import { startupFromNotification } from '@/features/reminders/hooks/useReminders';
@@ -42,7 +42,7 @@ export function useSessionRestore(): void {
   const { t, i18n } = useTranslation();
   const enabled = settings.restoreSession;
   const wardTimes = settings.wardTimes;
-  const clock = useAdwamuhaOptional()?.now;
+  const clock = useAdwamuhaActionsOptional()?.now;
   const lang = i18n.language;
 
   useEffect(() => {

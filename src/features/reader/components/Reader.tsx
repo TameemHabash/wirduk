@@ -10,7 +10,7 @@ import { AppText } from '@/components/ui/AppText';
 import { useToast } from '@/components/ui/Toast';
 import type { Category, Dhikr } from '@/data/models';
 import { useSettings } from '@/data/settings/SettingsProvider';
-import { useAdwamuhaOptional } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { useAdwamuhaActionsOptional } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { PlayButton } from '@/features/audio/components/PlayButton';
 import { type DhikrAudio, useDhikrAudio } from '@/features/audio/hooks/useDhikrAudio';
 import { useAdvanceTimer } from '@/features/reader/hooks/useAdvanceTimer';
@@ -20,7 +20,6 @@ import { useSaveReaderSession } from '@/features/reader/hooks/useSaveReaderSessi
 import { afterComplete, initialIndex } from '@/features/reader/logic/navigation';
 import { counterStore } from '@/features/reader/state/counter-store';
 import { ReaderActionsContext } from '@/features/reader/state/reader-actions';
-import { useCounters } from '@/features/reader/state/useCounters';
 import { useTickSound } from '@/hooks/useTickSound';
 import { useDirection } from '@/i18n/direction';
 import { haptics } from '@/lib/haptics';
@@ -30,8 +29,8 @@ import { TOUCH_TARGET } from '@/theme/tokens';
 
 import { CompleteButton } from './CompleteButton';
 import { DhikrPage } from './DhikrPage';
-import { ProgressRing } from './ProgressRing';
 import { ProgressSegments } from './ProgressSegments';
+import { ReaderCounter } from './ReaderCounter';
 import { ReaderHeader } from './ReaderHeader';
 
 /**
@@ -41,6 +40,27 @@ import { ReaderHeader } from './ReaderHeader';
  */
 const TAP_MAX_DISTANCE = 10;
 const TAP_MAX_DURATION_MS = 350;
+/**
+ * Pages drawn on each side of the current one (RF5: a long category drew every page at
+ * once). Three: when the reader moves several pages, the pager scrolls through the last
+ * three before the target. A page once drawn stays (its scroll position too).
+ */
+const PAGES_AROUND = 3;
+
+/** The pages drawn so far: a range that grows to cover the current page and its neighbours. */
+function useDrawnPages(index: number, count: number) {
+  const around = (i: number) => ({
+    from: Math.max(0, i - PAGES_AROUND),
+    to: Math.min(count - 1, i + PAGES_AROUND),
+  });
+  const [range, setRange] = useState(() => around(index));
+  const need = around(index);
+  if (need.from < range.from || need.to > range.to) {
+    // Adjusted while drawing (React's pattern for state that follows a prop).
+    setRange({ from: Math.min(range.from, need.from), to: Math.max(range.to, need.to) });
+  }
+  return (i: number) => i >= Math.min(range.from, need.from) && i <= Math.max(range.to, need.to);
+}
 interface ReaderProps {
   /** The header's title (and the edit button for the user's own category). */
   category: Category;
@@ -73,7 +93,6 @@ export function Reader({
   const { isRtl } = useDirection();
   const { settings } = useSettings();
   const { colors, spacing } = useAppTheme();
-  const counters = useCounters();
 
   const [index, setIndex] = useState(() =>
     initialIndex(
@@ -150,7 +169,7 @@ export function Reader({
    * dhikr or the completion screen. With the screen off it happens at once
    * (JS timers wait until the screen is on). Returns the next dhikr, or null.
    */
-  const adwamuha = useAdwamuhaOptional();
+  const adwamuha = useAdwamuhaActionsOptional();
   const advanceAfterComplete = useCallback(
     (from: number): Dhikr | null => {
       const next = afterComplete(from, adhkar.length, (i) => counterStore.isComplete(adhkar[i]!));
@@ -287,8 +306,7 @@ export function Reader({
   );
 
   const current = adhkar[index]!;
-  const done = counters.get(current.id);
-  const complete = adhkar.map((d) => counters.isComplete(d));
+  const drawn = useDrawnPages(index, adhkar.length);
 
   return (
     <ReaderActionsContext.Provider value={readerActions}>
@@ -299,7 +317,7 @@ export function Reader({
         {/* Header: not part of the tap zone. */}
         <ReaderHeader category={category} onReset={() => counterStore.reset(current.id)} />
         <View style={{ paddingHorizontal: spacing.lg, gap: spacing.sm }}>
-          <ProgressSegments complete={complete} current={index} />
+          <ProgressSegments items={adhkar} current={index} />
           <View style={styles.meta}>
             <View>
               <AppText
@@ -327,7 +345,7 @@ export function Reader({
               ) : null}
             </View>
             <View style={[styles.actions, { gap: spacing.sm }]}>
-              <CompleteButton done={counters.isComplete(current)} onPress={onComplete} />
+              <CompleteButton dhikr={current} onPress={onComplete} />
               {current.audioFile ? (
                 <PlayButton
                   phase={audio.activeId === current.id ? audio.phase : 'idle'}
@@ -380,37 +398,12 @@ export function Reader({
             >
               {adhkar.map((d, i) => (
                 <View key={d.id} style={styles.fill} collapsable={false}>
-                  <DhikrPage dhikr={d} current={i === index} />
+                  {drawn(i) ? <DhikrPage dhikr={d} current={i === index} /> : null}
                 </View>
               ))}
             </PagerView>
 
-            <View
-              style={[
-                styles.counter,
-                landscape
-                  ? { justifyContent: 'center', paddingHorizontal: spacing.lg, gap: spacing.sm }
-                  : { paddingTop: spacing.sm, paddingBottom: spacing.md, gap: spacing.sm },
-              ]}
-              accessible
-              accessibilityRole="button"
-              accessibilityLabel={t('reader.counter', { done, total: current.count })}
-              accessibilityHint={t('reader.counterHint')}
-              accessibilityActions={[{ name: 'activate' }]}
-              onAccessibilityAction={(e) => {
-                if (e.nativeEvent.actionName === 'activate') onTap();
-              }}
-            >
-              <ProgressRing progress={done / current.count} completeColor={colors.primary}>
-                <AppText style={styles.count}>{String(done)}</AppText>
-                <AppText variant="caption" tone="muted">
-                  {t('reader.of', { total: current.count })}
-                </AppText>
-              </ProgressRing>
-              <AppText variant="caption" tone="faint" style={styles.hint}>
-                {t('reader.hint')}
-              </AppText>
-            </View>
+            <ReaderCounter dhikr={current} landscape={landscape} onTap={onTap} />
           </View>
         </GestureDetector>
       </SafeAreaView>
@@ -431,7 +424,4 @@ const styles = StyleSheet.create({
   position: { fontSize: 13, lineHeight: 22 },
   positionNow: { fontFamily: UI_FONTS.semibold, fontSize: 15 },
   row: { flexDirection: 'row' },
-  counter: { alignItems: 'center' },
-  hint: { textAlign: 'center', maxWidth: 260 },
-  count: { fontFamily: UI_FONTS.semibold, fontSize: 40, lineHeight: 48 },
 });

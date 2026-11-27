@@ -8,7 +8,7 @@ import { AppText } from '@/components/ui/AppText';
 import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
 import { useSettings } from '@/data/settings/SettingsProvider';
-import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { useAdwamuhaEnabled } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { AdwamuhaSettings } from '@/features/adwamuha/components/AdwamuhaSettings';
 import { toMegabytes } from '@/features/audio/logic/audio-plan';
 import { useAudioStatus } from '@/features/audio/hooks/useAudioStatus';
@@ -29,7 +29,7 @@ export function SettingsScreen() {
   const { session } = useRepositories();
   const { colors, spacing } = useAppTheme();
   const audio = useAudioStatus();
-  const adwamuhaOn = useAdwamuha().enabled;
+  const adwamuhaOn = useAdwamuhaEnabled();
 
   // ?focus=restoreSession (the restore toast's arrow): scroll to that row and light it for a
   // few seconds (owner, 2026-11-26).

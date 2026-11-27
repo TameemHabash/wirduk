@@ -4,6 +4,7 @@ import {
   planDownloads,
   runPool,
   toMegabytes,
+  withDownloaded,
 } from './audio-plan';
 
 const file = (fileName: string, bytes: number) => ({ lang: 'ar', fileName, bytes });
@@ -23,6 +24,21 @@ describe('planDownloads', () => {
 
   it('handles a language with no audio', () => {
     expect(planDownloads([], () => false)).toMatchObject({ totalFiles: 0, missing: [] });
+  });
+});
+
+describe('withDownloaded', () => {
+  const plan = planDownloads([file('a', 100), file('b', 50), file('c', 25)], (n) => n === 'b');
+
+  it('counts the files done in a running download as downloaded', () => {
+    expect(withDownloaded(plan, ['c'])).toEqual(
+      planDownloads([file('a', 100), file('b', 50), file('c', 25)], (n) => n !== 'a'),
+    );
+  });
+
+  it('keeps the same plan when nothing new is done', () => {
+    expect(withDownloaded(plan, [])).toBe(plan);
+    expect(withDownloaded(plan, ['b'])).toBe(plan);
   });
 });
 

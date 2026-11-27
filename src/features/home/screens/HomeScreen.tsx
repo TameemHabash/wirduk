@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/ui/AppText';
-import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { useAdwamuhaEnabled } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { TodayWardCard } from '@/features/adwamuha/components/TodayWardCard';
 import { BackupNote } from '@/features/backup/components/BackupNote';
 import { useNotificationTaps } from '@/features/reminders/hooks/useReminders';
@@ -16,7 +16,7 @@ import { FavoritesStrip } from '@/features/home/components/FavoritesStrip';
 import { HomeHeader } from '@/features/home/components/HomeHeader';
 import { dayPeriod } from '@/features/home/logic/time-of-day';
 import { TimeOfDayCards } from '@/features/home/components/TimeOfDayCards';
-import { useHomeCategories } from '@/features/adhkar/hooks/useHomeCategories';
+import { useHomeCategories } from '@/features/adhkar/state/CategoriesProvider';
 
 /** Re-checks morning/evening when the app comes back to the foreground. */
 function useDayPeriod() {
@@ -43,7 +43,7 @@ export function HomeScreen() {
   const router = useRouter();
   const { colors, spacing } = useAppTheme();
   const period = useDayPeriod();
-  const adwamuhaOn = useAdwamuha().enabled;
+  const adwamuhaOn = useAdwamuhaEnabled();
   const { categories, favorites, error, reload } = useHomeCategories();
 
   // Favorites and own categories change on other screens: refresh when Home is shown again.

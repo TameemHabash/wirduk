@@ -294,3 +294,8 @@ content, actions })`, the action first, `cancel: true` on the one a tap outside 
   does not open it again.
 - dorar.net blocks scripts (Cloudflare 403): read pages only in the owner's Chrome tab.
 - `gh repo create --public` is blocked by the auto-mode safety check: ask the owner to run it.
+- **React Compiler is off on purpose** (RF5): «أدومها» reads the clock while drawing (`slot()`,
+  `now()`), and the compiler keeps the first result, so "today" stays stuck (12 scenario tests
+  fail). Make "today" state first; details in `docs/status.md`, RF5.
+- Use the narrowest provider hook (`docs/architecture.md`, "Speed rules"): `useAdwamuha()`
+  draws again on every change of «أدومها»'s data; `useAudio()` on every download tick.

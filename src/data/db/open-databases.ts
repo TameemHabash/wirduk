@@ -111,7 +111,7 @@ function removeCachedContentCopies(): void {
   }
 }
 
-async function openBoth(): Promise<AppDatabases> {
+async function openContent(): Promise<ClosableSqlDatabase> {
   const content = await installContent(APP_CONFIG.content.version, {
     importFromAsset: importContentAsset,
     open: async (name) =>
@@ -120,11 +120,33 @@ async function openBoth(): Promise<AppDatabases> {
     remove: removeDatabaseFiles,
   });
   removeCachedContentCopies();
+  return content;
+}
 
+async function openUser(): Promise<ClosableSqlDatabase> {
   const userDb = await SQLite.openDatabaseAsync(USER_DB_NAME);
-  await userDb.execAsync('PRAGMA journal_mode = WAL;');
   const user = fromExpoDatabase(userDb);
-  await migrate(user, USER_MIGRATIONS);
+  try {
+    await userDb.execAsync('PRAGMA journal_mode = WAL;');
+    await migrate(user, USER_MIGRATIONS);
+  } catch (e) {
+    await user.close().catch(() => undefined);
+    throw e;
+  }
+  return user;
+}
 
-  return { content, user };
+/**
+ * The two databases do not need each other: they open side by side (RF5: the content check
+ * reads the whole file). If one fails, the other is closed again, so a retry starts clean.
+ */
+async function openBoth(): Promise<AppDatabases> {
+  const [content, user] = await Promise.allSettled([openContent(), openUser()]);
+  if (content.status === 'fulfilled' && user.status === 'fulfilled') {
+    return { content: content.value, user: user.value };
+  }
+  for (const opened of [content, user]) {
+    if (opened.status === 'fulfilled') await opened.value.close().catch(() => undefined);
+  }
+  throw content.status === 'rejected' ? content.reason : (user as PromiseRejectedResult).reason;
 }

@@ -97,6 +97,152 @@ function Measure-E2ePerf([string]$Name = 'latest') {
   $text
 }
 
+# CPU time (ms) used so far by the app's JS thread and its main (UI) thread. /proc counts in
+# ticks of 10 ms; the thread name sits in brackets and may hold spaces, so read after the ')'.
+function Get-E2eAppCpu([int]$procId) {
+  $lines = Invoke-E2eAdb shell "for t in /proc/$procId/task/*; do cat `$t/stat; done" 2>$null
+  $js = 0; $ui = 0
+  foreach ($line in $lines) {
+    $open = $line.IndexOf('('); $close = $line.LastIndexOf(')')
+    if ($open -lt 0 -or $close -lt 0) { continue }
+    $name = $line.Substring($open + 1, $close - $open - 1)
+    $f = $line.Substring($close + 2).Split(' ')
+    # After the name: state(0) ... utime(11) stime(12).
+    $ms = ([long]$f[11] + [long]$f[12]) * 10
+    $tid = [int]$line.Substring(0, $open).Trim()
+    if ($name -like 'mqt*js*') { $js += $ms }
+    if ($tid -eq $procId) { $ui += $ms }
+  }
+  [pscustomobject]@{ Js = $js; Ui = $ui }
+}
+
+# The work some actions cost: the CPU time (ms) of the JS and UI threads in the seconds after
+# each one. Per cold start: the adhkar tab's first visit (the screen is built) and a second
+# one (shown again), then the morning adhkar opened from Home, then 10 counting taps. Median of
+# $Runs cold starts, written to .local/perf-cpu-<Name>.txt. Run it after a shots run.
+function Measure-E2eCpu([string]$Name = 'latest', [int]$Runs = 5) {
+  Initialize-E2eEnv
+  $results = foreach ($i in 1..$Runs) {
+    Invoke-E2eAdb shell am force-stop $script:app
+    Start-Sleep -Seconds 2
+    Invoke-E2eAdb shell am start -W -n "$script:app/.MainActivity" | Out-Null
+    Start-Sleep -Seconds 5
+    # The tabs: the middle one is the adhkar tab; in RTL Home is the right one.
+    Invoke-E2eAdb shell uiautomator dump /sdcard/ui.xml | Out-Null
+    $xml = Invoke-E2eAdb shell cat /sdcard/ui.xml
+    $m = [regex]::Match($xml, 'resource-id="tab-bar"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"')
+    if (-not $m.Success) { throw 'No tab bar on screen' }
+    $y = [int](([int]$m.Groups[2].Value + [int]$m.Groups[4].Value) / 2)
+    $w = [int]$m.Groups[3].Value
+    $procId = [int](Invoke-E2eAdb shell pidof $script:app)
+    $cpu = @(Get-E2eAppCpu $procId)
+    Invoke-E2eAdb shell input tap ([int]($w / 2)) $y          # adhkar tab, first visit
+    Start-Sleep -Seconds 4
+    $cpu += Get-E2eAppCpu $procId
+    Invoke-E2eAdb shell input tap ([int]($w * 5 / 6)) $y      # Home
+    Start-Sleep -Seconds 3
+    $cpu += Get-E2eAppCpu $procId
+    Invoke-E2eAdb shell input tap ([int]($w / 2)) $y          # adhkar tab again
+    Start-Sleep -Seconds 4
+    $cpu += Get-E2eAppCpu $procId
+    Invoke-E2eAdb shell input tap ([int]($w * 5 / 6)) $y      # Home
+    Start-Sleep -Seconds 3
+    $cpu += Get-E2eAppCpu $procId
+    Invoke-E2eAdb shell am start -a android.intent.action.VIEW -d 'wirduk://category/1' $script:app | Out-Null
+    Start-Sleep -Seconds 4
+    $cpu += Get-E2eAppCpu $procId
+    foreach ($t in 1..10) { Invoke-E2eAdb shell input tap ([int]($w / 2)) 1300; Start-Sleep -Milliseconds 400 }
+    Start-Sleep -Seconds 2
+    $cpu += Get-E2eAppCpu $procId
+    [pscustomobject]@{
+      TabFirst = $cpu[1].Js - $cpu[0].Js; TabFirstUi = $cpu[1].Ui - $cpu[0].Ui
+      TabAgain = $cpu[3].Js - $cpu[2].Js; TabAgainUi = $cpu[3].Ui - $cpu[2].Ui
+      Reader = $cpu[5].Js - $cpu[4].Js; ReaderUi = $cpu[5].Ui - $cpu[4].Ui
+      Taps = $cpu[6].Js - $cpu[5].Js; TapsUi = $cpu[6].Ui - $cpu[5].Ui
+    }
+  }
+  $line = {
+    param($label, $p)
+    $js = $results | ForEach-Object { $_.$p }
+    $ui = $results | ForEach-Object { $_."${p}Ui" }
+    $mid = [int][math]::Floor($Runs / 2)
+    "  ${label}: JS $($js -join ', ') -> median $(($js | Sort-Object)[$mid]);" +
+    " UI $($ui -join ', ') -> median $(($ui | Sort-Object)[$mid])"
+  }
+  $text = @(
+    "CPU ms per action ($Runs cold starts; JS thread / UI thread):",
+    (& $line 'adhkar tab, first visit' 'TabFirst'),
+    (& $line 'adhkar tab, again      ' 'TabAgain'),
+    (& $line 'open the morning adhkar' 'Reader'),
+    (& $line '10 counting taps       ' 'Taps')
+  )
+  $text | Out-File -Encoding utf8 (Join-Path $script:repo ".local\perf-cpu-$Name.txt")
+  $text
+}
+
+# One tap at ($x, $y) with atrace running; scripts/dev/tap-trace.ts reads the trace.
+function Invoke-E2eTracedTap([int]$x, [int]$y, [int]$procId, [int]$jsTid) {
+  Invoke-E2eAdb shell atrace --async_start -b 32768 sched gfx view input | Out-Null
+  Start-Sleep -Milliseconds 500
+  Invoke-E2eAdb shell input tap $x $y
+  Start-Sleep -Seconds 3
+  Invoke-E2eAdb shell 'atrace --async_stop > /data/local/tmp/tap.trace' | Out-Null
+  $local = Join-Path $script:repo '.local\tap.trace'
+  Invoke-E2eAdb pull /data/local/tmp/tap.trace $local | Out-Null
+  node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON (Join-Path $script:repo 'scripts\dev\tap-trace.ts') `
+    $local $procId $jsTid | ConvertFrom-Json
+}
+
+# How soon the adhkar tab shows after a tap (atrace): on the first visit, ms from the tap to
+# the frame that shows it and the JS thread's work before it; on a second visit (nothing new
+# to draw), the JS work right after the tap. Both with all the JS work in the 2 s after the
+# tap. Median of $Runs cold starts, to .local/perf-tab-<Name>.txt.
+function Measure-E2eLatency([string]$Name = 'latest', [int]$Runs = 5) {
+  Initialize-E2eEnv
+  Invoke-E2eAdb root | Out-Null
+  $results = foreach ($i in 1..$Runs) {
+    Invoke-E2eAdb shell am force-stop $script:app
+    Start-Sleep -Seconds 2
+    Invoke-E2eAdb shell am start -W -n "$script:app/.MainActivity" | Out-Null
+    Start-Sleep -Seconds 5
+    Invoke-E2eAdb shell uiautomator dump /sdcard/ui.xml | Out-Null
+    $xml = Invoke-E2eAdb shell cat /sdcard/ui.xml
+    $m = [regex]::Match($xml, 'resource-id="tab-bar"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"')
+    if (-not $m.Success) { throw 'No tab bar on screen' }
+    $y = [int](([int]$m.Groups[2].Value + [int]$m.Groups[4].Value) / 2)
+    $w = [int]$m.Groups[3].Value
+    $procId = [int](Invoke-E2eAdb shell pidof $script:app)
+    $threads = Invoke-E2eAdb shell "for t in /proc/$procId/task/*; do echo `${t##*/} `$(cat `$t/comm); done"
+    $js = $threads | Where-Object { $_ -match '^\d+ mqt.*js' } | Select-Object -First 1
+    if (-not $js) { throw 'No JS thread found' }
+    $jsTid = [int]($js -split ' ')[0]
+    $first = Invoke-E2eTracedTap ([int]($w / 2)) $y $procId $jsTid
+    Invoke-E2eAdb shell input tap ([int]($w * 5 / 6)) $y
+    Start-Sleep -Seconds 3
+    $again = Invoke-E2eTracedTap ([int]($w / 2)) $y $procId $jsTid
+    [pscustomobject]@{
+      FirstFrame = $first.frameMs; FirstBurst = $first.burstMs; FirstBusy = $first.jsBusyMs
+      AgainFrame = $again.frameMs; AgainBurst = $again.burstMs; AgainBusy = $again.jsBusyMs
+    }
+  }
+  $mid = [int][math]::Floor($Runs / 2)
+  $line = {
+    param($label, $p)
+    $v = $results | ForEach-Object { $_.$p }
+    "  ${label}: $($v -join ', ') -> median $(($v | Sort-Object)[$mid])"
+  }
+  $text = @(
+    "adhkar tab after a tap, ms ($Runs cold starts):",
+    (& $line 'first visit, tap to frame   ' 'FirstFrame'),
+    (& $line 'first visit, JS before frame' 'FirstBurst'),
+    (& $line 'first visit, JS in 2 s      ' 'FirstBusy'),
+    (& $line 'again, JS right after tap   ' 'AgainBurst'),
+    (& $line 'again, JS in 2 s            ' 'AgainBusy')
+  )
+  $text | Out-File -Encoding utf8 (Join-Path $script:repo ".local\perf-tab-$Name.txt")
+  $text
+}
+
 # Runs one Maestro file (e2e/<path>.yaml) and copies its named screenshots into $out.
 function Invoke-E2eFile([string]$path, [string]$out) {
   $run = Join-Path $out '_run'

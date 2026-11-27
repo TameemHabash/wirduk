@@ -1,10 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 
+import type { CountedItem } from '@/features/reader/state/counter-store';
+import { useCompleteFlags } from '@/features/reader/state/useCounters';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 interface Props {
-  /** Completion of each dhikr, in order. */
-  complete: readonly boolean[];
+  /** The adhkar, in order. */
+  items: readonly CountedItem[];
   current: number;
 }
 
@@ -14,9 +16,11 @@ const MAX_SEGMENTS = 40;
 /**
  * Category progress: one segment per dhikr (teal = done, gold = current).
  * Follows the layout direction, so in Arabic the first dhikr is on the right.
+ * Draws again only when a dhikr becomes complete, not on every tap.
  */
-export function ProgressSegments({ complete, current }: Props) {
+export function ProgressSegments({ items, current }: Props) {
   const { colors } = useAppTheme();
+  const complete = useCompleteFlags(items);
   const done = complete.filter(Boolean).length;
 
   if (complete.length > MAX_SEGMENTS) {

@@ -1,9 +1,25 @@
-import { useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 
-import { counterStore, type CounterStore } from './counter-store';
+import { type CountedItem, counterStore, type CounterStore } from './counter-store';
 
-/** Re-renders the component whenever any counter changes. */
-export function useCounters(store: CounterStore = counterStore): CounterStore {
-  useSyncExternalStore(store.subscribe, store.getVersion, store.getVersion);
-  return store;
+/** One dhikr's count. The component draws again only when this count changes. */
+export function useCount(dhikrId: number, store: CounterStore = counterStore): number {
+  const read = useCallback(() => store.get(dhikrId), [store, dhikrId]);
+  return useSyncExternalStore(store.subscribe, read, read);
+}
+
+/**
+ * Whether each item is complete, in order. The component draws again only when one of them
+ * becomes complete (or not), not on every tap.
+ */
+export function useCompleteFlags(
+  items: readonly CountedItem[],
+  store: CounterStore = counterStore,
+): readonly boolean[] {
+  const read = useCallback(
+    () => items.map((item) => (store.isComplete(item) ? '1' : '0')).join(''),
+    [items, store],
+  );
+  const flags = useSyncExternalStore(store.subscribe, read, read);
+  return useMemo(() => Array.from(flags, (f) => f === '1'), [flags]);
 }

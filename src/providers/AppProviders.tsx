@@ -11,6 +11,7 @@ import { DialogProvider } from '@/components/ui/Dialog';
 import { ToastProvider } from '@/components/ui/Toast';
 import { DataProvider } from '@/data/DataProvider';
 import { SettingsProvider, useSettings } from '@/data/settings/SettingsProvider';
+import { CategoriesProvider } from '@/features/adhkar/state/CategoriesProvider';
 import { AdwamuhaProvider } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { AudioProvider } from '@/features/audio/state/AudioProvider';
 import { newAppStart } from '@/features/reader/hooks/useSessionRestore';
@@ -21,8 +22,8 @@ import { AppThemeProvider, useAppTheme } from '@/theme/ThemeProvider';
 
 /**
  * Every app-wide provider, in the order they need each other:
- * the databases → the settings → «أدومها» → audio → the theme → the navigator's theme →
- * toasts → dialogs. Screens can use any of them.
+ * the databases → the settings → «أدومها» → audio → the chapters → the theme → the
+ * navigator's theme → toasts → dialogs. Screens can use any of them.
  */
 export function AppProviders({ children }: { children: ReactNode }) {
   const { i18n } = useTranslation();
@@ -47,7 +48,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <SettingsProvider>
             <AdwamuhaProvider>
               <AudioProvider>
-                <ThemedProviders>{children}</ThemedProviders>
+                <CategoriesProvider>
+                  <ThemedProviders>{children}</ThemedProviders>
+                </CategoriesProvider>
               </AudioProvider>
             </AdwamuhaProvider>
           </SettingsProvider>

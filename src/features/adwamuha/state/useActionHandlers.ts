@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SESSION_OF_CATEGORY } from '@/config/categories';
@@ -41,19 +41,30 @@ export interface ActionInputs {
   reload: () => Promise<void>;
 }
 
+/** Today or yesterday only (prompt §5). */
+function isRecent(date: DayKey, today: DayKey): boolean {
+  const d = daysBetween(date, today);
+  return d === 0 || d === 1;
+}
+
 /**
  * Every action that changes «أدومها»'s data: each saves to user.db, logs the event when it is
  * one, then reads everything again (their meaning: `AdwamuhaValue` in `AdwamuhaProvider`).
+ * The actions read the inputs of the latest render, so the object never changes (RF5): a
+ * screen that only acts (the reader, a button) does not draw again when the data changes.
  */
-export function useAdwamuhaActions(input: ActionInputs) {
+export function useActionHandlers(input: ActionInputs) {
   const { adwamuha: repo, content } = useRepositories();
   const { update } = useSettings();
   const { i18n } = useTranslation();
-  const { stored, enabled, records, pauses, shown, activeBreak, today, weekStart } = input;
-  const { times, now, slot, reload } = input;
+  const latest = useRef({ ...input, lang: i18n.language });
+  useLayoutEffect(() => {
+    latest.current = { ...input, lang: i18n.language };
+  });
 
   const completeWard = useCallback(
     async (session: Session): Promise<WardRecord | null> => {
+      const { stored, enabled, now, times, reload } = latest.current;
       if (!stored || !enabled) return null;
       const at = now();
       const s = recordSlot(session, at, times);
@@ -70,7 +81,7 @@ export function useAdwamuhaActions(input: ActionInputs) {
       await reload();
       return record;
     },
-    [enabled, now, reload, repo, stored, times],
+    [repo],
   );
 
   const onCategoryFinished = useCallback(
@@ -81,18 +92,10 @@ export function useAdwamuhaActions(input: ActionInputs) {
     [completeWard],
   );
 
-  /** Today or yesterday only (prompt §5). */
-  const isRecent = useCallback(
-    (date: DayKey) => {
-      const d = daysBetween(date, today);
-      return d === 0 || d === 1;
-    },
-    [today],
-  );
-
   const markFromMemory = useCallback(
     async (session: Session, date: DayKey) => {
-      if (!stored || !enabled || !isRecent(date)) return false;
+      const { stored, enabled, today, now, reload } = latest.current;
+      if (!stored || !enabled || !isRecent(date, today)) return false;
       const added = await repo.addRecord({
         date,
         session,
@@ -104,37 +107,41 @@ export function useAdwamuhaActions(input: ActionInputs) {
       await reload();
       return added;
     },
-    [enabled, isRecent, now, reload, repo, stored],
+    [repo],
   );
 
   const undoFromMemory = useCallback(
     async (session: Session, date: DayKey) => {
-      if (!isRecent(date)) return false;
+      const { today, reload } = latest.current;
+      if (!isRecent(date, today)) return false;
       const removed = await repo.removeManualRecord(date, session);
       await reload();
       return removed;
     },
-    [isRecent, reload, repo],
+    [repo],
   );
 
   const advance = useCallback(async () => {
+    const { stored, today, slot, reload } = latest.current;
     if (!stored) return;
     const state = advanceState(stored.state, stored.plan, today, slot().session);
     await repo.save({ ...stored, state });
     await repo.logEvent(today, state.maintenance ? 'finish' : 'advance', state.step);
     await reload();
-  }, [reload, repo, slot, stored, today]);
+  }, [repo]);
 
   const postpone = useCallback(async () => {
+    const { stored, today, reload } = latest.current;
     if (!stored) return;
     await repo.save({ ...stored, state: postponeState(stored.state, today) });
     await repo.logEvent(today, 'postpone', stored.state.step, { until: addDays(today, 7) });
     await reload();
-  }, [reload, repo, stored, today]);
+  }, [repo]);
 
   const start = useCallback(
     async (startStep: number) => {
-      const plan = copyDefaultPlan(await content.getDefaultPlan(i18n.language));
+      const { now, times, lang, reload } = latest.current;
+      const plan = copyDefaultPlan(await content.getDefaultPlan(lang));
       const { date: day, session } = slotAt(now(), times);
       const step = Math.min(Math.max(1, startStep), plan.steps.length);
       await repo.save({
@@ -147,11 +154,12 @@ export function useAdwamuhaActions(input: ActionInputs) {
       await repo.logEvent(day, 'start', step);
       await reload();
     },
-    [content, i18n.language, now, reload, repo, times],
+    [content, repo],
   );
 
   const stepBack = useCallback(
     async (kind: StepBack) => {
+      const { stored, today, slot, reload } = latest.current;
       if (!stored) return;
       const state = stepBackState(stored.state, kind, today, slot().session);
       await repo.save({ ...stored, state });
@@ -161,29 +169,32 @@ export function useAdwamuhaActions(input: ActionInputs) {
       });
       await reload();
     },
-    [reload, repo, slot, stored, today],
+    [repo],
   );
 
   const takeBreak = useCallback(
     async (weeks: 1 | 2) => {
+      const { stored, activeBreak, today, reload } = latest.current;
       if (!stored || activeBreak) return;
       const pause = breakFrom(today, weeks);
       await repo.addPause(pause);
       await repo.logEvent(today, 'break', stored.state.step, { weeks, to: pause.to });
       await reload();
     },
-    [activeBreak, reload, repo, stored, today],
+    [repo],
   );
 
   const endBreak = useCallback(async () => {
+    const { stored, activeBreak, today, reload } = latest.current;
     if (!activeBreak) return;
     await repo.updatePause(activeBreak.id, endBreakPause(activeBreak, today));
     await repo.logEvent(today, 'break-end', stored?.state.step ?? null);
     await reload();
-  }, [activeBreak, reload, repo, stored, today]);
+  }, [repo]);
 
   const savePlan = useCallback(
     async (plan: UserPlan, passed = 0, unpassed = 0) => {
+      const { stored, records, pauses, shown, today, weekStart, slot, reload } = latest.current;
       if (!stored) return;
       const state = passSteps(
         stored.state,
@@ -215,22 +226,23 @@ export function useAdwamuhaActions(input: ActionInputs) {
       );
       await reload();
     },
-    [pauses, records, reload, repo, shown, slot, stored, today, weekStart],
+    [repo],
   );
 
   const dismissSuggestion = useCallback(async () => {
+    const { stored, today, reload } = latest.current;
     if (!stored) return;
     await repo.save({ ...stored, state: { ...stored.state, suggestedStepBackOn: today } });
     await reload();
-  }, [reload, repo, stored, today]);
+  }, [repo]);
 
   const markShown = useCallback(
     async (key: string) => {
       const first = await repo.markShown(key);
-      await reload();
+      await latest.current.reload();
       return first;
     },
-    [reload, repo],
+    [repo],
   );
 
   const dismissMessage = useCallback(
@@ -240,13 +252,14 @@ export function useAdwamuhaActions(input: ActionInputs) {
         await repo.addPick(moment, pick);
       }
       for (const key of message.keys) await repo.markShown(key);
-      await reload();
+      await latest.current.reload();
     },
-    [reload, repo],
+    [repo],
   );
 
   const setWeekStart = useCallback(
     async (day: Weekday) => {
+      const { stored, enabled, records, pauses, today, reload } = latest.current;
       if (stored && enabled) {
         const week = lastFinishedWeek(stored.state, records, pauses, today, day);
         if (week) await repo.markShown(weekMessageKey(stored.state, week.weekStart));
@@ -254,24 +267,26 @@ export function useAdwamuhaActions(input: ActionInputs) {
       await update('weekStart', day);
       await reload();
     },
-    [enabled, pauses, records, reload, repo, stored, today, update],
+    [repo, update],
   );
 
   const turnOff = useCallback(async () => {
+    const { stored, today, reload } = latest.current;
     if (!stored || !stored.enabled) return;
     await repo.save({ ...stored, enabled: false, offSince: today });
     await repo.logEvent(today, 'off', stored.state.step);
     await reload();
-  }, [reload, repo, stored, today]);
+  }, [repo]);
 
   const resume = useCallback(async () => {
+    const { stored, today, reload } = latest.current;
     if (!stored || stored.enabled) return;
     const pause = stored.offSince ? offPause(stored.offSince, today) : null;
     if (pause) await repo.addPause(pause);
     await repo.save({ ...stored, enabled: true, offSince: null });
     await repo.logEvent(today, 'on', stored.state.step);
     await reload();
-  }, [reload, repo, stored, today]);
+  }, [repo]);
 
   return useMemo(
     () => ({

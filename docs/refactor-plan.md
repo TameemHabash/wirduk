@@ -1,7 +1,8 @@
-# Refactor plan (RF5–RF8 still to do)
+# Refactor plan (RF6–RF8 still to do)
 
-The refactor the owner asked for on 2026-11-27 (`docs/status.md`, "Refactor"). RF0–RF4 are done.
-This file is the plan for the rest; delete it at the end of RF8.
+The refactor the owner asked for on 2026-11-27 (`docs/status.md`, "Refactor"). RF0–RF5 are done
+(RF5's plan is kept below for the record; what was done is in `docs/status.md`). This file is the
+plan for the rest; delete it at the end of RF8.
 
 ## How each RF runs (owner's rules)
 
@@ -20,7 +21,7 @@ This file is the plan for the rest; delete it at the end of RF8.
 - Owner decisions during the refactor: the user's data is kept (RF2); the two bottom sheets stay
   different (RF3); a link to the open chapter goes to its dhikr (fixed).
 
-## RF5 — Speed (measure, fix, measure again)
+## RF5 — Speed (measure, fix, measure again) — done
 
 Numbers before (`.local/baseline.md`, emulator, release build): cold start median 609 ms; reader,
 20 swipes: 11.2% janky frames. `Measure-E2ePerf -Name <name>` (in `scripts/dev/e2e.ps1`) measures
@@ -95,6 +96,7 @@ both after a shots run.
   (and approved by the owner if visible).
 - Dev build: the dev-clock states (a filled week, «جاهز لإضافة الذكر التالي؟», a break) and audio
   with the screen off.
-- Speed before and after.
+- Speed before and after: `Measure-E2ePerf`, `Measure-E2eCpu`, `Measure-E2eLatency` against
+  RF5's numbers (`docs/status.md`, RF5; `.local/perf-*-before-rf5.txt`, `-rf5a.txt`).
 - A private page for the owner with before / after pictures side by side.
 - Offer (do not build) the phone APK. Delete this file.

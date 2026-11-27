@@ -6,7 +6,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Icon } from '@/components/ui/Icon';
 import { IconButton } from '@/components/ui/IconButton';
 import { Logo } from '@/components/ui/Logo';
-import { useAdwamuhaOptional } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { useAdwamuhaStatusOptional } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
@@ -46,7 +46,7 @@ function AdwamuhaBadge() {
   const { t } = useTranslation();
   const router = useRouter();
   const { colors } = useAppTheme();
-  const adwamuha = useAdwamuhaOptional();
+  const adwamuha = useAdwamuhaStatusOptional();
   if (!adwamuha?.ready || adwamuha.enabled) return null;
   return (
     <Pressable

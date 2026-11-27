@@ -72,6 +72,8 @@ export interface DownloadAllProgress {
   totalFiles: number;
   doneBytes: number;
   totalBytes: number;
+  /** The files downloaded so far in this run (screens show the status without reading it). */
+  doneNames: readonly string[];
 }
 
 export class AudioDownloads {
@@ -162,6 +164,7 @@ export class AudioDownloads {
       totalFiles: plan.missing.length,
       doneBytes: 0,
       totalBytes: plan.missingBytes,
+      doneNames: [],
     };
     onProgress?.({ ...progress });
     try {
@@ -172,6 +175,7 @@ export class AudioDownloads {
           await this.ensure(lang, file.fileName, signal);
           progress.doneFiles += 1;
           progress.doneBytes += file.bytes;
+          progress.doneNames = [...progress.doneNames, file.fileName];
           onProgress?.({ ...progress });
         },
         signal,

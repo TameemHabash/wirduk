@@ -47,7 +47,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | RF2 | Refactor: the data (kept, not reset: Android's backup would bring old data back; stale comments) | 🟢 Done | one commit 2026-11-27 |
 | RF3 | Refactor: the new structure (feature folders, shared UI kit, layer rules) | 🟢 Done | two commits 2026-11-27 |
 | RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | 🟢 Done | one commit 2026-11-27 |
-| RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | Not started | |
+| RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | 🟢 Done | one commit 2026-11-27 |
 | RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | Not started | |
 | RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | Not started | |
 | RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | Not started | |
@@ -64,7 +64,7 @@ clean code, better tests, speed, a clean repo, a simple Claude Code setup, and *
 user sees changes**. The owner's answers: feature folders, Maestro, delete the old files, and keep
 the user's data (decided in RF2; `docs/decisions.md`).
 
-**Next: RF5. The plan for RF5–RF8 and how each RF runs: [refactor-plan.md](refactor-plan.md).
+**Next: RF6. The plan for RF6–RF8 and how each RF runs: [refactor-plan.md](refactor-plan.md).
 One RF per session (owner, 2026-11-27): a new session says "continue the refactor".**
 
 RF0, done (2026-11-27):
@@ -145,6 +145,39 @@ RF4, done (2026-11-27): the big files split by what they do.
   change; Gboard itself was not updated), which Maestro cannot hide. The emulator now has
   `hw.keyboard=no` in its `config.ini` (Gboard shows its full keyboard; the PC's keyboard no
   longer types into the emulator window), and the flows wait for the keyboard before hiding it.
+
+RF5, done (2026-11-27): speed. Rules for new code: `docs/architecture.md`, "Speed rules".
+
+- «الأذكار» tab: a `FlatList` (only the rows near the screen; each row draws its part of the
+  card, the same pixels), and one shared read of the chapters for Home, the tab and the reorder
+  screen (`adhkar/state/CategoriesProvider.tsx`); a read that finds nothing changed keeps the
+  same objects (`lib/keep-same.ts`), so the rows do not draw again on each visit.
+- Reader: draws the pages near the current one (3 on each side; a page once drawn stays); a tap
+  draws only the counter, the progress and «إتمام» (`useCount`, `useCompleteFlags`).
+- «أدومها»: the actions never change (they read the latest data through a ref) and have their
+  own context, with a small status context (`useAdwamuhaEnabled`, `useAdwamuhaStatusOptional`,
+  `useAdwamuhaActionsOptional`): Home, Settings, the reader and the root providers (the
+  reminders' sync) no longer draw again on every change of «أدومها»'s data.
+- Audio "download all": the reader uses only the actions (`useAudioActions`); progress shown at
+  most 4 times a second; the status is no longer read again from the phone for each file (the
+  files done count at once, `withDownloaded`).
+- Start: the two databases open side by side (one closed again if the other fails).
+- Speed, release build on the emulator, before (71af701) → after, medians of 5:
+  «الأذكار» tab first visit, tap to screen **327 → 139 ms** (JS before it 179 → 52 ms; its total
+  JS in 2 s 183 → 237 ms, the list draws the other rows after the screen shows); a second
+  visit's JS **77 → 14 ms**; opening the morning adhkar JS **150 → 80 ms**; reader swipes,
+  janky frames **14.5% → 7.3%** (99th percentile 500 → 23 ms). 10 counting taps and the cold
+  start: no clear change (the cold start moves between about 510 and 990 ms on the emulator).
+  New tools: `Measure-E2eCpu`, `Measure-E2eLatency` (atrace, `scripts/dev/tap-trace.ts`).
+- Screens: 48 of 48 the same as the baseline (03, 04, 20 included). The old code's own run
+  showed screen 45 scrolled 44 px less (a drag that landed elsewhere, not a change).
+- React Compiler: tried, left **off**. With it on, 12 «أدومها» scenario tests fail: «أدومها»
+  reads the clock while drawing (`slot()`, `now()` in about 10 files), and the compiler keeps
+  the first result, so "today" would stay stuck (in the app too). Turn it on only after "today"
+  is state that changes (on return to the app, at the ward times); Jest then needs a
+  transformer file that compiles only `src/` app code (inline options lose the `sources`
+  function in Jest's workers). 174 functions compile today, 10 are skipped (try/finally and
+  the like; skipped code simply runs as written).
 
 ## Where things are now
 

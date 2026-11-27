@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from 'react';
@@ -28,7 +29,7 @@ import { type WardSlot, slotAt } from '@/features/adwamuha/logic/sessions';
 import { wardDhikrIds } from '@/features/adwamuha/logic/ward';
 
 import { devNow } from './dev-clock';
-import { useAdwamuhaActions } from './useAdwamuhaActions';
+import { useActionHandlers } from './useActionHandlers';
 import { useAdwamuhaData } from './useAdwamuhaData';
 import { useMessageLibrary } from './useMessageLibrary';
 
@@ -130,7 +131,47 @@ export interface AdwamuhaValue {
   reload: () => Promise<void>;
 }
 
+type ActionName =
+  | 'completeWard'
+  | 'onCategoryFinished'
+  | 'markFromMemory'
+  | 'undoFromMemory'
+  | 'advance'
+  | 'postpone'
+  | 'start'
+  | 'stepBack'
+  | 'takeBreak'
+  | 'endBreak'
+  | 'savePlan'
+  | 'dismissSuggestion'
+  | 'markShown'
+  | 'dismissMessage'
+  | 'setWeekStart'
+  | 'turnOff'
+  | 'resume'
+  | 'reload'
+  | 'now';
+
+/** The actions and the clock: one object that never changes (RF5). */
+export interface AdwamuhaActions extends Pick<AdwamuhaValue, ActionName> {
+  /** Everything as it is now: for event handlers and effects (not while drawing). */
+  current: () => AdwamuhaValue;
+}
+
+/** Whether the stored data was read, and whether the feature is on. */
+export interface AdwamuhaStatus {
+  ready: boolean;
+  enabled: boolean;
+}
+
+/**
+ * Three contexts, so a screen draws again only for what it uses: everything (changes with
+ * the data), the actions (never change), the status (changes once at start and when the
+ * feature is turned on or off).
+ */
 const AdwamuhaContext = createContext<AdwamuhaValue | null>(null);
+const ActionsContext = createContext<AdwamuhaActions | null>(null);
+const StatusContext = createContext<AdwamuhaStatus | null>(null);
 
 /** The real time (moved by the dev clock in a dev build only). */
 const systemNow = devNow;
@@ -232,7 +273,7 @@ export function AdwamuhaProvider({
     ],
   );
 
-  const actions = useAdwamuhaActions({
+  const actions = useActionHandlers({
     stored,
     enabled,
     records,
@@ -290,16 +331,51 @@ export function AdwamuhaProvider({
     ],
   );
 
-  return <AdwamuhaContext.Provider value={value}>{children}</AdwamuhaContext.Provider>;
+  const latest = useRef(value);
+  useLayoutEffect(() => {
+    latest.current = value;
+  });
+  const current = useCallback(() => latest.current, []);
+  const actionsValue = useMemo<AdwamuhaActions>(
+    () => ({ ...actions, reload, now, current }),
+    [actions, reload, now, current],
+  );
+  const status = useMemo<AdwamuhaStatus>(() => ({ ready, enabled }), [ready, enabled]);
+
+  return (
+    <ActionsContext.Provider value={actionsValue}>
+      <StatusContext.Provider value={status}>
+        <AdwamuhaContext.Provider value={value}>{children}</AdwamuhaContext.Provider>
+      </StatusContext.Provider>
+    </ActionsContext.Provider>
+  );
 }
 
+/** Everything (draws again whenever «أدومها»'s data changes). */
 export function useAdwamuha(): AdwamuhaValue {
   const value = useContext(AdwamuhaContext);
   if (!value) throw new Error('useAdwamuha must be used inside <AdwamuhaProvider>');
   return value;
 }
 
-/** For shared screens (the reader): null where Adwamuha is not provided. */
+/** For shared screens: null where Adwamuha is not provided. */
 export function useAdwamuhaOptional(): AdwamuhaValue | null {
   return useContext(AdwamuhaContext);
+}
+
+/** Only the actions and the clock: never draws again. Null where Adwamuha is not provided. */
+export function useAdwamuhaActionsOptional(): AdwamuhaActions | null {
+  return useContext(ActionsContext);
+}
+
+/** Only whether the data was read and the feature is on. Null where it is not provided. */
+export function useAdwamuhaStatusOptional(): AdwamuhaStatus | null {
+  return useContext(StatusContext);
+}
+
+/** Whether «أدومها» is on (Home, Settings): draws again only when that changes. */
+export function useAdwamuhaEnabled(): boolean {
+  const status = useContext(StatusContext);
+  if (!status) throw new Error('useAdwamuhaEnabled must be used inside <AdwamuhaProvider>');
+  return status.enabled;
 }

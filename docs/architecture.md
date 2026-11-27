@@ -60,4 +60,20 @@ Components `PascalCase.tsx`, hooks `useThing.ts`, everything else `kebab-case.ts
 `user.db` (the user's data, migrations in `data/db/user-schema.ts`: add, never edit), then makes
 the repositories. Screens get them with `useRepositories()`. App state that many screens share
 lives in providers: settings (`SettingsProvider`), «أدومها» (`AdwamuhaProvider`), audio
-(`AudioProvider`).
+(`AudioProvider`), the chapters (`CategoriesProvider`: Home, the «الأذكار» tab, the reorder
+screen; one read for all of them).
+
+## Speed rules (RF5)
+
+- A provider whose state changes often also gives a context that never changes, for screens
+  that only act: «أدومها»'s actions (`useAdwamuhaActionsOptional`), audio's
+  (`useAudioActions`). And a small hook for one value: `useAdwamuhaEnabled`. Use the narrowest
+  hook a screen needs; `useAdwamuha()` draws again on every change of «أدومها»'s data.
+- A list read again (a screen shown again) keeps the old objects when nothing changed
+  (`keepSame`, `lib/keep-same.ts`), so `memo` rows do not draw again.
+- A long list is a `FlatList` (only the rows near the screen are drawn), not a `.map` in a
+  `ScrollView`. The reader draws the pages near the current one (`useDrawnPages`).
+- The counters: a component watches only the count it shows (`useCount`, `useCompleteFlags`
+  in `reader/state/useCounters.ts`), so a tap draws only the counter and the progress.
+- Measure before and after on the release build: `Measure-E2ePerf`, `Measure-E2eCpu`,
+  `Measure-E2eLatency` (`scripts/dev/e2e.ps1`, `e2e/README.md`).

@@ -50,6 +50,25 @@ export function planDownloads(
   };
 }
 
+/**
+ * The plan while a download runs, without reading the phone again (RF5: every finished file
+ * read the status of every recording again): the files done in this run are no longer missing.
+ */
+export function withDownloaded(plan: DownloadPlan, doneNames: readonly string[]): DownloadPlan {
+  if (doneNames.length === 0) return plan;
+  const done = new Set(doneNames);
+  const missing = plan.missing.filter((f) => !done.has(f.fileName));
+  if (missing.length === plan.missing.length) return plan;
+  const missingBytes = missing.reduce((n, f) => n + f.bytes, 0);
+  return {
+    ...plan,
+    downloadedFiles: plan.totalFiles - missing.length,
+    downloadedBytes: plan.totalBytes - missingBytes,
+    missing,
+    missingBytes,
+  };
+}
+
 /** Megabytes for display: one decimal below 10 MB, whole numbers above. */
 export function toMegabytes(bytes: number): number {
   const mb = bytes / (1024 * 1024);

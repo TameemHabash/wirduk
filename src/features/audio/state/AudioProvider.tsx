@@ -37,14 +37,14 @@ export function scopeCategories(scope: DownloadScope): readonly number[] | undef
   return scope === 'morningEvening' ? [morningCategoryId, eveningCategoryId] : undefined;
 }
 
-interface AudioContextValue {
+/** The progress of "download all" is shown at most this often (it can finish many files a second). */
+const PROGRESS_EVERY_MS = 250;
+
+/** What never changes: the downloader and the actions. */
+interface AudioActions {
   downloads: AudioDownloads;
   /** Audio language: the app language. */
   lang: string;
-  /** The one download running or last run (one at a time). */
-  downloadAll: DownloadAllState;
-  /** Goes up whenever downloaded files change, so screens can refresh. */
-  changes: number;
   startDownloadAll: (scope: DownloadScope) => void;
   cancelDownloadAll: () => void;
   deleteAll: () => Promise<void>;
@@ -52,11 +52,25 @@ interface AudioContextValue {
   notifyChanged: () => void;
 }
 
-const AudioContext = createContext<AudioContextValue | null>(null);
+/** What changes while downloading. */
+interface AudioState {
+  /** The one download running or last run (one at a time). */
+  downloadAll: DownloadAllState;
+  /**
+   * Goes up whenever downloaded files change (a file played the first time, a download
+   * finished or stopped, a delete), so screens read the status again. Not on each file of a
+   * running download: `useAudioStatus` adds those from its progress.
+   */
+  changes: number;
+}
+
+const ActionsContext = createContext<AudioActions | null>(null);
+const StateContext = createContext<AudioState | null>(null);
 
 /**
  * Owns audio downloads for the whole app, so "download all" keeps going
- * (and keeps its progress) while the user moves between screens.
+ * (and keeps its progress) while the user moves between screens. Two contexts: the reader
+ * uses only the actions, so a running download does not draw it again.
  */
 export function AudioProvider({
   children,
@@ -87,6 +101,16 @@ export function AudioProvider({
   const controller = useRef<AbortController | null>(null);
   const notifyChanged = useCallback(() => setChanges((n) => n + 1), []);
 
+  // The latest progress not shown yet, and when progress was last shown.
+  const pending = useRef<DownloadAllProgress | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shownAt = useRef(0);
+  const stopProgress = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    pending.current = null;
+  }, []);
+
   const startDownloadAll = useCallback(
     (scope: DownloadScope) => {
       if (controller.current) return;
@@ -95,27 +119,43 @@ export function AudioProvider({
       setDownloadAll({
         phase: 'running',
         scope,
-        progress: { doneFiles: 0, totalFiles: 0, doneBytes: 0, totalBytes: 0 },
+        progress: { doneFiles: 0, totalFiles: 0, doneBytes: 0, totalBytes: 0, doneNames: [] },
       });
+      const show = () => {
+        timer.current = null;
+        const progress = pending.current;
+        if (!progress || controller.current !== abort) return;
+        pending.current = null;
+        shownAt.current = Date.now();
+        setDownloadAll({ phase: 'running', scope, progress });
+      };
       downloads
         .downloadAll(lang, {
           signal: abort.signal,
           categoryIds: scopeCategories(scope),
           onProgress: (progress) => {
-            setDownloadAll({ phase: 'running', scope, progress });
-            setChanges((n) => n + 1);
+            pending.current = progress;
+            const wait = PROGRESS_EVERY_MS - (Date.now() - shownAt.current);
+            if (wait <= 0) show();
+            else if (!timer.current) timer.current = setTimeout(show, wait);
           },
         })
         .then(
-          () => setDownloadAll({ phase: 'done', scope }),
-          (e: unknown) => setDownloadAll({ phase: 'stopped', scope, reason: classifyError(e) }),
+          () => {
+            stopProgress();
+            setDownloadAll({ phase: 'done', scope });
+          },
+          (e: unknown) => {
+            stopProgress();
+            setDownloadAll({ phase: 'stopped', scope, reason: classifyError(e) });
+          },
         )
         .finally(() => {
           controller.current = null;
           setChanges((n) => n + 1);
         });
     },
-    [downloads, lang],
+    [downloads, lang, stopProgress],
   );
 
   const cancelDownloadAll = useCallback(() => controller.current?.abort(), []);
@@ -128,7 +168,13 @@ export function AudioProvider({
   }, [downloads, lang]);
 
   // Stop downloading when the app (or this provider) goes away.
-  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(
+    () => () => {
+      controller.current?.abort();
+      stopProgress();
+    },
+    [stopProgress],
+  );
 
   // On start: delete downloaded recordings no dhikr plays any more (milestone 11: the book's
   // recordings the owner's replaced).
@@ -139,34 +185,30 @@ export function AudioProvider({
       .catch(() => undefined);
   }, [downloads, lang]);
 
-  const value = useMemo<AudioContextValue>(
-    () => ({
-      downloads,
-      lang,
-      downloadAll,
-      changes,
-      startDownloadAll,
-      cancelDownloadAll,
-      deleteAll,
-      notifyChanged,
-    }),
-    [
-      downloads,
-      lang,
-      downloadAll,
-      changes,
-      startDownloadAll,
-      cancelDownloadAll,
-      deleteAll,
-      notifyChanged,
-    ],
+  const actions = useMemo<AudioActions>(
+    () => ({ downloads, lang, startDownloadAll, cancelDownloadAll, deleteAll, notifyChanged }),
+    [downloads, lang, startDownloadAll, cancelDownloadAll, deleteAll, notifyChanged],
   );
+  const state = useMemo<AudioState>(() => ({ downloadAll, changes }), [downloadAll, changes]);
 
-  return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>;
+  return (
+    <ActionsContext.Provider value={actions}>
+      <StateContext.Provider value={state}>{children}</StateContext.Provider>
+    </ActionsContext.Provider>
+  );
 }
 
-export function useAudio(): AudioContextValue {
-  const value = useContext(AudioContext);
-  if (!value) throw new Error('useAudio must be used inside <AudioProvider>');
+/** The downloader and the actions only: never draws again for a download's progress. */
+export function useAudioActions(): AudioActions {
+  const value = useContext(ActionsContext);
+  if (!value) throw new Error('useAudioActions must be used inside <AudioProvider>');
   return value;
+}
+
+/** Everything, the download's progress included. */
+export function useAudio(): AudioActions & AudioState {
+  const actions = useAudioActions();
+  const state = useContext(StateContext);
+  if (!state) throw new Error('useAudio must be used inside <AudioProvider>');
+  return useMemo(() => ({ ...actions, ...state }), [actions, state]);
 }

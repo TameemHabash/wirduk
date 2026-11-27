@@ -8,7 +8,7 @@ import { Icon } from '@/components/ui/Icon';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
-import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { useAdwamuhaEnabled } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
 
 /**
@@ -20,7 +20,7 @@ export function AdwamuhaSettings() {
   const { t } = useTranslation();
   const router = useRouter();
   const { colors } = useAppTheme();
-  const { enabled } = useAdwamuha();
+  const enabled = useAdwamuhaEnabled();
   const value = enabled ? t('adwamuha.settingsScreen.enabled') : t('adwamuha.settings.off');
   return (
     <Pressable

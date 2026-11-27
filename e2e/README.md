@@ -49,3 +49,16 @@ Two runs of the same code give the same pictures, with these rules:
 
 To work on one part: `Invoke-E2e shots -Name dev -Flow 03-reader -NoReset` (keeps the app's
 data, so run the parts before it first).
+
+## Speed (after a shots run, so the app has data)
+
+```powershell
+Measure-E2ePerf -Name latest      # cold start (5 runs) and frames while swiping 20 reader pages
+Measure-E2eCpu -Name latest       # CPU ms of the JS and UI threads: the adhkar tab, the reader, taps
+Measure-E2eLatency -Name latest   # ms from a tap on the adhkar tab to the frame that shows it (atrace)
+```
+
+Each writes `.local/perf-*-<Name>.txt`. `Measure-E2eLatency` reads its traces with
+`scripts/dev/tap-trace.ts` (`--timeline` prints each JS run and frame of the first second).
+The emulator's numbers move from run to run (the cold start most): compare medians, and
+measure before and after on the same emulator.

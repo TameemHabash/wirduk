@@ -16,7 +16,7 @@ import { TIME_OF_DAY_CATEGORY_IDS } from '@/config/categories';
 import type { HomeCategory } from '@/data/models';
 import { useUnsavedGuard } from '@/hooks/useUnsavedGuard';
 import { ReorderRow } from '@/features/adhkar/components/ReorderRow';
-import { useHomeCategories } from '@/features/adhkar/hooks/useHomeCategories';
+import { useHomeCategories } from '@/features/adhkar/state/CategoriesProvider';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 /**
