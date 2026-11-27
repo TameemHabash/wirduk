@@ -97,8 +97,8 @@ export interface AdwamuhaValue {
   /** Turns the feature on with a fresh copy of the default plan, at `startStep`. */
   start: (startStep: number) => Promise<void>;
   /**
-   * «طرأ عليّ ظرف»: back to half the step, to the first three, or to a step the user
-   * picked (owner, 2026-11-22). History kept.
+   * «طرأ عليّ ظرف»: back to a step the user picked with − and +
+   * (owner, 2026-11-22). History kept.
    */
   stepBack: (kind: StepBack) => Promise<void>;
   /** A break of 1 or 2 weeks from today (those days count for nothing). */
@@ -110,9 +110,10 @@ export interface AdwamuhaValue {
   /**
    * Saves the user's own plan (after the warning). `passed`: steps marked «قطعتها»
    * (owner, 2026-11-22), already moved right after the steps done: the current step
-   * moves on by as many. Otherwise the current step number stays.
+   * moves on by as many. `unpassed`: steps done put back (owner, 2026-11-26), already
+   * moved right after the current step: its number goes down by as many. Otherwise the
+   * current step number stays.
    */
-  /** `passed`: steps marked «قطعتُها»; `unpassed`: steps done put back («لم أقطعها بعد»). */
   savePlan: (plan: UserPlan, passed?: number, unpassed?: number) => Promise<void>;
   /** The gentle step-back suggestion is due (low commitment; at most once every 14 days). */
   suggestStepBack: boolean;

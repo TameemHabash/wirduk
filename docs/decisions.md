@@ -491,6 +491,21 @@ Claude's choices in the approved design (for the owner to know):
 - The plan save confirm keeps the hadith card inside the dialog.
 - Fonts, logo, app icon, splash, content and every «أدومها» rule stay the same.
 
+## 2026-11-27 — Refactor (RF0–RF8)
+
+The owner asked for a full refactor before Google Play: a known Expo structure, clean code,
+better tests, speed, a clean repo, a simple Claude Code setup, and nothing the user sees changes
+(a visible change only for a strong reason, after asking the owner).
+
+| Topic | Decision |
+|---|---|
+| Structure | Feature folders (owner). |
+| Emulator tests | Maestro on a release build; every screen is compared with a baseline picture (owner). |
+| Old files | Old local files, old history docs, the logo's PDF, EPS and PNG copies, and the emulator's app data deleted (owner). |
+| User data | **Kept** (owner, after first choosing "start from zero"): `user.db` keeps its 7 migrations and the content keeps its version (13). Reason: Android's automatic backup puts `user.db` back when the app is installed again, so a reset schema would refuse to start, and old backup files would be refused too. Phones update over the old app; nobody uninstalls. |
+| A link to the open reader | `wirduk://category/<id>?dhikr=<n>` while that chapter is open now goes to that dhikr; before, it kept its page (owner: "fix it"). The «أدومها» ward too. |
+| The Adhkar tab | Opens slowly since the redesign: fix it in RF5 (owner). |
+
 ## Technical choices (milestone 0–1)
 
 | Topic | Choice | Why |

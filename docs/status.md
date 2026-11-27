@@ -44,7 +44,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | R6 | Redesign: checks (contrast, dark mode, largest font, emulator pass of every screen) | 🟢 Done | one commit 2026-11-26 |
 | RF0 | Refactor: safety net (Maestro screen runs, baseline pictures, coverage and speed numbers) | 🟢 Done | one commit 2026-11-27 |
 | RF1 | Refactor: clean the repo and the PC (old files, history docs, stale references) | 🟢 Done | one commit 2026-11-27 |
-| RF2 | Refactor: start the data from zero (one schema, content v1, no old-data code) | Not started | |
+| RF2 | Refactor: the data (kept, not reset: Android's backup would bring old data back; stale comments) | 🟢 Done | one commit 2026-11-27 |
 | RF3 | Refactor: the new structure (feature folders, shared UI kit, layer rules) | Not started | |
 | RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | Not started | |
 | RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | Not started | |
@@ -61,8 +61,8 @@ The commit ids above (and any from before 2026-11-01) are in the private archive
 
 The owner asked for a full refactor before Google Play (2026-11-27): a known Expo structure,
 clean code, better tests, speed, a clean repo, a simple Claude Code setup, and **nothing the
-user sees changes**. The plan: `.claude/plans` on the owner's PC; the owner's answers: start the
-data from zero (testers uninstall once), feature folders, Maestro, delete the old files.
+user sees changes**. The plan: `.claude/plans` on the owner's PC; the owner's answers: feature folders,
+Maestro, delete the old files, and keep the user's data (decided in RF2; `docs/decisions.md`).
 
 RF0, done (2026-11-27):
 
@@ -95,6 +95,16 @@ RF1, done (2026-11-27):
   files in `.local/` deleted (kept: the two newest APKs, `devices.md`, `redesign/`, the Dorar
   pages, `tanzil/`, the owner's chat texts, `keys/`), and the emulator's app data cleared.
 
+RF2, done (2026-11-27):
+
+- The plan was "start the data from zero" (one migration, content v1, testers uninstall). Found:
+  Android's automatic backup saves `user.db` and puts it back on a new install, and `migrate()`
+  refuses a database newer than the app, so testers' apps would not start. The owner chose to
+  keep the data: the 7 migrations and content v13 stay, and so does the code that reads old
+  stored data (`extraWeeks`, old event kinds).
+- Stale comments fixed (`AdwamuhaProvider`: the step back, `savePlan`). The link fix (owner:
+  "fix it", 782966d) was checked on the emulator in the screen run.
+
 ## Where things are now
 
 - **Content:** version **13** (`APP_CONFIG.content.version`; v9 added "times said per recording";
@@ -120,9 +130,9 @@ RF1, done (2026-11-27):
     pre-release `test-build`, owner's choice 2026-11-01), built with `scripts/dev/phone-apk.ps1`
     (CLAUDE.md, "Phone"). On the link since 2026-11-26: the APK of e3b69e2 (the whole redesign,
     R1–R6; kept in `.local/apk/`).
-  - From RF2 on (the data starts from zero), testers uninstall the old test app once before the
-    next APK. Before Google Play: the Play build is signed with another key, so testers uninstall
-    again (a backup file keeps their data).
+  - The next APK installs over the old one: the data is kept (decisions, 2026-11-27). Before
+    Google Play: the Play build is signed with another key, so testers uninstall then (a backup
+    file keeps their data).
 - **Tests:** 845 (Jest: logic + ui, and the relay in `workers/`). `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
   `AdwamuhaMessagePicks`, the message each ward got, 2026-11-21).
