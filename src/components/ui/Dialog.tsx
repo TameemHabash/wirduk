@@ -11,6 +11,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
+import { toneColors } from '@/theme/tones';
 
 import { AppText } from './AppText';
 import { Button, type ButtonKind } from './Button';
@@ -101,11 +102,7 @@ function DialogView({
 }) {
   const { colors, radii, spacing } = useAppTheme();
   const tone = dialog.tone ?? 'primary';
-  const tile = {
-    primary: { background: colors.primarySoft, icon: colors.primaryInk },
-    danger: { background: colors.dangerSoft, icon: colors.danger },
-    gold: { background: colors.accentSoft, icon: colors.accentInk },
-  }[tone];
+  const tile = toneColors(colors, tone);
   return (
     <Modal
       visible

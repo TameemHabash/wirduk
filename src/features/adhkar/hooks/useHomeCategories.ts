@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useRepositories } from '@/data/DataProvider';
-import type { Category, HomeCategory } from '@/data/models/index';
+import type { Category, HomeCategory } from '@/data/models';
 import { buildHomeCategories, favoriteCategories } from '@/data/services/home-categories';
 
 interface HomeData {

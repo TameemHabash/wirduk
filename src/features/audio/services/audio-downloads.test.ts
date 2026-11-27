@@ -1,5 +1,5 @@
-import type { AudioFileInfo } from '@/data/models/index';
-import { DownloadedAudioRepository } from '@/data/repositories/user-repositories';
+import type { AudioFileInfo } from '@/data/models';
+import { DownloadedAudioRepository } from '@/data/repositories/downloaded-audio-repository';
 import { createUserDb } from '@/test-utils/databases';
 
 import { AudioDownloads, type AudioStorage } from './audio-downloads';

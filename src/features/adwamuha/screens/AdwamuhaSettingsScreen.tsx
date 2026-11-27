@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,7 +10,8 @@ import { useToast } from '@/components/ui/Toast';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { autoBackupKnown, lastAutoBackupAt } from '@/features/backup/services/auto-backup';
 import { AutoBackupStatus } from '@/features/backup/components/AutoBackupStatus';
-import { displayTime, formatTime, parseTime } from '@/lib/time';
+import { displayTime } from '@/lib/time';
+import { openTimePicker } from '@/lib/time-picker';
 import { ReminderSettings } from '@/features/settings/components/ReminderSettings';
 import { RowDivider, SettingsGroup, ToggleRow } from '@/components/ui/SettingsRows';
 import { useAppTheme } from '@/theme/ThemeProvider';
@@ -142,21 +142,12 @@ function WardTimesSettings() {
   const toast = useToast();
   const times = settings.wardTimes;
 
-  const pick = (key: keyof WardTimes) => {
-    const { hour, minute } = parseTime(times[key]);
-    const value = new Date();
-    value.setHours(hour, minute, 0, 0);
-    DateTimePickerAndroid.open({
-      mode: 'time',
-      value,
-      is24Hour: false,
-      onValueChange: (_event, date) => {
-        const next = { ...times, [key]: formatTime(date.getHours(), date.getMinutes()) };
-        if (validWardTimes(next)) void update('wardTimes', next);
-        else toast.show({ message: t('adwamuha.settings.badTimes'), icon: 'clock', tone: 'gold' });
-      },
+  const pick = (key: keyof WardTimes) =>
+    openTimePicker(times[key], (time) => {
+      const next = { ...times, [key]: time };
+      if (validWardTimes(next)) void update('wardTimes', next);
+      else toast.show({ message: t('adwamuha.settings.badTimes'), icon: 'clock', tone: 'gold' });
     });
-  };
 
   const rows = [
     ['morningTimes', 'morningTimesNote', 'morningStart', 'morningOnTimeEnd'],

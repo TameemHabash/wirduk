@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/ui/AppText';
 import { DhikrText } from '@/components/ui/DhikrText';
 import { Icon } from '@/components/ui/Icon';
-import type { DhikrSearchHit, HomeCategory, SearchResults as Results } from '@/data/models/index';
+import type { DhikrSearchHit, HomeCategory, SearchResults as Results } from '@/data/models';
 import { CategoryRow } from './CategoryRow';
 import { NAME_MARK, aroundName } from '@/i18n/around-name';
 import { UI_FONTS } from '@/theme/fonts';

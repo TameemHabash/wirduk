@@ -1,7 +1,7 @@
 /**
  * Pure helpers for audio downloads (no React Native imports, tested in Node).
  */
-import type { AudioFileInfo } from '@/data/models/index';
+import type { AudioFileInfo } from '@/data/models';
 
 /** Room left free on the phone after a download, so it never fills up completely. */
 export const STORAGE_MARGIN_BYTES = 20 * 1024 * 1024;

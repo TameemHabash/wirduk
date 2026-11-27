@@ -6,7 +6,7 @@ import { Icon } from '@/components/ui/Icon';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { addDays } from '@/features/adwamuha/logic/days';
-import type { DayStatus, GridDay } from '@/features/adwamuha/logic/weeks';
+import { type DayStatus, type GridDay, weekdayOf } from '@/features/adwamuha/logic/weeks';
 import { type DayKey, type Session, SESSIONS } from '@/data/models';
 
 const DOT = 28;
@@ -41,10 +41,6 @@ export function WeekGrid({
   const shortNames = t('adwamuha.weekdays', { returnObjects: true }) as string[];
   const dayNames = t('adwamuha.masariHelp.dayNames', { returnObjects: true }) as string[];
   const yesterday = addDays(today, -1);
-  const weekdayOf = (date: DayKey) => {
-    const [y, m, d] = date.split('-').map(Number) as [number, number, number];
-    return new Date(y, m - 1, d).getDay();
-  };
 
   return (
     <View style={{ gap: spacing.sm }}>

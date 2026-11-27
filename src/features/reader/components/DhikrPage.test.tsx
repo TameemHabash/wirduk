@@ -3,7 +3,7 @@ import { Linking } from 'react-native';
 import { fireEvent, screen } from '@testing-library/react-native';
 
 import { Button } from '@/components/ui/Button';
-import type { Dhikr } from '@/data/models/index';
+import type { Dhikr } from '@/data/models';
 import { renderWithApp } from '@/test-utils/render-app';
 
 import { DhikrPage } from './DhikrPage';

@@ -8,8 +8,8 @@ import { AppText } from '@/components/ui/AppText';
 import { Icon } from '@/components/ui/Icon';
 import { IconButton } from '@/components/ui/IconButton';
 import { TextButton } from '@/components/ui/TextButton';
-import { APP_CONFIG } from '@/config/app-config';
-import type { HomeCategory } from '@/data/models/index';
+import { TIME_OF_DAY_CATEGORY_IDS } from '@/config/categories';
+import type { HomeCategory } from '@/data/models';
 import { CategoryRow } from '@/features/adhkar/components/CategoryRow';
 import { MyAdhkarSection } from '@/features/adhkar/components/MyAdhkarSection';
 import { useHomeCategories } from '@/features/adhkar/hooks/useHomeCategories';
@@ -19,11 +19,6 @@ import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
 import { SearchResults } from '@/features/adhkar/components/SearchResults';
-
-const TIME_OF_DAY_IDS: ReadonlySet<number> = new Set([
-  APP_CONFIG.content.morningCategoryId,
-  APP_CONFIG.content.eveningCategoryId,
-]);
 
 /**
  * «الأذكار», the second tab (redesign): a real search box on top (its results take the
@@ -73,7 +68,7 @@ export function AdhkarScreen() {
   );
 
   const list = useMemo(
-    () => (categories ?? []).filter((c) => !TIME_OF_DAY_IDS.has(c.id)),
+    () => (categories ?? []).filter((c) => !TIME_OF_DAY_CATEGORY_IDS.has(c.id)),
     [categories],
   );
   const categoryById = useMemo(

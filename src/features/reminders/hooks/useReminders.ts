@@ -5,6 +5,7 @@ import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
 import { useToast } from '@/components/ui/Toast';
+import { SESSION_OF_CATEGORY } from '@/config/categories';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { useAdwamuhaOptional } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { closedWardText } from '@/features/adwamuha/logic/closed-ward';
@@ -12,7 +13,6 @@ import { closedWard } from '@/features/adwamuha/logic/sessions';
 import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
 
 import {
-  REMINDER_CATEGORY,
   type ReminderTexts,
   categoryOf,
   syncReminders,
@@ -53,11 +53,6 @@ export function useReminderSync(): void {
     syncing = syncing.then(() => syncReminders(reminders, texts)).catch(() => undefined);
   }, [adwamuhaOn, morning.enabled, morning.time, evening.enabled, evening.time, t]);
 }
-
-const SESSION_OF_CATEGORY: Record<number, 'morning' | 'evening'> = {
-  [REMINDER_CATEGORY.morning]: 'morning',
-  [REMINDER_CATEGORY.evening]: 'evening',
-};
 
 /**
  * A tap on a reminder opens its adhkar — or, with «أدومها» on, that session's

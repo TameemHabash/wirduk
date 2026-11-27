@@ -1,5 +1,4 @@
 import { Linking, Pressable, StyleSheet, Switch, View } from 'react-native';
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/ui/AppText';
@@ -7,7 +6,8 @@ import { IconTile } from '@/components/ui/IconTile';
 import { useToast } from '@/components/ui/Toast';
 import type { ReminderSetting } from '@/data/settings/settings';
 import { useSettings } from '@/data/settings/SettingsProvider';
-import { displayTime, formatTime, parseTime } from '@/lib/time';
+import { displayTime } from '@/lib/time';
+import { openTimePicker } from '@/lib/time-picker';
 import { NotificationsDeniedCard } from '@/features/reminders/components/NotificationsDeniedCard';
 import { type ReminderKind, ensurePermission } from '@/features/reminders/services/reminders';
 import { UI_FONTS } from '@/theme/fonts';
@@ -72,18 +72,7 @@ function ReminderRow({ kind, name }: { kind: ReminderKind; name?: string }) {
     });
   };
 
-  const pickTime = () => {
-    const { hour, minute } = parseTime(reminder.time);
-    const value = new Date();
-    value.setHours(hour, minute, 0, 0);
-    DateTimePickerAndroid.open({
-      mode: 'time',
-      value,
-      is24Hour: false,
-      onValueChange: (_event, date) =>
-        save({ ...reminder, time: formatTime(date.getHours(), date.getMinutes()) }),
-    });
-  };
+  const pickTime = () => openTimePicker(reminder.time, (time) => save({ ...reminder, time }));
 
   return (
     <View

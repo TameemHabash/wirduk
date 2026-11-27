@@ -1,12 +1,10 @@
 import { DEFAULT_SETTINGS } from '@/data/settings/settings';
 import { createUserDb } from '@/test-utils/databases';
 
-import {
-  CategoryOrderRepository,
-  DownloadedAudioRepository,
-  FavoritesRepository,
-  SettingsRepository,
-} from './user-repositories';
+import { CategoryOrderRepository } from './category-order-repository';
+import { DownloadedAudioRepository } from './downloaded-audio-repository';
+import { FavoritesRepository } from './favorites-repository';
+import { SettingsRepository } from './settings-repository';
 
 /** A clock that moves forward 1 ms on every call. */
 function fakeClock(start = 1_000) {

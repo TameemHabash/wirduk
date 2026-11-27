@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +8,7 @@ import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
 import { DHIKR_FONT_SIZE, stepFontSize } from '@/data/settings/settings';
 import { useSettings } from '@/data/settings/SettingsProvider';
+import { useAsync } from '@/hooks/useAsync';
 import { DHIKR_FONTS, UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 import { TOUCH_TARGET } from '@/theme/tokens';
@@ -19,18 +19,14 @@ import { RowDivider, SettingsGroup } from '@/components/ui/SettingsRows';
 function usePreviewText(): string | null {
   const { content } = useRepositories();
   const { i18n } = useTranslation();
-  const [text, setText] = useState<string | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    content
-      .getDhikr(APP_CONFIG.content.previewDhikrId, i18n.language)
-      .then((d) => !cancelled && setText(d?.text ?? null))
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [content, i18n.language]);
-  return text;
+  return useAsync(
+    () =>
+      content
+        .getDhikr(APP_CONFIG.content.previewDhikrId, i18n.language)
+        .then((d) => d?.text ?? null),
+    [content, i18n.language],
+    null,
+  );
 }
 
 /** Text size (with live preview) and dhikr font. */

@@ -1,59 +1,27 @@
 import '@/i18n';
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { DialogProvider } from '@/components/ui/Dialog';
-import { StartupError } from '@/components/layout/StartupError';
-import { ToastProvider } from '@/components/ui/Toast';
-import { DataProvider } from '@/data/DataProvider';
-import { SettingsProvider, useSettings } from '@/data/settings/SettingsProvider';
-import { AdwamuhaProvider } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
-import { AudioProvider } from '@/features/audio/state/AudioProvider';
 import { showRemindersInForeground } from '@/features/reminders/services/reminders';
-import { useReminderSync } from '@/features/reminders/hooks/useReminders';
-import { newAppStart } from '@/features/reader/hooks/useSessionRestore';
-import { syncLayoutDirection } from '@/i18n/direction';
+import { AppProviders } from '@/providers/AppProviders';
 import { UI_FONTS } from '@/theme/fonts';
-import type { ThemePreference } from '@/theme/resolve';
-import { AppThemeProvider, useAppTheme } from '@/theme/ThemeProvider';
 
 // Keep the splash screen until the databases and settings are ready.
 void SplashScreen.preventAutoHideAsync();
 showRemindersInForeground();
 
-/** Gives the navigator (headers, screen backgrounds) our theme colors. */
-function NavigationTheme({ children }: { children: ReactNode }) {
-  const { scheme, colors } = useAppTheme();
-  const navTheme = useMemo<Theme>(() => {
-    const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
-    return {
-      ...base,
-      colors: {
-        ...base.colors,
-        primary: colors.primary,
-        background: colors.background,
-        card: colors.background,
-        text: colors.text,
-        border: colors.border,
-      },
-    };
-  }, [scheme, colors]);
-
+export default function RootLayout() {
   return (
-    <ThemeProvider value={navTheme}>
-      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      {children}
-    </ThemeProvider>
+    <AppProviders>
+      <RootStack />
+    </AppProviders>
   );
 }
 
+/** Every screen of the app: the three tabs, and the screens pushed above them. */
 function RootStack() {
   const { t } = useTranslation();
   return (
@@ -100,64 +68,5 @@ function RootStack() {
       <Stack.Screen name="adwamuha/intro" options={{ title: OWNER_TEXTS.featureName }} />
       <Stack.Screen name="audio" options={{ title: t('audio.downloads.title') }} />
     </Stack>
-  );
-}
-
-/** Everything that needs the saved settings. */
-function ThemedApp() {
-  const { settings, update } = useSettings();
-  const saveTheme = useCallback(
-    (preference: ThemePreference) => void update('theme', preference),
-    [update],
-  );
-  useReminderSync();
-
-  useEffect(() => {
-    void SplashScreen.hideAsync();
-  }, []);
-
-  return (
-    <AppThemeProvider initialPreference={settings.theme} onPreferenceChange={saveTheme}>
-      <NavigationTheme>
-        <ToastProvider>
-          <DialogProvider>
-            <RootStack />
-          </DialogProvider>
-        </ToastProvider>
-      </NavigationTheme>
-    </AppThemeProvider>
-  );
-}
-
-export default function RootLayout() {
-  const { i18n } = useTranslation();
-  // A new root is a new app start, even in a process Android kept. Before any screen
-  // renders, so Home's "continue where I stopped" and reminder taps see it.
-  useState(newAppStart);
-
-  useEffect(() => {
-    syncLayoutDirection(i18n.language);
-  }, [i18n.language]);
-
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <DataProvider
-          renderError={(error, retry) => (
-            <AppThemeProvider>
-              <StartupError error={error} onRetry={retry} />
-            </AppThemeProvider>
-          )}
-        >
-          <SettingsProvider>
-            <AdwamuhaProvider>
-              <AudioProvider>
-                <ThemedApp />
-              </AudioProvider>
-            </AdwamuhaProvider>
-          </SettingsProvider>
-        </DataProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
   );
 }

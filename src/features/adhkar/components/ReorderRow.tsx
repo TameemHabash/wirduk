@@ -5,7 +5,7 @@ import { useIsActive, useReorderableDrag } from 'react-native-reorderable-list';
 
 import { AppText } from '@/components/ui/AppText';
 import { Icon } from '@/components/ui/Icon';
-import type { HomeCategory } from '@/data/models/index';
+import type { HomeCategory } from '@/data/models';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 import { TOUCH_TARGET } from '@/theme/tokens';

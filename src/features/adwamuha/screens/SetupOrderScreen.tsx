@@ -1,15 +1,14 @@
-import { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/Button';
 import { useRepositories } from '@/data/DataProvider';
+import type { UserPlan } from '@/data/models';
 import { useSettings } from '@/data/settings/SettingsProvider';
-
-import { copyDefaultPlan, wardDhikrIds } from '@/features/adwamuha/logic/ward';
 import { SetupLayout } from '@/features/adwamuha/components/SetupParts';
 import { WardOrderPicker } from '@/features/adwamuha/components/WardOrderPicker';
-import type { UserPlan } from '@/data/models';
+import { copyDefaultPlan, wardDhikrIds } from '@/features/adwamuha/logic/ward';
+import { useAsync } from '@/hooks/useAsync';
 
 /**
  * Setup 3 of 4 (owner, 2026-10-30): «ترتيب الورد», as in «أدومها»'s settings,
@@ -23,18 +22,11 @@ export function SetupOrderScreen() {
   const { settings, update } = useSettings();
   const params = useLocalSearchParams<{ step?: string }>();
   const step = Math.max(1, Math.floor(Number(params.step)) || 1);
-  const [plan, setPlan] = useState<UserPlan | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    content
-      .getDefaultPlan(i18n.language)
-      .then((p) => !cancelled && setPlan(copyDefaultPlan(p)))
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [content, i18n.language]);
+  const plan = useAsync<UserPlan | null>(
+    () => content.getDefaultPlan(i18n.language).then(copyDefaultPlan),
+    [content, i18n.language],
+    null,
+  );
 
   const ward = plan ? wardDhikrIds(plan, Math.min(step, plan.steps.length), 'morning') : [];
 

@@ -16,7 +16,7 @@ import type { SqlDatabase } from '../db/sql';
 import { parseCounts } from '../session';
 
 import { parsePlanState, parseUserPlan } from './adwamuha-stored';
-import type { Clock } from './user-repositories';
+import type { Clock } from './clock';
 
 const systemClock: Clock = () => Date.now();
 

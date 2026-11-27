@@ -2,10 +2,10 @@ import { toSearchText } from '@/lib/normalize';
 
 import { fromCustomId, isCustomId, toCustomId } from '@/data/models/custom-ids';
 import type { SqlDatabase } from '../db/sql';
-import type { Category, CustomDhikrInput, Dhikr, SearchResults } from '@/data/models/index';
+import type { Category, CustomDhikrInput, Dhikr, SearchResults } from '@/data/models';
 import { queryWords } from '../search/fts-query';
 
-import type { Clock } from './user-repositories';
+import type { Clock } from './clock';
 
 export const CUSTOM_LIMITS = {
   titleMax: 120,

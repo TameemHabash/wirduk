@@ -13,6 +13,7 @@ import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppTheme } from '@/theme/ThemeProvider';
+import { toneColors } from '@/theme/tones';
 
 import { AppText } from './AppText';
 import { Icon, type IconName } from './Icon';
@@ -94,11 +95,7 @@ function ToastView({
   const { colors, spacing } = useAppTheme();
   const insets = useSafeAreaInsets();
   const { onPress } = toast;
-  const tile = {
-    primary: { background: colors.primarySoft, icon: colors.primaryInk },
-    gold: { background: colors.accentSoft, icon: colors.accentInk },
-    danger: { background: colors.dangerSoft, icon: colors.danger },
-  }[toast.tone ?? 'primary'];
+  const tile = toneColors(colors, toast.tone ?? 'primary');
   return (
     <View
       pointerEvents="box-none"

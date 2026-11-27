@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/ui/AppText';
 import { DhikrText } from '@/components/ui/DhikrText';
 import { Icon } from '@/components/ui/Icon';
-import type { AdwamuhaMessage } from '@/data/models/index';
+import type { AdwamuhaMessage } from '@/data/models';
 import { SourceFold } from '@/features/reader/components/SourceFold';
 import { DEFAULT_DHIKR_FONT_ID, UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';

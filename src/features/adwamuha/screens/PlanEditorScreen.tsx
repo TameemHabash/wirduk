@@ -16,6 +16,7 @@ import { useToast } from '@/components/ui/Toast';
 import { useRepositories } from '@/data/DataProvider';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
+import { toneColors } from '@/theme/tones';
 
 import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { HadithCard } from '@/features/adwamuha/components/HadithCard';
@@ -401,21 +402,10 @@ function StepCard({
 
 function Badge({ tone, children }: { tone: 'primary' | 'gold'; children: string }) {
   const { colors } = useAppTheme();
+  const look = toneColors(colors, tone);
   return (
-    <View
-      style={[
-        styles.badge,
-        { backgroundColor: tone === 'gold' ? colors.accentSoft : colors.primarySoft },
-      ]}
-    >
-      <AppText
-        style={[
-          styles.badgeText,
-          { color: tone === 'gold' ? colors.accentInk : colors.primaryInk },
-        ]}
-      >
-        {children}
-      </AppText>
+    <View style={[styles.badge, { backgroundColor: look.background }]}>
+      <AppText style={[styles.badgeText, { color: look.icon }]}>{children}</AppText>
     </View>
   );
 }

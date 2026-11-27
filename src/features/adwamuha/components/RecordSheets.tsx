@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import type { DayKey, Session } from '@/data/models';
 import { addDays } from '@/features/adwamuha/logic/days';
+import { weekdayOf } from '@/features/adwamuha/logic/weeks';
 import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
@@ -153,7 +154,6 @@ export function YesterdaySheet({
   const { slot, markFromMemory } = useAdwamuha();
   const yesterday = addDays(slot().date, -1);
   const dayNames = t('adwamuha.masariHelp.dayNames', { returnObjects: true }) as string[];
-  const [y, m, d] = yesterday.split('-').map(Number) as [number, number, number];
   const ward = session ? t(`adwamuha.sessionName.${session}`) : '';
 
   const confirm = async () => {
@@ -171,7 +171,7 @@ export function YesterdaySheet({
       <AppText tone="muted">
         {t('adwamuha.masari.yesterdayText', {
           ward,
-          day: dayNames[new Date(y, m - 1, d).getDay()] ?? '',
+          day: dayNames[weekdayOf(yesterday)] ?? '',
         })}
       </AppText>
       <Button title={t('adwamuha.masari.yesterdayConfirm')} onPress={() => void confirm()} />

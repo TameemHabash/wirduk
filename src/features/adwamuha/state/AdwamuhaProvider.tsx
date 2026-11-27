@@ -11,7 +11,7 @@ import {
 import { AppState } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { APP_CONFIG } from '@/config/app-config';
+import { SESSION_OF_CATEGORY } from '@/config/categories';
 import { useRepositories } from '@/data/DataProvider';
 import type {
   AdwamuhaMessage,
@@ -157,11 +157,6 @@ export interface AdwamuhaValue {
 }
 
 const AdwamuhaContext = createContext<AdwamuhaValue | null>(null);
-
-const SESSION_OF_CATEGORY: Record<number, Session> = {
-  [APP_CONFIG.content.morningCategoryId]: 'morning',
-  [APP_CONFIG.content.eveningCategoryId]: 'evening',
-};
 
 /** The real time (moved by the dev clock in a dev build only). */
 const systemNow = devNow;

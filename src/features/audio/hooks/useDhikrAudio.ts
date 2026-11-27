@@ -3,7 +3,7 @@ import { AppState } from 'react-native';
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { useTranslation } from 'react-i18next';
 
-import type { Dhikr } from '@/data/models/index';
+import type { Dhikr } from '@/data/models';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { customAudioUri } from '@/features/custom/services/custom-audio';
 

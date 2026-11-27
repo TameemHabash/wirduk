@@ -12,7 +12,7 @@ import { IconTile } from '@/components/ui/IconTile';
 import { TextButton } from '@/components/ui/TextButton';
 import { SortableList } from '@/components/ui/SortableList';
 import { useRepositories } from '@/data/DataProvider';
-import type { Category } from '@/data/models/index';
+import type { Category } from '@/data/models';
 import { useAppTheme } from '@/theme/ThemeProvider';
 import { TOUCH_TARGET } from '@/theme/tokens';
 

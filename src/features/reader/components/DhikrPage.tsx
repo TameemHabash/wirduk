@@ -13,7 +13,7 @@ import { AppText } from '@/components/ui/AppText';
 import { BottomFade } from './BottomFade';
 import { DhikrText } from '@/components/ui/DhikrText';
 import { Icon } from '@/components/ui/Icon';
-import type { Dhikr } from '@/data/models/index';
+import type { Dhikr } from '@/data/models';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 

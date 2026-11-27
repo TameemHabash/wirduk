@@ -20,7 +20,7 @@ import { IconButton } from '@/components/ui/IconButton';
 import { ProgressRing } from '@/features/reader/components/ProgressRing';
 import { useToast } from '@/components/ui/Toast';
 import { useRepositories } from '@/data/DataProvider';
-import type { Category, Dhikr } from '@/data/models/index';
+import type { Category, Dhikr } from '@/data/models';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { useAdwamuhaOptional } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { PlayButton } from '@/features/audio/components/PlayButton';

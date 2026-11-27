@@ -13,13 +13,11 @@ import { AdwamuhaRepository } from '@/data/repositories/adwamuha-repository';
 import { BackupRepository } from '@/data/repositories/backup-repository';
 import { ContentRepository } from '@/data/repositories/content-repository';
 import { CustomRepository } from '@/data/repositories/custom-repository';
-import {
-  CategoryOrderRepository,
-  DownloadedAudioRepository,
-  FavoritesRepository,
-  SessionRepository,
-  SettingsRepository,
-} from '@/data/repositories/user-repositories';
+import { CategoryOrderRepository } from '@/data/repositories/category-order-repository';
+import { DownloadedAudioRepository } from '@/data/repositories/downloaded-audio-repository';
+import { FavoritesRepository } from '@/data/repositories/favorites-repository';
+import { SessionRepository } from '@/data/repositories/session-repository';
+import { SettingsRepository } from '@/data/repositories/settings-repository';
 import { SettingsProvider } from '@/data/settings/SettingsProvider';
 import { AdwamuhaProvider } from '@/features/adwamuha/state/AdwamuhaProvider';
 import { setupShownKey } from '@/features/adwamuha/logic/setup';

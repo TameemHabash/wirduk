@@ -18,6 +18,7 @@ import { PlanRows } from '@/features/adwamuha/components/PlanRows';
 import { HadithCard } from '@/features/adwamuha/components/HadithCard';
 import { addDays } from '@/features/adwamuha/logic/days';
 import { WEEK_TARGET } from '@/features/adwamuha/logic/commitment';
+import { weekdayOf } from '@/features/adwamuha/logic/weeks';
 import { OWNER_TEXTS } from '@/features/adwamuha/generated/owner-texts';
 import { ReadOutsideSheet, YesterdaySheet } from '@/features/adwamuha/components/RecordSheets';
 import { StepBackSheet } from '@/features/adwamuha/components/StepBackSheet';
@@ -122,9 +123,9 @@ export function ProgressScreen() {
   const tip = textFor('tip', finished ? 'maintenance' : `stage:${progress.stage}`);
   const dayNames = t('adwamuha.masariHelp.dayNames', { returnObjects: true }) as string[];
   const breakDate = (date: DayKey) => {
-    const [y, m, d] = date.split('-').map(Number) as [number, number, number];
+    const [, m, d] = date.split('-').map(Number) as [number, number, number];
     return t('adwamuha.masariHelp.breakDate', {
-      day: dayNames[new Date(y, m - 1, d).getDay()] ?? '',
+      day: dayNames[weekdayOf(date)] ?? '',
       date: `${d}/${m}`,
     });
   };

@@ -13,13 +13,11 @@ import { AdwamuhaRepository } from './repositories/adwamuha-repository';
 import { BackupRepository } from './repositories/backup-repository';
 import { ContentRepository } from './repositories/content-repository';
 import { CustomRepository } from './repositories/custom-repository';
-import {
-  CategoryOrderRepository,
-  DownloadedAudioRepository,
-  FavoritesRepository,
-  SessionRepository,
-  SettingsRepository,
-} from './repositories/user-repositories';
+import { CategoryOrderRepository } from './repositories/category-order-repository';
+import { DownloadedAudioRepository } from './repositories/downloaded-audio-repository';
+import { FavoritesRepository } from './repositories/favorites-repository';
+import { SessionRepository } from './repositories/session-repository';
+import { SettingsRepository } from './repositories/settings-repository';
 
 /** Every repository the UI can use. */
 export interface Repositories {

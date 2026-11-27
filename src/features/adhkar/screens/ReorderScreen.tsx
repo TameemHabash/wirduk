@@ -12,17 +12,12 @@ import { AppBar, AppBarAction } from '@/components/layout/AppBar';
 import { AppText } from '@/components/ui/AppText';
 import { useDialog } from '@/components/ui/Dialog';
 import { TextButton } from '@/components/ui/TextButton';
-import { APP_CONFIG } from '@/config/app-config';
-import type { HomeCategory } from '@/data/models/index';
+import { TIME_OF_DAY_CATEGORY_IDS } from '@/config/categories';
+import type { HomeCategory } from '@/data/models';
 import { useUnsavedGuard } from '@/hooks/useUnsavedGuard';
 import { ReorderRow } from '@/features/adhkar/components/ReorderRow';
 import { useHomeCategories } from '@/features/adhkar/hooks/useHomeCategories';
 import { useAppTheme } from '@/theme/ThemeProvider';
-
-const TIME_OF_DAY_IDS: ReadonlySet<number> = new Set([
-  APP_CONFIG.content.morningCategoryId,
-  APP_CONFIG.content.eveningCategoryId,
-]);
 
 /**
  * «تعديل الترتيب» of the book's chapters (route /reorder, redesign): the order is saved only
@@ -36,7 +31,7 @@ export function ReorderScreen() {
   const { colors, spacing } = useAppTheme();
   const { categories, saveOrder, resetOrder } = useHomeCategories();
   const initial = useMemo(
-    () => (categories ?? []).filter((c) => !TIME_OF_DAY_IDS.has(c.id)),
+    () => (categories ?? []).filter((c) => !TIME_OF_DAY_CATEGORY_IDS.has(c.id)),
     [categories],
   );
   // The user's order once they moved a row; until then, the saved one (it may still load).

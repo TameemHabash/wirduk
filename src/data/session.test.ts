@@ -1,6 +1,6 @@
 import { createUserDb } from '@/test-utils/databases';
 
-import { SessionRepository } from './repositories/user-repositories';
+import { SessionRepository } from './repositories/session-repository';
 import { SESSION_MAX_AGE_MS, isFresh, parseSession } from './session';
 
 describe('saved session', () => {

@@ -110,6 +110,10 @@ README.md is long: read only the section you need.
 
 ## Map
 
+Folders and import rules (feature folders since RF3, checked by lint): [docs/architecture.md](docs/architecture.md).
+Below, a file named without its folder is in its feature's `screens/`, `components/`, `hooks/`,
+`logic/`, `state/` or `services/`.
+
 - `src/app/` thin routes. Deep links: `wirduk://category/<id>?dhikr=<dhikrId>`, `wirduk://custom`,
   `wirduk://custom/<-id>/dhikr/new`, `wirduk://settings`, `adhkar`, `search`, `audio`, `about`.
   Three tabs (redesign R2): `src/app/(tabs)/` = Home (`index`), `adhkar`, `settings`

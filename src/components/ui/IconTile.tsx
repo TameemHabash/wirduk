@@ -1,11 +1,12 @@
 import { View } from 'react-native';
 
 import { useAppTheme } from '@/theme/ThemeProvider';
+import { type Tone, toneColors } from '@/theme/tones';
 
 import { Icon, type IconName } from './Icon';
 
 /** teal (most), gold («أدومها», warnings), plain (quiet), sand (the user's own adhkar). */
-export type TileTone = 'primary' | 'gold' | 'plain' | 'sand' | 'danger';
+export type TileTone = Tone;
 
 /** A rounded square with one icon, at the start of a row or a card (design `.tile`). */
 export function IconTile({
@@ -18,13 +19,7 @@ export function IconTile({
   size?: number;
 }) {
   const { colors } = useAppTheme();
-  const look = {
-    primary: { background: colors.primarySoft, icon: colors.primaryInk },
-    gold: { background: colors.accentSoft, icon: colors.accentInk },
-    plain: { background: colors.surfaceMuted, icon: colors.textMuted },
-    sand: { background: colors.surface, icon: colors.customAccent },
-    danger: { background: colors.dangerSoft, icon: colors.danger },
-  }[tone];
+  const look = toneColors(colors, tone);
   return (
     <View
       style={{

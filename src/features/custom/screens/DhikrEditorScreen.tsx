@@ -19,7 +19,7 @@ import { Icon } from '@/components/ui/Icon';
 import { TextButton } from '@/components/ui/TextButton';
 import { TextField } from '@/components/ui/TextField';
 import { useRepositories } from '@/data/DataProvider';
-import type { Dhikr } from '@/data/models/index';
+import type { Dhikr } from '@/data/models';
 import { CUSTOM_LIMITS, CustomContentError } from '@/data/repositories/custom-repository';
 import { useSettings } from '@/data/settings/SettingsProvider';
 import { counterStore } from '@/features/reader/state/counter-store';

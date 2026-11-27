@@ -14,7 +14,7 @@
  * No React Native imports: storage is passed in (expo-file-system in the
  * app, a fake in tests).
  */
-import type { AudioFileInfo, DownloadedAudio } from '@/data/models/index';
+import type { AudioFileInfo, DownloadedAudio } from '@/data/models';
 
 import {
   AudioDownloadError,

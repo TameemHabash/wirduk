@@ -1,4 +1,4 @@
-import type { Category, HomeCategory } from '@/data/models/index';
+import type { Category, HomeCategory } from '@/data/models';
 
 /**
  * Applies the user's custom order to the categories.

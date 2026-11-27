@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { isCustomId } from '@/data/models/custom-ids';
 import { useRepositories } from '@/data/DataProvider';
-import type { Category, Dhikr } from '@/data/models/index';
+import type { Category, Dhikr } from '@/data/models';
 
 type State =
   | { status: 'loading' }

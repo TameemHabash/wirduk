@@ -13,7 +13,7 @@ import { SortableList } from '@/components/ui/SortableList';
 import { TextButton } from '@/components/ui/TextButton';
 import { TextField } from '@/components/ui/TextField';
 import { useRepositories } from '@/data/DataProvider';
-import type { Category, Dhikr } from '@/data/models/index';
+import type { Category, Dhikr } from '@/data/models';
 import { CUSTOM_LIMITS } from '@/data/repositories/custom-repository';
 import { counterStore } from '@/features/reader/state/counter-store';
 import { useAppTheme } from '@/theme/ThemeProvider';

@@ -45,7 +45,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | RF0 | Refactor: safety net (Maestro screen runs, baseline pictures, coverage and speed numbers) | 🟢 Done | one commit 2026-11-27 |
 | RF1 | Refactor: clean the repo and the PC (old files, history docs, stale references) | 🟢 Done | one commit 2026-11-27 |
 | RF2 | Refactor: the data (kept, not reset: Android's backup would bring old data back; stale comments) | 🟢 Done | one commit 2026-11-27 |
-| RF3 | Refactor: the new structure (feature folders, shared UI kit, layer rules) | Not started | |
+| RF3 | Refactor: the new structure (feature folders, shared UI kit, layer rules) | 🟢 Done | two commits 2026-11-27 |
 | RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | Not started | |
 | RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | Not started | |
 | RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | Not started | |
@@ -104,6 +104,21 @@ RF2, done (2026-11-27):
   stored data (`extraWeeks`, old event kinds).
 - Stale comments fixed (`AdwamuhaProvider`: the step back, `savePlan`). The link fix (owner:
   "fix it", 782966d) was checked on the emulator in the screen run.
+
+RF3, done (2026-11-27): the structure in `docs/architecture.md`.
+
+- Feature folders (`screens/ components/ hooks/ logic/ state/ services/ __tests__/`), shared
+  `components/ui|layout|navigation`, `hooks/`, `lib/`, `providers/AppProviders.tsx`. 164 files
+  moved with their history (`git mv`); imports rewritten by a script.
+- Layers: `data/` imports no feature («أدومها»'s shared types and defaults in
+  `data/models/adwamuha.ts`, the ward-time check in `data/settings/ward-times.ts`); no import
+  cycles. Both checked by lint (`import/no-cycle`, `no-restricted-imports` per layer).
+- One copy each: `useAsync` (the plain loads, 6 places), the time picker (`lib/time-picker.ts`),
+  the tone colors (`theme/tones.ts`), the morning/evening ids (`config/categories.ts`),
+  `weekdayOf`. Repositories one class per file. The dev clock's logic is a screen of «أدومها».
+- Kept as they are (a merge would change the look): the «قرأتُ وردي بدون التطبيق» sheet and the
+  step-back sheet (corners, dimming, grab line differ), and the reorder row. The other loads do
+  more than load (a delay while typing, a refresh on return, saving a date) and stay.
 
 ## Where things are now
 

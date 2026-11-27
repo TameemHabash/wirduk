@@ -6,7 +6,7 @@ import { GoldCard } from '@/components/ui/GoldCard';
 import { Icon } from '@/components/ui/Icon';
 import { IconTile } from '@/components/ui/IconTile';
 import { APP_CONFIG } from '@/config/app-config';
-import type { Category } from '@/data/models/index';
+import type { Category } from '@/data/models';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 

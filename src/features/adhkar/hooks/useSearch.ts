@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useRepositories } from '@/data/DataProvider';
-import type { SearchResults } from '@/data/models/index';
+import type { SearchResults } from '@/data/models';
 
 const DEBOUNCE_MS = 200;
 const EMPTY: SearchResults = { categories: [], adhkar: [] };

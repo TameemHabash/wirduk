@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -7,12 +7,13 @@ import { DhikrText } from '@/components/ui/DhikrText';
 import { Icon } from '@/components/ui/Icon';
 import { APP_CONFIG } from '@/config/app-config';
 import { useRepositories } from '@/data/DataProvider';
+import type { WardOrder } from '@/data/models';
+import { dhikrLabel } from '@/features/adwamuha/logic/setup';
+import { orderWard } from '@/features/adwamuha/logic/ward';
+import { useAsync } from '@/hooks/useAsync';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
-import { orderWard } from '@/features/adwamuha/logic/ward';
-import { dhikrLabel } from '@/features/adwamuha/logic/setup';
-import type { WardOrder } from '@/data/models';
 import { ChoiceCard } from './SetupParts';
 
 /** How many adhkar the short preview shows. */
@@ -40,19 +41,15 @@ export function WardOrderPicker({
   const { t, i18n } = useTranslation();
   const { colors, radii, spacing } = useAppTheme();
   const { content } = useRepositories();
-  const [category, setCategory] = useState<{ id: number; text: string }[]>([]);
+  const category = useAsync(
+    () =>
+      content
+        .listAdhkar(APP_CONFIG.content.morningCategoryId, i18n.language)
+        .then((list) => list.map((d) => ({ id: d.id, text: d.text }))),
+    [content, i18n.language],
+    [],
+  );
   const [showAll, setShowAll] = useState(showAllFirst);
-
-  useEffect(() => {
-    let cancelled = false;
-    content
-      .listAdhkar(APP_CONFIG.content.morningCategoryId, i18n.language)
-      .then((list) => !cancelled && setCategory(list.map((d) => ({ id: d.id, text: d.text }))))
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [content, i18n.language]);
 
   const texts = new Map(category.map((d) => [d.id, d.text]));
   const ward = orderWard(

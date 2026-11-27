@@ -1,7 +1,7 @@
 import { Linking } from 'react-native';
 import { fireEvent, screen } from '@testing-library/react-native';
 
-import type { AdwamuhaMessage } from '@/data/models/index';
+import type { AdwamuhaMessage } from '@/data/models';
 import { renderWithApp } from '@/test-utils/render-app';
 
 import { LibraryMessageView } from './LibraryMessageView';

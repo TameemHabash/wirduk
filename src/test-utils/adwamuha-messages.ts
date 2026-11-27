@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 
 import type { Repositories } from '@/data/DataProvider';
-import type { AdwamuhaMoment } from '@/data/models/index';
+import type { AdwamuhaMoment } from '@/data/models';
 import { type MessageContent, messagePool, textFor } from '@/features/adwamuha/logic/messages';
 
 /** A piece of text that is on screen when this message is shown. */

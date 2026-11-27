@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Linking, Pressable, StyleSheet, Switch, View } from 'react-native';
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { useToast } from '@/components/ui/Toast';
 import { useSettings } from '@/data/settings/SettingsProvider';
-import { displayTime, formatTime, parseTime } from '@/lib/time';
+import { displayTime } from '@/lib/time';
+import { openTimePicker } from '@/lib/time-picker';
 import { ensurePermission } from '@/features/reminders/services/reminders';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
@@ -104,17 +104,7 @@ function ReminderChoice({
   const name = t(`adwamuha.wardTitle.${session}`);
   const shown = displayTime(time, t('settings.am'), t('settings.pm'));
 
-  const pickTime = () => {
-    const { hour, minute } = parseTime(time);
-    const value = new Date();
-    value.setHours(hour, minute, 0, 0);
-    DateTimePickerAndroid.open({
-      mode: 'time',
-      value,
-      is24Hour: false,
-      onValueChange: (_event, date) => onTime(formatTime(date.getHours(), date.getMinutes())),
-    });
-  };
+  const pickTime = () => openTimePicker(time, onTime);
 
   return (
     <View

@@ -6,7 +6,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Button } from '@/components/ui/Button';
 import { IconTile } from '@/components/ui/IconTile';
 import { TextButton } from '@/components/ui/TextButton';
-import type { HomeCategory } from '@/data/models/index';
+import type { HomeCategory } from '@/data/models';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/ui/AppText';
 import { IconButton } from '@/components/ui/IconButton';
 import { IconTile } from '@/components/ui/IconTile';
-import type { HomeCategory } from '@/data/models/index';
+import type { HomeCategory } from '@/data/models';
 import { UI_FONTS } from '@/theme/fonts';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
