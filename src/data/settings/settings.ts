@@ -48,6 +48,12 @@ export interface AppSettings {
   wardOrder: WardOrder;
   /** Adwamuha: the first day of every week (the settings screen offers four). */
   weekStart: Weekday;
+  /**
+   * The app has asked for notifications (turning a reminder on). Not shown in Settings: Android
+   * 13+ says "denied" before the app ever asked, so the «notifications not allowed» card waits
+   * for this (owner, 2026-11-27).
+   */
+  notificationsAsked: boolean;
 }
 
 export type SettingKey = keyof AppSettings;
@@ -85,6 +91,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   wardOrder: 'plan',
   // Owner decision 2026-10-30: Saturday, whatever the phone's region says.
   weekStart: DEFAULT_WEEK_START,
+  notificationsAsked: false,
 };
 
 const isBool = (v: unknown): v is boolean => typeof v === 'boolean';
@@ -128,6 +135,7 @@ const VALIDATORS: { [K in SettingKey]: (v: unknown) => v is AppSettings[K] } = {
   wardOrder: (v): v is WardOrder => WARD_ORDERS.includes(v as WardOrder),
   // Any day works (the settings screen offers four).
   weekStart: (v): v is Weekday => Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 6,
+  notificationsAsked: isBool,
 };
 
 export function isSettingKey(key: string): key is SettingKey {

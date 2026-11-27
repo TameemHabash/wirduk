@@ -164,12 +164,15 @@ describe('Reminders — settings', () => {
     const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
     const { repos } = await renderWithApp(<SettingsWithSync />);
     await fireEvent(await screen.findByLabelText(MORNING), 'valueChange', true);
-    expect(await screen.findByText(DENIED)).toBeOnTheScreen();
+    // The toast, and at once the lasting card above the reminders: both say it.
+    expect(await screen.findByTestId('notifications-denied')).toBeOnTheScreen();
+    const messages = screen.getAllByText(DENIED);
+    expect(messages).toHaveLength(2);
     expect(screen.getByLabelText(MORNING).props.value).toBe(false);
     expect((await repos.settings.getAll()).morningReminder.enabled).toBe(false);
     expect(notificationState.scheduled.size).toBe(0);
-    await fireEvent.press(screen.getByText(DENIED));
-    expect(openSettings).toHaveBeenCalled();
+    for (const message of messages) await fireEvent.press(message);
+    expect(openSettings).toHaveBeenCalledTimes(2);
     openSettings.mockRestore();
   });
 
@@ -200,11 +203,42 @@ describe('Reminders — notifications not allowed (owner, 2026-11-25)', () => {
     openSettings.mockRestore();
   });
 
-  it('no card once they are allowed, or before the app ever asked', async () => {
+  it('no card once they are allowed', async () => {
     notificationState.permission = { granted: true, canAskAgain: true };
     await renderWithApp(<SettingsWithSync />);
     await screen.findByLabelText(MORNING);
     expect(screen.queryByTestId('notifications-denied')).toBeNull();
+  });
+
+  // Android 13+ says "denied" before the app ever asked (found in RF6; owner: fix it, 2026-11-27).
+  const androidBeforeAsking = { granted: false, canAskAgain: true, status: 'denied' } as never;
+
+  it('a new install: no card before the app ever asked', async () => {
+    notificationState.permission = androidBeforeAsking;
+    await renderWithApp(<SettingsWithSync />);
+    await screen.findByLabelText(MORNING);
+    expect(screen.queryByTestId('notifications-denied')).toBeNull();
+  });
+
+  it('the user says no when a reminder is turned on: the card stays (Android may ask again)', async () => {
+    notificationState.permission = androidBeforeAsking;
+    mockNotifications.requestPermissionsAsync.mockImplementationOnce(() => {
+      notificationState.asked += 1;
+      return Promise.resolve(androidBeforeAsking);
+    });
+    const { repos } = await renderWithApp(<SettingsWithSync />);
+    await fireEvent(await screen.findByLabelText(MORNING), 'valueChange', true);
+    expect(await screen.findByTestId('notifications-denied')).toBeOnTheScreen();
+    expect(notificationState.asked).toBe(1);
+    expect((await repos.settings.getAll()).notificationsAsked).toBe(true);
+  });
+
+  it('a reminder is on but notifications were turned off in the phone settings: the card', async () => {
+    const repos = await createTestRepositories();
+    await repos.settings.set('morningReminder', { enabled: true, time: '06:00' });
+    notificationState.permission = androidBeforeAsking;
+    await renderWithApp(<SettingsWithSync />, repos);
+    expect(await screen.findByTestId('notifications-denied')).toBeOnTheScreen();
   });
 });
 

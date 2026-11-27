@@ -35,6 +35,7 @@ Each state below is reached in a test, and what the app decides and shows there 
 | End of a week | A full week is over, or a cut week that was good | A word on Home (target reached, or not); none again before all of its kind were shown (2026-11-21) | `scenarios` (steady, break), `messages.test.tsx`, `progress.test.ts` |
 | Before the good weeks | Fewer good weeks than the step's weeks | Ring: «الأسابيع المكتملة في هذه الخطوة: N من M» | `scenarios`, `progress-screens.test.tsx` |
 | The question | The step has its good weeks | Home and «مساري»: «جاهز لإضافة الذكر التالي؟» | `plan-walk`, `scenarios`, `progress-screens.test.tsx` |
+| The question during a break | The step has its good weeks, a break goes on | No question on Home or «مساري»; back when the break ends (owner, 2026-11-27) | `scenarios` (the question waits for a break’s end) |
 | «أضِف الذكر التالي» | The user adds | Next step; a word; a new stage's tip | `plan-walk` (steady user), `scenarios`, `messages.test.tsx` |
 | «أبقِني أسبوعًا آخر» | The user waits | Asked again 7 days later | `plan-walk`, `scenarios` |
 | Not opened for weeks | The app opens after a long gap | Nothing added; the good weeks before stay | `scenarios` (not opened) |

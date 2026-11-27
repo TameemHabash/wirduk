@@ -275,6 +275,8 @@ describe('setup 4: the reminders, then the path begins', () => {
     await waitFor(() => expect(mockRouter.dismissTo).toHaveBeenCalledWith('/'));
     expect((await repos.settings.getAll()).morningReminder.enabled).toBe(false);
     expect((await repos.adwamuha.load())?.enabled).toBe(true);
+    // Settings now shows the card «notifications not allowed» (it waits until the app asked).
+    expect((await repos.settings.getAll()).notificationsAsked).toBe(true);
   });
 
   it('started in the evening: that morning shows "—" and is not counted', async () => {

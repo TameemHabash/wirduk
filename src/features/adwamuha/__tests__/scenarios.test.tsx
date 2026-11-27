@@ -214,6 +214,33 @@ describe('the user’s choices', () => {
     expect(s.app.readyToMoveOn).toBe(true);
   }, 30_000);
 
+  it('the question waits for a break’s end: not on Home or «مساري» during the break (owner, 2026-11-27)', async () => {
+    const s = await startScenario({ day: SAT, hour: 9, step: 5 });
+    await readMessages(s);
+    await s.play(`
+      day 1: both wards
+      days 2-14: both wards, app closed
+    `);
+    expect(s.app.readyToMoveOn).toBe(true);
+    await s.run((app) => app.takeBreak(1)); // days 14-20
+    expect(s.app.readyToMoveOn).toBe(false);
+    await s.play('days 15-20: none, app closed');
+    expect(s.app.activeBreak).not.toBeNull();
+    expect(s.app.readyToMoveOn).toBe(false);
+    await readMessages(s);
+    await s.show(<HomeScreen />);
+    expect(screen.queryByText(OWNER_TEXTS.labels.readyQuestion)).toBeNull();
+    await s.show(<ProgressScreen />);
+    expect(screen.queryByText(OWNER_TEXTS.labels.readyQuestion)).toBeNull();
+    // The break is over: the question is back (the break's days took nothing away).
+    await s.play('day 21: none');
+    expect(s.app.activeBreak).toBeNull();
+    expect(s.app.readyToMoveOn).toBe(true);
+    await readMessages(s);
+    await s.show(<ProgressScreen />);
+    expect(screen.getByText(OWNER_TEXTS.labels.readyQuestion)).toBeTruthy();
+  }, 30_000);
+
   it('«طرأ عليّ ظرف» back to a picked step (3 of 7): a word; the steps reached before are climbed again a week each', async () => {
     const s = await startScenario({ day: SAT, hour: 9, step: 7 });
     await readMessages(s);

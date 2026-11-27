@@ -506,6 +506,15 @@ better tests, speed, a clean repo, a simple Claude Code setup, and nothing the u
 | A link to the open reader | `wirduk://category/<id>?dhikr=<n>` while that chapter is open now goes to that dhikr; before, it kept its page (owner: "fix it"). The «أدومها» ward too. |
 | The Adhkar tab | Opens slowly since the redesign: fix it in RF5 (owner). |
 
+After RF8 (owner, 2026-11-27):
+
+| Topic | Decision |
+|---|---|
+| Expo packages | Update the 11 that were a few patch versions behind (`npx expo install --fix`), then check everything again. |
+| The card «الإشعارات غير مسموحة» | Fix it: it showed on a new install before the app ever asked (Android 13+ says "denied" then). Now it shows only once the app has asked (the setting `notificationsAsked`), or a reminder is on, or Android will not ask again. |
+| «جاهز لإضافة الذكر التالي؟» during a break | Hidden on Home and «مساري» until the break ends; then it comes back. |
+| The phone APK | After these three, run the tests again; if they pass, build the APK. |
+
 ## Technical choices (milestone 0–1)
 
 | Topic | Choice | Why |

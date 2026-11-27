@@ -43,7 +43,8 @@ npm run shots:compare               # .local/shots/baseline vs .local/shots/late
 
 `shots:compare` prints only the screens that changed and writes
 `.local/shots/compare/index.html` (before / after / diff). The baseline was taken from commit
-22803cf, before the refactor.
+22803cf, before the refactor; screens 22–24 again on 2026-11-27, after the approved
+notifications card fix.
 
 Two runs of the same code give the same pictures, with these rules:
 

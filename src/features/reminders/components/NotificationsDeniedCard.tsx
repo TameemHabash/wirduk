@@ -6,22 +6,32 @@ import { useTranslation } from 'react-i18next';
 
 import { AppText } from '@/components/ui/AppText';
 import { Icon } from '@/components/ui/Icon';
+import { useSettings } from '@/data/settings/SettingsProvider';
 import { useAppTheme } from '@/theme/ThemeProvider';
 
+import {
+  type NotificationPermission,
+  showNotificationsDenied,
+} from '@/features/reminders/logic/notifications-denied';
+
 /**
- * Has the user turned notifications off for the app (denied, or "don't ask again")? Not
- * yet asked does not count. Checked again when the screen is shown and when the app comes
- * back (the user may have changed it in the phone's settings).
+ * Has the user turned notifications off for the app? Not yet asked does not count, even though
+ * Android 13+ says "denied" then (`showNotificationsDenied`). Checked again when the screen is
+ * shown, when the app comes back (the user may have changed it in the phone's settings), and
+ * right after the app asked.
  */
 export function useNotificationsDenied(): boolean {
-  const [denied, setDenied] = useState(false);
+  const { settings } = useSettings();
+  const asked = settings.notificationsAsked;
+  const reminderOn = settings.morningReminder.enabled || settings.eveningReminder.enabled;
+  const [permission, setPermission] = useState<NotificationPermission | null>(null);
   const check = useCallback(() => {
     let cancelled = false;
     Notifications.getPermissionsAsync()
       .then((p) => {
         if (cancelled) return;
         const status = (p as { status?: string }).status;
-        setDenied(!p.granted && (status === 'denied' || p.canAskAgain === false));
+        setPermission({ granted: p.granted, canAskAgain: p.canAskAgain, status });
       })
       .catch(() => undefined);
     return () => {
@@ -29,13 +39,15 @@ export function useNotificationsDenied(): boolean {
     };
   }, []);
   useFocusEffect(check);
+  // The question's answer: Android's dialog does not always send the app to the background.
+  useEffect(() => (asked ? check() : undefined), [asked, check]);
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') check();
     });
     return () => sub.remove();
   }, [check]);
-  return denied;
+  return permission !== null && showNotificationsDenied(permission, { asked, reminderOn });
 }
 
 /**

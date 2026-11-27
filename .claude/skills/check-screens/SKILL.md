@@ -41,4 +41,7 @@ for the notice.
   under `varying` in `e2e/shots-compare.json`) or fix the code. A real visible change needs the
   owner's yes first.
 - Baselines (old code, commit 22803cf): `.local/shots/baseline`, `-dark`, `-big` (not in git).
+  Screens 22–24 were taken again on 2026-11-27, after the approved notifications card fix (no
+  card on a new install); the old ones are in `baseline*-before-card-fix/`. After any approved
+  visible change, copy the new pictures of those screens into the baselines the same way.
 - A failed Maestro step prints the flow; its debug pictures are in the run folder it names.

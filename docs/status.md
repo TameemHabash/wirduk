@@ -51,6 +51,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | 🟢 Done | one commit 2026-11-27 |
 | RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | 🟢 Done | one commit 2026-11-27 |
 | RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | 🟢 Done | one commit 2026-11-27 |
+| — | Owner decisions after RF8 (2026-11-27): 11 Expo packages updated; the notifications card only after the app asked; no «جاهز لإضافة الذكر التالي؟» during a break; then the APK | 🟢 Done | one commit 2026-11-27 |
 | 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -299,6 +300,25 @@ RF8, done (2026-11-27): the full check. One small app change (a log line, below)
 - `docs/refactor-plan.md` deleted (the refactor is done); the "one RF per session" lines left
   the `/finish-milestone` skill.
 
+After RF8, the owner's decisions (2026-11-27, `docs/decisions.md`):
+
+- The 11 Expo packages updated (`npx expo install --fix`; expo 57.0.34, expo-router 57.0.32,
+  expo-sqlite 57.0.7, …), `npx expo prebuild`, a new release build. expo-sqlite 57.0.5 fixed
+  a "database is locked" bug in transactions: maybe linked to RF8's one failed read on Home,
+  maybe not (the log line will tell).
+- The card «الإشعارات غير مسموحة»: Android 13+ says "denied" before the app ever asked, so it
+  showed on a new install. Now `showNotificationsDenied` (`reminders/logic/`, tested): not
+  allowed and (the app has asked — a new setting `notificationsAsked`, saved when a reminder is
+  turned on or in the setup — or a reminder is on, or Android will not ask again). After a no,
+  the card now shows at once (before: on the next visit).
+- «جاهز لإضافة الذكر التالي؟» is hidden while a break goes on (`readyToMoveOn` in the
+  provider, as the step-back suggestion already was), on Home and «مساري», and comes back when
+  the break ends (a scenario test; a row in `docs/adwamuha/states.md`).
+- Checks: 1097 tests; the 6 flows; every screen in light, dark and font 1.3: the same, except
+  Settings 22–24 on a new install (the card is gone, the rows below move up; the owner's yes).
+  Those three baselines were taken again (old ones in `.local/shots/baseline*-before-card-fix/`).
+  The 40-day timeline passed (29 min), with no failed read in the phone's log.
+
 ## Where things are now
 
 - **Content:** version **13** (`APP_CONFIG.content.version`; v9 added "times said per recording";
@@ -327,7 +347,7 @@ RF8, done (2026-11-27): the full check. One small app change (a log line, below)
   - The next APK installs over the old one: the data is kept (decisions, 2026-11-27). Before
     Google Play: the Play build is signed with another key, so testers uninstall then (a backup
     file keeps their data).
-- **Tests:** 1084 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
+- **Tests:** 1097 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
   6 Maestro user flows (`npm run e2e`) and the «أدومها» timeline (`npm run e2e:timeline`).
   `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
@@ -338,12 +358,6 @@ RF8, done (2026-11-27): the full check. One small app change (a log line, below)
 - **The refactor (RF0–RF8, 2026-11-27)**: done; every screen compared, nothing the user sees
   changed (report page: RF8 above). Not on the phone yet: the link still has the APK of e3b69e2.
   A new APK (`/phone-apk`) when the owner asks.
-- **11 Expo packages** are a few patch versions behind (`npx expo-doctor`, RF8). Update them
-  before Google Play (`npx expo install --fix`, a new dev build, then the full check again)?
-- **The notifications card on a fresh install** (found in RF6, old): Settings shows
-  «الإشعارات غير مسموحة» before the app ever asked. Fix it, or keep it?
-- **During a break** (seen in RF8): a waiting «جاهز لإضافة الذكر التالي؟» stays on «مساري». Keep
-  it, or hide it until the break ends?
 - **The redesign (R1–R6, 2026-11-26)**: built and checked on the emulator; the owner checks it
   all together (owner, 2026-11-26), on the phone with the APK of e3b69e2 (on the link).
   Claude's choices to confirm: the rules around «لم أقطعها بعد» (below), and the reader ring is teal as in

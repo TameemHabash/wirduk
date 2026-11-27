@@ -45,6 +45,7 @@ export function SetupRemindersScreen() {
       const allowed = wanted
         ? await ensurePermission(t('reminders.channel')).catch(() => false)
         : true;
+      if (wanted && !settings.notificationsAsked) await update('notificationsAsked', true);
       for (const s of SESSIONS) {
         await update(SETTING_KEY[s], { enabled: on[s] && allowed, time: timeOf(s) });
       }

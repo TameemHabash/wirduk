@@ -59,7 +59,10 @@ export interface AdwamuhaValue {
   setWeekStart: (day: Weekday) => Promise<void>;
   /** The current ward's dhikr ids (the opening first); empty when the feature is off. */
   wardIds: (session: Session) => number[];
-  /** «جاهز لإضافة الذكر التالي؟» is due (until answered; never automatic). */
+  /**
+   * «جاهز لإضافة الذكر التالي؟» is due (until answered; never automatic). Not during a break:
+   * it waits for the break's end (owner, 2026-11-27).
+   */
   readyToMoveOn: boolean;
   /**
    * A ward was finished in the reader: records the day if that ward's window is
@@ -220,7 +223,6 @@ export function AdwamuhaProvider({
         saving.current = false;
       });
   }, [outcome, reload, repo, stored, today]);
-  const readyToMoveOn = outcome?.event?.kind === 'ready';
 
   const wardIds = useCallback(
     (session: Session) =>
@@ -232,6 +234,9 @@ export function AdwamuhaProvider({
     () => pauses.find((p) => p.kind === 'break' && isPaused(today, [p])) ?? null,
     [pauses, today],
   );
+
+  // Hidden while a break goes on; it comes back when the break ends (owner, 2026-11-27).
+  const readyToMoveOn = outcome?.event?.kind === 'ready' && !activeBreak;
 
   const suggestStepBack = useMemo(
     () =>

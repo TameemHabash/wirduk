@@ -63,6 +63,7 @@ function ReminderRow({ kind, name }: { kind: ReminderKind; name?: string }) {
   const onToggle = async (enabled: boolean) => {
     if (!enabled) return save({ ...reminder, enabled });
     const allowed = await ensurePermission(t('reminders.channel')).catch(() => false);
+    if (!settings.notificationsAsked) void update('notificationsAsked', true);
     if (allowed) return save({ ...reminder, enabled });
     toast.show({
       message: t('settings.notificationsDenied'),
