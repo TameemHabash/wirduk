@@ -26,7 +26,7 @@ describe('Settings → «أدومها»', () => {
   });
 
   // A layout guard, not a look: on a Galaxy S21+ a label as wide as measured lost its last
-  // word (owner, 2026-10-30; CLAUDE.md, "Traps"). Jest has no layout to show the cut.
+  // word (owner, 2026-10-30; CLAUDE.md, "Traps (whole app)"). Jest has no layout to show the cut.
   it('gives «غير مفعّلة» more room than measured', async () => {
     await renderWithApp(<SettingsScreen />, undefined, { now: at(9) });
     const off = await screen.findByText(tr('adwamuha.settings.off'));

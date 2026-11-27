@@ -1,7 +1,7 @@
-# Refactor plan (RF7–RF8 still to do)
+# Refactor plan (RF8 still to do)
 
-The refactor the owner asked for on 2026-11-27 (`docs/status.md`, "Refactor"). RF0–RF6 are done
-(RF5's and RF6's plans are kept below for the record; what was done is in `docs/status.md`). This
+The refactor the owner asked for on 2026-11-27 (`docs/status.md`, "Refactor"). RF0–RF7 are done
+(RF5's to RF7's plans are kept below for the record; what was done is in `docs/status.md`). This
 file is the plan for the rest; delete it at the end of RF8.
 
 ## How each RF runs (owner's rules)
@@ -10,14 +10,12 @@ file is the plan for the rest; delete it at the end of RF8.
   the RF notes) and this file, then do only the next RF. At the end, tell the owner to start a new
   session and say "continue the refactor".
 - Nothing the user sees changes. A visible change only for a strong reason, after asking.
-- When it is done: `npm run verify`; when app code changed, the screen check (below); update the
-  table and add the RF's notes in `docs/status.md`; commit (message in a new file with the Write
-  tool, no AI attribution, no `Co-Authored-By`), push `main`, report in simple English with the
-  full milestones table, stop.
-- Screen check: `. .\scripts\dev\e2e.ps1; Install-E2eApk; Invoke-E2e shots -Name latest`, then
-  `npm run shots:compare` (baseline vs latest). Look at every screen it lists and explain or fix
-  it. Baselines (old code, 22803cf): `.local/shots/baseline`, `-dark`, `-big`. The emulator needs
-  `hw.keyboard=no` (`e2e/README.md`).
+- When it is done: the `/finish-milestone` skill (verify; when app code changed, the screen
+  check; the table and the RF's notes in `docs/status.md`; commit, push `main`, report with the
+  full milestones table, stop).
+- Screen check: the `/check-screens` skill (release build, Maestro, compare with the baselines
+  of the old code, 22803cf: `.local/shots/baseline`, `-dark`, `-big`). Look at every screen it
+  lists and explain or fix it.
 - Owner decisions during the refactor: the user's data is kept (RF2); the two bottom sheets stay
   different (RF3); a link to the open chapter goes to its dhikr (fixed).
 
@@ -67,7 +65,7 @@ both after a shots run.
   «أبقِني أسبوعًا آخر», a break and its end, a step back, a reminder tap outside the ward's time,
   the ward read in parts).
 
-## RF7 — Claude Code setup and docs
+## RF7 — Claude Code setup and docs — done
 
 - `CLAUDE.md` short (about 120 lines; score it with the claude-md-improver rubric before and
   after): the owner's rules, commands, a short map, where new code goes, general traps. Area rules

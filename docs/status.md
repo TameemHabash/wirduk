@@ -49,7 +49,7 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | RF4 | Refactor: split the big files («أدومها» provider, reader, plan editor, editors) | 🟢 Done | one commit 2026-11-27 |
 | RF5 | Refactor: speed («الأذكار» tab, reader, «أدومها» context, audio progress, shared loads) | 🟢 Done | one commit 2026-11-27 |
 | RF6 | Refactor: better tests (test kit, behavior tests, «أدومها» timeline tests, e2e flows) | 🟢 Done | one commit 2026-11-27 |
-| RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | Not started | |
+| RF7 | Refactor: Claude Code setup and docs (CLAUDE.md, .claude/, architecture doc) | 🟢 Done | one commit 2026-11-27 |
 | RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | Not started | |
 | 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
@@ -64,7 +64,7 @@ clean code, better tests, speed, a clean repo, a simple Claude Code setup, and *
 user sees changes**. The owner's answers: feature folders, Maestro, delete the old files, and keep
 the user's data (decided in RF2; `docs/decisions.md`).
 
-**Next: RF7. The plan for RF7–RF8 and how each RF runs: [refactor-plan.md](refactor-plan.md).
+**Next: RF8. The plan for RF8 and how each RF runs: [refactor-plan.md](refactor-plan.md).
 One RF per session (owner, 2026-11-27): a new session says "continue the refactor".**
 
 RF0, done (2026-11-27):
@@ -225,6 +225,41 @@ RF6, done (2026-11-27): better tests. No app code changed (so no screen compare)
   first question; the code meant "not yet asked does not count" (`useNotificationsDenied`). The
   baseline pictures of the old code show it too (22-settings-2).
 
+RF7, done (2026-11-27): the Claude Code setup and the docs. No app code changed (two test
+comments point to the new notes), so no screen compare.
+
+- `CLAUDE.md` 305 → 146 lines: the owner's rules, the machine, commands, a short map, where new
+  code goes, the traps of the whole app, tests. The rules of one area moved next to its code
+  (they load when Claude works there): `src/data/CLAUDE.md` (SQLite traps, migrations, backup),
+  `src/features/reader/CLAUDE.md` (screen off, pager width, focus reload, the process kept
+  alive), `src/features/adwamuha/CLAUDE.md` (the owner's rules, generated texts, time,
+  scenarios, dev clock), `scripts/CLAUDE.md` (content pipeline, Arabic text, Dorar, audio sheet),
+  `e2e/CLAUDE.md` (Maestro, the emulator, release builds). Score with the claude-md-improver
+  rubric (Claude's own scoring): 77/100 before (long, area rules in every session, a few stale
+  lines) → 93/100 after. Every file and name in the notes was checked by a script.
+- Found while checking: `node`, `npm`, `git` and `gh` are found without reloading the PATH (only
+  Maestro is not; the `.ps1` scripts reload it themselves), so the PATH line is now only for
+  those. `newAppStart` and `useReminderSync` run in `AppProviders` (the notes said the root
+  layout). Five empty folders left by RF3 deleted (`src/features/counter`, `feedback`, `search`,
+  `session`, `tabs`; not in git).
+- `.claude/settings.json` (in git): the safe commands need no prompt (verify, jest, prettier
+  check, git status/diff/log, db:peek, reading reports, read-only adb); `git push --all`,
+  `--mirror` and `archive-main` to `origin` are denied. `.claude/settings.local.json` is ignored.
+- A hook, `.claude/hooks/guard-git.mjs` (checks in `scripts/dev/git-guard.ts`, 45 tests), runs
+  before every shell command: it blocks a commit message with a Co-Authored-By line, AI
+  attribution or a BOM, and any push to `origin` but `main` (a tag only when its commit is on
+  main, as `test-build`). It runs `node` directly, because Git Bash cannot start on this PC (the
+  same EPERM as the Bash tool). Tested live: a dry-run commit with an attribution line was
+  stopped.
+- Skills in `.claude/skills/`: `/finish-milestone`, `/check-screens`, `/content-change`,
+  `/phone-apk` (only when the owner asks).
+- `AGENTS.md`: Expo's rules kept; fixed for this project (npm, `app.config.ts`, no Expo Go,
+  local Gradle builds for testing and EAS for the stores). README 409 → 240 lines and current
+  (it said «العدّ مع الصوت» is off by default, the step back had three kinds, «أذكاري» was on
+  Home). `docs/architecture.md`: the features, the start and data flow, the providers in order,
+  and how to add a screen, a feature, a migration, a setting, a string, a content change, a
+  native module.
+
 ## Where things are now
 
 - **Content:** version **13** (`APP_CONFIG.content.version`; v9 added "times said per recording";
@@ -248,12 +283,12 @@ RF6, done (2026-11-27): better tests. No app code changed (so no screen compare)
     Samsung phone: release builds from the fixed link
     https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk (public
     pre-release `test-build`, owner's choice 2026-11-01), built with `scripts/dev/phone-apk.ps1`
-    (CLAUDE.md, "Phone"). On the link since 2026-11-26: the APK of e3b69e2 (the whole redesign,
+    (the `/phone-apk` skill). On the link since 2026-11-26: the APK of e3b69e2 (the whole redesign,
     R1–R6; kept in `.local/apk/`).
   - The next APK installs over the old one: the data is kept (decisions, 2026-11-27). Before
     Google Play: the Play build is signed with another key, so testers uninstall then (a backup
     file keeps their data).
-- **Tests:** 1038 (Jest: logic + ui, and the relay in `workers/`), with a coverage floor;
+- **Tests:** 1083 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
   6 Maestro user flows (`npm run e2e`) and the «أدومها» timeline (`npm run e2e:timeline`).
   `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:

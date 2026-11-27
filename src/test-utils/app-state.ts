@@ -1,7 +1,7 @@
 /**
  * Test-only: the app going to the background and back, as Android reports it.
  * (In the ui setup `AppState.addEventListener` is already a mock: its own behavior is put
- * back after the test; `mockRestore` would leave it returning undefined. CLAUDE.md, "Traps".)
+ * back after the test; `mockRestore` would leave it returning undefined. CLAUDE.md, "Tests".)
  */
 import { AppState, type AppStateStatus } from 'react-native';
 import { act } from '@testing-library/react-native';

@@ -1,6 +1,6 @@
 /**
  * With the screen off (Android), JS timers wait until it is on again: the reader must move on
- * and play the next recording without them (CLAUDE.md, "Traps").
+ * and play the next recording without them (src/features/reader/CLAUDE.md, "Traps").
  */
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 

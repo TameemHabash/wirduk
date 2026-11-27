@@ -38,7 +38,7 @@ for a dhikr id.
    A dhikr id of the morning or the evening copy changes both (they share one entry).
 4. Bump `APP_CONFIG.content.version` (`src/config/app-config.ts`), run `npm run content:build`,
    then `npm run verify`. Stop Metro before bumping, then restart it with `--clear`
-   (see CLAUDE.md, "Content version").
+   (the order: `.claude/skills/content-change/SKILL.md`).
 5. Record the decision in `docs/decisions.md` if it is a new kind of rule.
 
 ## Evening words

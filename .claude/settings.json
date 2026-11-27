@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "PowerShell(npm run verify)",
+      "PowerShell(npm run typecheck)",
+      "PowerShell(npm run lint)",
+      "PowerShell(npm run content:check)",
+      "PowerShell(npm test *)",
+      "PowerShell(npm run test:coverage)",
+      "PowerShell(npx jest *)",
+      "PowerShell(npx prettier --check *)",
+      "PowerShell(npx tsc --noEmit *)",
+      "PowerShell(npm run db:peek *)",
+      "PowerShell(npm run shots:compare *)",
+      "PowerShell(git status *)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log *)",
+      "PowerShell(git show *)",
+      "PowerShell(git ls-files *)",
+      "PowerShell(git grep *)",
+      "PowerShell(git rev-parse *)",
+      "PowerShell(git branch --show-current)",
+      "PowerShell(gh issue list -R TameemHabash/wirduk-reports *)",
+      "PowerShell(gh issue view * -R TameemHabash/wirduk-reports *)",
+      "PowerShell(adb devices *)",
+      "PowerShell(adb -s * shell run-as com.wirduk.app ls *)",
+      "PowerShell(adb -s * shell dumpsys *)",
+      "PowerShell(adb -s * shell getprop *)",
+      "PowerShell(adb -s * shell ps *)",
+      "PowerShell(adb -s * logcat -d *)",
+      "PowerShell(adb shell run-as com.wirduk.app ls *)",
+      "PowerShell(adb shell dumpsys *)",
+      "PowerShell(adb shell getprop *)",
+      "PowerShell(adb shell ps *)",
+      "PowerShell(adb logcat -d *)",
+      "Bash(npm run verify)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run lint)",
+      "Bash(npm run content:check)",
+      "Bash(npm test *)",
+      "Bash(npm run test:coverage)",
+      "Bash(npx jest *)",
+      "Bash(npx prettier --check *)",
+      "Bash(npx tsc --noEmit *)",
+      "Bash(npm run db:peek *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git ls-files *)",
+      "Bash(git grep *)",
+      "Bash(git rev-parse *)",
+      "Bash(git branch --show-current)",
+      "Bash(adb devices *)",
+      "Bash(adb shell run-as com.wirduk.app ls *)",
+      "Bash(adb shell dumpsys *)",
+      "Bash(adb logcat -d *)"
+    ],
+    "deny": [
+      "PowerShell(git push --all *)",
+      "PowerShell(git push * --all *)",
+      "PowerShell(git push --mirror *)",
+      "PowerShell(git push * --mirror *)",
+      "PowerShell(git push origin archive-main *)",
+      "PowerShell(git push * origin archive-main *)",
+      "Bash(git push --all *)",
+      "Bash(git push * --all *)",
+      "Bash(git push --mirror *)",
+      "Bash(git push * --mirror *)",
+      "Bash(git push origin archive-main *)",
+      "Bash(git push * origin archive-main *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-git.mjs"
+            ],
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  }
+}
