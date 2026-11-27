@@ -53,7 +53,8 @@ in [decisions.md](decisions.md). The story of each milestone is in git (`git log
 | RF8 | Refactor: full check and report (all tests, e2e, pictures compared, speed) | 🟢 Done | one commit 2026-11-27 |
 | — | Owner decisions after RF8 (2026-11-27): 11 Expo packages updated; the notifications card only after the app asked; no «جاهز لإضافة الذكر التالي؟» during a break; then the APK | 🟢 Done | one commit 2026-11-27 |
 | — | Owner feedback 2026-11-27 (2): a tap on the «المصدر» row in the reader no longer counts (what it shows inside still counts) | 🟢 Done | one commit 2026-11-27 |
-| — | Owner feedback 2026-11-27 (2): an unlimited count for own adhkar (design first) | Waits for the owner's pick | |
+| — | Owner feedback 2026-11-27 (2): Home crashed when the phone's date went back before the «أدومها» step's start | 🟢 Done | one commit 2026-11-27 |
+| — | Owner feedback 2026-11-27 (2): an unlimited count for own adhkar (design option ب) | In progress | |
 | 14 | Google Play (waits for the redesign) | Not started | |
 | 15 | App Store (iOS) | Not started | |
 
@@ -335,13 +336,23 @@ Owner feedback 2026-11-27 (2) (`docs/decisions.md`):
   the ring empty, full after «إتمام»), the rules, the recording and the word:
   https://claude.ai/artifact/1E71SekjnQkGkY7csy4Ym1 (its file: `.local/unlimited-count-design.html`). The
   data needs a new column (migration 8): `CustomAdhkar.Count` has `CHECK (Count >= 1)`.
-- Found (old, not changed, the owner decides): **Home crashes when "today" is before the
+- Found, then fixed (owner: "fix it", next commit): **Home crashes when "today" is before the
   «أدومها» step's start** (`useProgress.ts`: `status.weeks[0]` is undefined, so
   `week.morning` throws). Seen on the emulator: the 40-day timeline left the plan starting
   2026-11-28 and the step on 2027-01-04, and the emulator's date was back on 2026-11-27. On a
   phone: a wrong date ahead (a new phone before the network time, a date changed by hand), then
   the right date again. The app does not open until that day comes. The emulator app's data was
   cleared to go on (a copy of that `user.db`: `.local/user-db-step-ahead/`).
+
+The owner's answers (2026-11-27): the unlimited count as option ب, the recording option 1, the
+word «بلا حد»; fix the crash; tests for both.
+
+- The crash, fixed: `stepWeeks` (`logic/weeks.ts`) now always gives this week first, as its
+  callers expect, even when the step's first day is after it (0 and 0, not full). Tests: a logic
+  one (`weeks.test.ts`) and Home and «مساري» with the emulator's state (`progress-screens.test.tsx`,
+  "the phone's date went back"); the 3 fail on the old code with the emulator's error. On the
+  emulator, that `user.db` put back: Home shows «وردك اليوم» and «مساري» opens ("0 من 1", the
+  week «—»). `docs/adwamuha/states.md`: the row "The phone's date moves back" names them.
 
 ## Where things are now
 
@@ -371,7 +382,7 @@ Owner feedback 2026-11-27 (2) (`docs/decisions.md`):
   - The next APK installs over the old one: the data is kept (decisions, 2026-11-27). Before
     Google Play: the Play build is signed with another key, so testers uninstall then (a backup
     file keeps their data).
-- **Tests:** 1098 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
+- **Tests:** 1101 (Jest: logic + ui, the scripts, and the relay in `workers/`), with a coverage floor;
   6 Maestro user flows (`npm run e2e`) and the «أدومها» timeline (`npm run e2e:timeline`).
   `npm run verify` passes.
 - **user.db:** schema 7 (6: `WardProgress`, the day's ward read in parts, 2026-11-14; 7:
@@ -379,10 +390,6 @@ Owner feedback 2026-11-27 (2) (`docs/decisions.md`):
 
 ## Waiting for the owner
 
-- **The unlimited count (2026-11-27)**: pick an option on the design page
-  (https://claude.ai/artifact/1E71SekjnQkGkY7csy4Ym1): A, B or C, the recording, and the word.
-- **Home crashes when "today" is before the «أدومها» step's start** (found 2026-11-27, above):
-  fix it or not.
 - **The refactor (RF0–RF8) and the decisions after RF8 (2026-11-27)**: on the link (APK of
   63bddc8), to check on the phone. Every screen was compared; the only visible change is the
   approved one: on a new install, Settings has no «الإشعارات غير مسموحة» card until the app has

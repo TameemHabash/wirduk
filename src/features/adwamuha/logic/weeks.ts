@@ -58,6 +58,10 @@ export interface StepWeek {
  * The calendar weeks of a step, newest first: from this week (the one
  * holding `today`) back to the week holding `since`, the step's first day.
  * `skipped`: the step's first morning, when it was already over.
+ *
+ * The first is always this week, even when `since` is after it: the phone's date was ahead
+ * when the step began, then went back (found 2026-11-27; Home crashed until that day came).
+ * Such a week has no day in the step: 0 and 0, not full.
  */
 export function stepWeeks(
   records: readonly WardRecord[],
@@ -70,9 +74,10 @@ export function stepWeeks(
   const until = judgedUntil(records, today);
   const done = { morning: doneDays(records, 'morning'), evening: doneDays(records, 'evening') };
   const out: StepWeek[] = [];
+  const thisWeek = weekStartOf(today, firstDay);
   for (
-    let start = weekStartOf(today, firstDay);
-    daysBetween(since, addDays(start, WEEK_DAYS - 1)) >= 0;
+    let start = thisWeek;
+    start === thisWeek || daysBetween(since, addDays(start, WEEK_DAYS - 1)) >= 0;
     start = addDays(start, -WEEK_DAYS)
   ) {
     const days = weekDays(start);

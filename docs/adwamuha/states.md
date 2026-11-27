@@ -56,7 +56,7 @@ Each state below is reached in a test, and what the app decides and shows there 
 | Ward times changed | «أوقات الورد» | The windows move | `sessions.test.ts`, `AdwamuhaSettingsScreen.test.tsx` |
 | Ward order | «ترتيب الورد» (setup 3, settings) | The same adhkar, another order | `ward.test.ts`, `WardScreen.test.tsx`, `setup.test.tsx` |
 | Week start changed | «بداية الأسبوع» (any of 4, mid-week) | Grid and bars from that day; no repeated word | `AdwamuhaSettingsScreen.test.tsx`, `messages.test.tsx`, `weeks.test.ts` |
-| The phone's date moves back | The clock goes back | Nothing breaks | `scenarios` (date moving back) |
+| The phone's date moves back | The clock goes back; also to before the step began (the date was ahead, then back; found 2026-11-27: Home crashed) | Nothing breaks; before the step's first day, this week shows 0 and 0 | `scenarios` (date moving back), `weeks.test.ts`, `progress-screens.test.tsx` |
 | Reminders | Setup 4, settings | Two daily notifications | `setup.test.tsx`, `ward-reminders.test.tsx` |
 | Backup and restore | Settings | The path comes back | `backup-db.test.ts`, `backup-screens.test.tsx` |
 

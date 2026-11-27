@@ -105,6 +105,35 @@ describe('Home: «وردك اليوم»', () => {
   });
 });
 
+describe("the phone's date went back (found 2026-11-27: Home crashed)", () => {
+  /**
+   * As the emulator was left: the plan, its wards and step 2 on days still ahead (the date was
+   * set ahead, then back to DAY).
+   */
+  async function withPlanAhead(): Promise<Repositories> {
+    const repos = await givenAdwamuha(await createTestRepositories(), {
+      step: 2,
+      startedOn: addDays(DAY, 1),
+      state: { stepStartedOn: addDays(DAY, 30) },
+    });
+    await givenDaysRead(repos, addDays(DAY, 1), addDays(DAY, 28));
+    return repos;
+  }
+
+  it('Home still opens, with «وردك اليوم»', async () => {
+    await renderWithApp(<HomeScreen />, await withPlanAhead(), { now: at(7) });
+    expect(await screen.findByText(OWNER_TEXTS.labels.todayWard)).toBeOnTheScreen();
+    expect(screen.getByText(stepText(2))).toBeOnTheScreen();
+  });
+
+  it('«مساري» opens, with this week at 0 and 0', async () => {
+    await renderWithApp(<ProgressScreen />, await withPlanAhead(), { now: at(7) });
+    expect(await screen.findByLabelText(stepText(2))).toBeOnTheScreen();
+    expect(screen.getByLabelText('الصباح: 0 من 4')).toBeOnTheScreen();
+    expect(screen.getByLabelText('المساء: 0 من 4')).toBeOnTheScreen();
+  });
+});
+
 describe('moving on', () => {
   it('asks «جاهز لإضافة الذكر التالي؟» in «وردك اليوم» until answered; «أضِف الذكر التالي» starts step 2', async () => {
     const repos = await withPlan(28);

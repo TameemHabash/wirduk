@@ -520,6 +520,8 @@ Owner feedback (2026-11-27, 2):
 | Topic | Decision |
 |---|---|
 | «المصدر» in the reader | A tap on its row (the word, the arrow and the two lines) only opens or closes it, and **never counts**, open or closed. What it shows inside (the source lines, «عرض في الدرر السنية») still counts like the rest of the page. Replaces the 2026-11-26 rule (a tap on it counted). |
+| Home crashed when the date went back | Fix it (owner). When "today" is before the «أدومها» step's first day (the phone's date was ahead, then back), this week shows 0 and 0, and Home and «مساري» open as usual. |
+| Unlimited count for own adhkar | Option **ب** of the design (owner): in the dhikr editor, «عدد المرات» with two choices «عدد محدد» and «بلا حد»; + and − only with «عدد محدد». The word: «بلا حد». The recording: option 1, it repeats until paused or «إتمام». The reader: the number only (no «من N»), the ring empty, full after «إتمام». Tests for both (owner). |
 
 ## Technical choices (milestone 0–1)
 

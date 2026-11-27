@@ -56,6 +56,23 @@ describe("a step's weeks", () => {
     });
   });
 
+  it('this week comes first even when the step begins after it (the date went back)', () => {
+    // The phone's date was ahead when the step began (day 20), then went back to day 12.
+    const later = stepWeeks(daily(14, 20), [], day(20), day(12), SATURDAY);
+    expect(later).toEqual([
+      expect.objectContaining({
+        start: day(9),
+        end: day(15),
+        morning: 0,
+        evening: 0,
+        full: false,
+        met: false,
+      }),
+    ]);
+    expect(goodWeeks(later)).toEqual([]);
+    expect(finishedWeeks(later)).toEqual([]);
+  });
+
   it('a break day or a skipped first morning cuts the week', () => {
     expect(weeks(daily(0, 12), day(12), [breakDays(3, 3)])[1]!.full).toBe(false);
     const skipped = { day: day(2), session: 'morning' as const };
