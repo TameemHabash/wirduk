@@ -381,8 +381,10 @@ word «بلا حد»; fix the crash; tests for both.
     Samsung phone: release builds from the fixed link
     https://github.com/TameemHabash/wirduk/releases/download/test-build/wirduk.apk (public
     pre-release `test-build`, owner's choice 2026-11-01), built with `scripts/dev/phone-apk.ps1`
-    (the `/phone-apk` skill). On the link since 2026-11-27: the APK of 63bddc8 (the redesign
-    R1–R6, the refactor RF0–RF8 and the owner's decisions after RF8; kept in `.local/apk/`).
+    (the `/phone-apk` skill). On the link since 2026-11-27 (evening): the APK of 4a4b0b3 (the
+    redesign R1–R6, the refactor RF0–RF8, the owner's decisions after RF8, and the owner
+    feedback of 2026-11-27 (2): «المصدر», the date-back crash fix, «بلا حد»; kept in
+    `.local/apk/`; its JS bundle checked for the new code). Before it: 63bddc8.
   - The next APK installs over the old one: the data is kept (decisions, 2026-11-27). Before
     Google Play: the Play build is signed with another key, so testers uninstall then (a backup
     file keeps their data).
@@ -396,29 +398,29 @@ word «بلا حد»; fix the crash; tests for both.
 ## Waiting for the owner
 
 - **The owner feedback of 2026-11-27 (2)** («المصدر» does not count, the crash when the date
-  went back, «بلا حد»): built and checked on the emulator; not on the link yet (the APK only
-  when the owner asks). Claude's choices to confirm: a tap on a finished «بلا حد» dhikr does
+  went back, «بلا حد»): built and checked on the emulator; on the link (APK of 4a4b0b3), to
+  check on the phone. Claude's choices to confirm: a tap on a finished «بلا حد» dhikr does
   nothing (as with any finished dhikr; the reset button starts it again); a number of 4 digits
   or more gets a smaller font in the ring.
 - **The refactor (RF0–RF8) and the decisions after RF8 (2026-11-27)**: on the link (APK of
-  63bddc8), to check on the phone. Every screen was compared; the only visible change is the
+  4a4b0b3), to check on the phone. Every screen was compared; the only visible change is the
   approved one: on a new install, Settings has no «الإشعارات غير مسموحة» card until the app has
   asked (it shows at once after a no). During a break, «جاهز لإضافة الذكر التالي؟» waits for the
   break's end.
 - **The redesign (R1–R6, 2026-11-26)**: built and checked on the emulator; the owner checks it
-  all together (owner, 2026-11-26), on the phone with the APK of 63bddc8 (on the link).
+  all together (owner, 2026-11-26), on the phone with the APK of 4a4b0b3 (on the link).
   Claude's choices to confirm: the rules around «لم أقطعها بعد» (below), and the reader ring is teal as in
   the design (it was gold).
   - «لم أقطعها بعد» is not on the finished path;
     «تغيير الترتيب» waits until a step put back is saved; a step put back needs its full weeks
     when reached again (not the one week of a climb back).
 - **The owner feedback of 2026-11-21** (`docs/decisions.md`): to check on the phone with the
-  APK of 63bddc8 (on the link). The 2026-11-14 changes: tested by the owner (2026-11-21).
-- **The owner feedback of 2026-11-22** («قطعتها», `docs/decisions.md`): on the link (APK of 63bddc8), to check
+  APK of 4a4b0b3 (on the link). The 2026-11-14 changes: tested by the owner (2026-11-21).
+- **The owner feedback of 2026-11-22** («قطعتها», `docs/decisions.md`): on the link (APK of 4a4b0b3), to check
   on the phone. Claude's choices to confirm: «قطعتها» on later steps too, the last step cannot be
   marked, reset keeps the steps done, the intro line.
 - **The owner feedback of 2026-11-22 (2)** («ارجع إلى الخطوة:», `docs/decisions.md`): built as the approved
-  design; on the link (APK of 63bddc8), to check on the phone.
+  design; on the link (APK of 4a4b0b3), to check on the phone.
 - **The week rule** (2026-11-14: a step of N weeks needs N good weeks, 4 mornings and 4
   evenings each, not in a row) is Claude's advice, asked for by the owner: confirm or change it.
 
