@@ -15,7 +15,7 @@ import {
   type PlanStage,
   type PlanStep,
   type SearchResults,
-} from '../models';
+} from '@/data/models/index';
 import { buildFtsQuery, queryWords } from '../search/fts-query';
 
 interface DhikrRow {

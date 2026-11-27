@@ -1,4 +1,4 @@
-import { toSearchText } from '@/text/normalize';
+import { toSearchText } from '@/lib/normalize';
 
 /** Words shorter than this are ignored, unless the whole query is one short word. */
 const MIN_WORD_LENGTH = 2;

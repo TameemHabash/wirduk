@@ -1,8 +1,7 @@
 import { day, rec } from '@/test-utils/adwamuha';
+import type { Pause } from '@/data/models';
 
 import { countedDays, judgedUntil } from './commitment';
-import type { Pause } from './types';
-
 const breakDays = (from: number, to: number): Pause => ({
   from: day(from),
   to: day(to),

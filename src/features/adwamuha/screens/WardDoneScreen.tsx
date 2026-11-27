@@ -1,0 +1,102 @@
+import { useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { AppText } from '@/components/ui/AppText';
+import { Button } from '@/components/ui/Button';
+import { useSettings } from '@/data/settings/SettingsProvider';
+import { haptics } from '@/lib/haptics';
+import { BeadCircle } from '@/features/reader/components/BeadCircle';
+import { DISPLAY_FONT } from '@/theme/fonts';
+import { useAppTheme } from '@/theme/ThemeProvider';
+
+import type { Session } from '@/data/models';
+import { LibraryMessageView } from '@/features/adwamuha/components/LibraryMessageView';
+import type { MessageContent } from '@/features/adwamuha/logic/messages';
+import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
+
+/**
+ * After a ward: the owner's short prayer or an approved verse / hadith,
+ * «العودة للرئيسية», and a gentle word to stop at the ward today (owner: no
+ * «read the rest»; a small ward kept every day makes the habit stronger).
+ * The same after the day's second ward (owner, 2026-11-01; before: only the
+ * owner's prayer). The prayer for both wards stays on Home.
+ */
+export function WardDoneScreen() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const { settings } = useSettings();
+  const { colors, spacing } = useAppTheme();
+  const params = useLocalSearchParams<{ session: string; counted?: string }>();
+  const session: Session = params.session === 'evening' ? 'evening' : 'morning';
+  const counted = params.counted === '1';
+  const { slot, chooseMessage } = useAdwamuha();
+  const buzzed = useRef(false);
+
+  useEffect(() => {
+    if (buzzed.current) return;
+    buzzed.current = true;
+    haptics.categoryComplete(settings.completionVibration);
+  }, [settings.completionVibration]);
+
+  // The owner's words or a verse / hadith: none comes again until every one has been shown
+  // (owner, 2026-11-21), and the same ward of the same day keeps its message.
+  const [occasion] = useState(() => `ward:${slot().date}:${session}`);
+  const [chosen, setChosen] = useState<MessageContent | null>(null);
+  useEffect(() => {
+    if (!counted) return;
+    let cancelled = false;
+    chooseMessage('wardDone', occasion)
+      .then((content) => !cancelled && content && setChosen(content))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [chooseMessage, counted, occasion]);
+  const message: MessageContent | null = counted
+    ? chosen
+    : { kind: 'owner', text: t('adwamuha.notCounted') };
+
+  return (
+    <SafeAreaView style={[styles.fill, { backgroundColor: colors.background }]}>
+      <ScrollView contentContainerStyle={styles.grow}>
+        <Animated.View
+          entering={FadeIn.duration(500)}
+          style={[styles.fill, styles.center, { padding: spacing.xl, gap: spacing.lg }]}
+        >
+          <BeadCircle />
+          {message === null ? null : message.kind === 'owner' ? (
+            <View style={styles.center} accessible accessibilityRole="header">
+              <Text style={[styles.blessing, { color: colors.text }]}>{message.text}</Text>
+            </View>
+          ) : (
+            <View style={styles.message}>
+              <LibraryMessageView message={message.message} size={24} />
+            </View>
+          )}
+          {counted ? (
+            <AppText tone="muted" style={styles.centerText}>
+              {t(`adwamuha.stayWithWard.${session}`)}
+            </AppText>
+          ) : null}
+          <View style={[styles.actions, { gap: spacing.md, marginTop: spacing.md }]}>
+            <Button title={t('completion.home')} onPress={() => router.dismissTo('/')} />
+          </View>
+        </Animated.View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+  grow: { flexGrow: 1 },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  centerText: { textAlign: 'center' },
+  blessing: { fontFamily: DISPLAY_FONT, fontSize: 26, lineHeight: 48, textAlign: 'center' },
+  actions: { alignSelf: 'stretch', maxWidth: 360, width: '100%', marginHorizontal: 'auto' },
+  message: { alignSelf: 'stretch', maxWidth: 560, width: '100%', marginHorizontal: 'auto' },
+});

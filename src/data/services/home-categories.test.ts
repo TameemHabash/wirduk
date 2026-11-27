@@ -1,4 +1,4 @@
-import type { Category } from '../models';
+import type { Category } from '@/data/models/index';
 
 import { applyCustomOrder, buildHomeCategories, favoriteCategories } from './home-categories';
 

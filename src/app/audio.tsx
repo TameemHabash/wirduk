@@ -1,1 +1,1 @@
-export { AudioDownloadsScreen as default } from '@/features/audio/AudioDownloadsScreen';
+export { AudioDownloadsScreen as default } from '@/features/audio/screens/AudioDownloadsScreen';

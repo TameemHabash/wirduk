@@ -1,4 +1,4 @@
-import { REPORT_LIMITS } from '../../../src/features/report/report-protocol';
+import { REPORT_LIMITS } from '../../../src/features/report/logic/report-protocol';
 
 import { escapeText, issueBody, issueTitle } from './github';
 import { type Env, type RateLimiter, handleRequest } from './handler';

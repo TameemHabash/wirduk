@@ -15,7 +15,7 @@ module.exports = defineConfig([
       '.expo/*',
       '.local/*',
       // Generated from the owner's description (scripts/adwamuha/owner-texts.ts).
-      'src/features/adwamuha/owner-texts.ts',
+      'src/features/adwamuha/generated/owner-texts.ts',
     ],
   },
   {

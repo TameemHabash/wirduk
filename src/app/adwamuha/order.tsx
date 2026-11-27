@@ -1,1 +1,1 @@
-export { SetupOrderScreen as default } from '@/features/adwamuha/SetupOrderScreen';
+export { SetupOrderScreen as default } from '@/features/adwamuha/screens/SetupOrderScreen';

@@ -2,9 +2,8 @@
  * Test-only helpers for Adwamuha's logic: days counted from 2026-01-01, and
  * ward records made in bulk.
  */
-import { type DayKey, addDays } from '@/features/adwamuha/logic/days';
-import type { Session } from '@/features/adwamuha/logic/sessions';
-import type { PlanState, UserPlan, WardRecord } from '@/features/adwamuha/logic/types';
+import type { DayKey, PlanState, Session, UserPlan, WardRecord } from '@/data/models';
+import { addDays } from '@/features/adwamuha/logic/days';
 
 export const D0: DayKey = '2026-01-01';
 

@@ -1,1 +1,1 @@
-export { SetupIntroScreen as default } from '@/features/adwamuha/SetupIntroScreen';
+export { SetupIntroScreen as default } from '@/features/adwamuha/screens/SetupIntroScreen';

@@ -3,8 +3,8 @@
  * audio storage and the downloaded-audio storage (wired in jest.setup.ui.ts).
  * Tests read the calls and drive player events.
  */
-import type { AudioStorage } from '@/features/audio/audio-downloads';
-import { audioFileName } from '@/features/audio/audio-plan';
+import type { AudioStorage } from '@/features/audio/services/audio-downloads';
+import { audioFileName } from '@/features/audio/logic/audio-plan';
 
 import manifest from '../../content-source/audio-manifest.json';
 

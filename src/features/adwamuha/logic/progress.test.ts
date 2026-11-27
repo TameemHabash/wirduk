@@ -1,4 +1,5 @@
 import { daily, day, planOf, rec, stateAt } from '@/test-utils/adwamuha';
+import type { Weekday } from '@/data/models';
 
 import {
   LATER_START_WEEKS,
@@ -19,7 +20,7 @@ import {
   stepSkipped,
   weeksNeeded,
 } from './progress';
-import { type Weekday, weekdayOf } from './weeks';
+import { weekdayOf } from './weeks';
 
 // Step 1: 4 weeks, step 2: 3 weeks, step 3: 1 week, step 4: 2 weeks.
 const plan = planOf(4, 3, 1, 2);

@@ -4,7 +4,7 @@
  * The token needs "Contents: read and write" and "Issues: read and write" on
  * that one repo only.
  */
-import type { Report } from '../../../src/features/report/report-protocol';
+import type { Report } from '../../../src/features/report/logic/report-protocol';
 
 const API = 'https://api.github.com';
 

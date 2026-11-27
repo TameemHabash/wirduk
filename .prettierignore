@@ -10,4 +10,4 @@ assets/db
 package-lock.json
 .local
 # Generated from the owner's description (scripts/adwamuha/owner-texts.ts)
-src/features/adwamuha/owner-texts.ts
+src/features/adwamuha/generated/owner-texts.ts

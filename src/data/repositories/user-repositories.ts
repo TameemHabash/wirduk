@@ -1,5 +1,5 @@
 import type { SqlDatabase } from '../db/sql';
-import type { DownloadedAudio } from '../models';
+import type { DownloadedAudio } from '@/data/models/index';
 import { type ReaderSession, type SavedSession, parseSession } from '../session';
 import {
   type AppSettings,

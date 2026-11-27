@@ -129,11 +129,11 @@ jest.mock('expo-audio', () => {
 jest.mock('expo-document-picker', () => require('@/test-utils/audio-mock').mockPicker);
 
 jest.mock(
-  '@/features/custom/custom-audio',
+  './src/features/custom/services/custom-audio',
   () => require('@/test-utils/audio-mock').mockCustomAudio,
 );
 
-jest.mock('@/features/audio/expo-audio-storage', () => ({
+jest.mock('./src/features/audio/services/expo-audio-storage', () => ({
   expoAudioStorage: require('@/test-utils/audio-mock').mockAudioStorage,
 }));
 
@@ -151,14 +151,14 @@ jest.mock('expo-keep-awake', () => ({
 }));
 
 // Native image work: a picked screenshot becomes a tiny "JPEG".
-jest.mock('@/features/report/shrink-image', () => ({
+jest.mock('./src/features/report/services/shrink-image', () => ({
   shrinkImage: jest.fn((uri: string) =>
     Promise.resolve({ uri: `${uri}#small`, type: 'image/jpeg', data: '/9j/AAAA' }),
   ),
 }));
 
 // The phone has 12.3 GB free.
-jest.mock('@/features/report/free-space', () => ({
+jest.mock('./src/features/report/services/free-space', () => ({
   freeStorageBytes: jest.fn(() => 12.3 * 1024 ** 3),
 }));
 
@@ -173,5 +173,5 @@ beforeEach(() => {
   resetAudioMocks();
   resetNotificationMocks();
   // Each test is a fresh app start for "continue where I stopped".
-  require('@/features/session/useSessionRestore').newAppStart();
+  require('./src/features/reader/hooks/useSessionRestore').newAppStart();
 });

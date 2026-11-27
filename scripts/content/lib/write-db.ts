@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { CONTENT_META_KEYS, CONTENT_SCHEMA_SQL } from '../../../src/data/db/content-schema.ts';
-import { toSearchText } from '../../../src/text/normalize.ts';
+import { toSearchText } from '../../../src/lib/normalize.ts';
 
 import type { ContentModel } from './types.ts';
 

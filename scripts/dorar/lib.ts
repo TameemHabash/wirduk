@@ -5,7 +5,7 @@
  * from a saved Dorar page, never typed. A fadl quote is cut out of the Dorar
  * text (exactSpan), so it is always an exact quote.
  */
-import { toSearchText } from '../../src/text/normalize.ts';
+import { toSearchText } from '../../src/lib/normalize.ts';
 import type { DorarHadith, DorarSourceEntry, DorarSources } from '../content/lib/types.ts';
 
 /** What `browser-helpers.js` saves for one Dorar page (through `receiver.ts`). */

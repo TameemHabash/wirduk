@@ -179,14 +179,14 @@ Two SQLite databases, opened at start by `src/data/db/open-databases.ts`:
 - Repositories depend on the small `SqlDatabase` interface (`src/data/db/sql.ts`). The app uses
   expo-sqlite; tests use Node's built-in SQLite, so tests run the real SQL and FTS5 queries —
   including against the shipped `content.db`.
-- Dhikr counters are in memory only (`src/features/counter/counter-store.ts`). Leaving the reader
+- Dhikr counters are in memory only (`src/features/reader/state/counter-store.ts`). Leaving the reader
   resets that category's counters (so it starts from zero next time), and all reset when the app
   closes. The reader's "إتمام" button fills the current dhikr's count and moves on.
 - **Continue where I stopped** (setting, on by default): when the app goes to the background in
   the reader, the place and the counts are saved in `user.db` (`SavedSession`,
   `SessionRepository`). A fresh app start within 5 hours reopens the reader there
-  (`src/features/session/useSessionRestore.ts`, run by the Home screen) and shows a toast
-  (`src/components/Toast.tsx`, one `ToastProvider` for the app).
+  (`src/features/reader/hooks/useSessionRestore.ts`, run by the Home screen) and shows a toast
+  (`src/components/ui/Toast.tsx`, one `ToastProvider` for the app).
 - App code must not import `node:*` modules, `src/test-utils` or `scripts/` (enforced by ESLint).
 
 ## The user's own adhkar ("أذكاري")
@@ -197,11 +197,11 @@ the favorites, in a sand color (`customSurface`, `customBorder`, `customAccent` 
 
 - Stored in `user.db` (`CustomCategories`, `CustomAdhkar`), through `CustomRepository`
   (`src/data/repositories/custom-repository.ts`). Content updates never touch them.
-- **Ids are negative** (`src/data/custom-ids.ts`): row 5 is id `-5`. So one id space works for
+- **Ids are negative** (`src/data/models/custom-ids.ts`): row 5 is id `-5`. So one id space works for
   routes (`/category/-5`), counters and favorites, and never clashes with content ids.
 - They use the same reader, counter, favorites, search and completion screen as the book.
 - Optional audio is recorded in the app or picked from a file, then copied to the app's own
-  folder `custom-audio/` (`src/features/custom/custom-audio.ts`). Files are deleted when the
+  folder `custom-audio/` (`src/features/custom/services/custom-audio.ts`). Files are deleted when the
   dhikr or category is deleted or the audio is replaced.
 - Screens are in `src/features/custom/`; routes in `src/app/custom/`.
 
@@ -298,7 +298,7 @@ Two kinds (owner, 2026-10-25), no sign-in and no server of ours:
   backup / from a newer app / damaged), brings an older one up to date with the usual
   migrations, shows what is inside, keeps a safety copy (`SQLite/user-before-restore.db`), then
   replaces the data in one transaction and starts the app again. Core: `src/data/backup/`;
-  files and share sheet: `src/features/backup/backup-files.ts`.
+  files and share sheet: `src/features/backup/services/backup-files.ts`.
 - **Android's automatic backup** to the user's own Google Drive: rules keep only `user.db` and
   the backup date (never audio or the content database: Android skips everything above 25 MB).
   A backup agent (`modules/wirduk-backup`, set by `plugins/with-backup-agent.js`) records each
@@ -333,7 +333,7 @@ The design files are in `wirduk-logo/` (light and dark SVG).
 
 | File                                                         | Use                                                                 |
 | ------------------------------------------------------------ | ------------------------------------------------------------------- |
-| `assets/branding/logo-{light,dark}.png`, `…-small.png`       | Logo inside the app (`src/components/Logo.tsx` picks light or dark) |
+| `assets/branding/logo-{light,dark}.png`, `…-small.png`       | Logo inside the app (`src/components/ui/Logo.tsx` picks light or dark) |
 | `assets/icon.png`                                            | App icon (iOS and fallback): full square                            |
 | `assets/android-icon-{background,foreground,monochrome}.png` | Android adaptive icon and themed (one-color) icon                   |
 | `assets/splash-icon.png`, `assets/splash-icon-dark.png`      | Splash screen (set in `app.config.ts`)                              |

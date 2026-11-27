@@ -1,5 +1,7 @@
+import { DEFAULT_WARD_TIMES } from '@/data/models';
+
 import { addDays, dayKeyOf, daysBetween, daysFrom } from './days';
-import { DEFAULT_WARD_TIMES, closedWard, recordSlot, slotAt, validWardTimes } from './sessions';
+import { closedWard, recordSlot, slotAt } from './sessions';
 
 /** A local moment on 2026-01-15 (day 15) or the next day (16). */
 const at = (day: 15 | 16, hh: number, mm: number) => new Date(2026, 0, day, hh, mm);
@@ -84,16 +86,5 @@ describe('a ward outside its window cannot be opened (owner, 2026-11-21)', () =>
   it('without a reminder (a screen left open): over', () => {
     expect(closedWard('morning', at(15, 16, 1), T)).toBe('over');
     expect(closedWard('evening', at(15, 4, 1), T)).toBe('over');
-  });
-});
-
-describe('validWardTimes', () => {
-  it('accepts the defaults and refuses times out of order', () => {
-    expect(validWardTimes(DEFAULT_WARD_TIMES)).toBe(true);
-    expect(validWardTimes({ ...DEFAULT_WARD_TIMES, morningOnTimeEnd: '03:00' })).toBe(false);
-    expect(validWardTimes({ ...DEFAULT_WARD_TIMES, eveningStart: '11:00' })).toBe(false);
-    // The evening's on-time end after the next morning starts.
-    expect(validWardTimes({ ...DEFAULT_WARD_TIMES, eveningOnTimeEnd: '05:00' })).toBe(false);
-    expect(validWardTimes({ ...DEFAULT_WARD_TIMES, morningStart: '4:00' })).toBe(false);
   });
 });

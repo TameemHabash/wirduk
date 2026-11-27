@@ -3,7 +3,7 @@
  * (`docs/adwamuha/feature-prompt.md`) and the owner's design
  * (`docs/adwamuha/flow-design.html`), so no Arabic is typed by hand:
  * - the labels and the hadith go into a module the app uses
- *   (`src/features/adwamuha/owner-texts.ts`);
+ *   (`src/features/adwamuha/generated/owner-texts.ts`);
  * - the messages and tips (each one chosen by state) go into
  *   `content-source/adwamuha-texts.json`, which the content build writes into
  *   the content database (owner, 2026-10-29: «store each placeholder in the DB»).
@@ -19,7 +19,7 @@ import { dirname, join } from 'node:path';
 /** The inputs and the generated files, from the repo's root folder. */
 export const PROMPT_FILE = join('docs', 'adwamuha', 'feature-prompt.md');
 export const DESIGN_FILE = join('docs', 'adwamuha', 'flow-design.html');
-export const MODULE_FILE = join('src', 'features', 'adwamuha', 'owner-texts.ts');
+export const MODULE_FILE = join('src', 'features', 'adwamuha', 'generated', 'owner-texts.ts');
 export const TEXTS_FILE = join('content-source', 'adwamuha-texts.json');
 /** The owner's later edits, given in chat (cut from the messages by script). */
 export const EDITS_FILE = join('docs', 'adwamuha', 'owner-edits.json');

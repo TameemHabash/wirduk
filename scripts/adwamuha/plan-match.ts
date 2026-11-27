@@ -6,7 +6,7 @@
  * Arabic here is only what the owner's prompt gives (read at run time) and a
  * few matcher phrases: nothing is shown in the app from this file.
  */
-import { toSearchText } from '../../src/text/normalize.ts';
+import { toSearchText } from '../../src/lib/normalize.ts';
 
 export type Session = 'M' | 'E';
 

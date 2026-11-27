@@ -3,9 +3,7 @@
  * time. Day arithmetic is done on the calendar date only (never on hours), so
  * daylight saving time and time zone changes cannot shift a day.
  */
-
-/** A local calendar date, "YYYY-MM-DD". */
-export type DayKey = string;
+import type { DayKey } from '@/data/models';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 

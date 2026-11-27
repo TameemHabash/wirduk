@@ -7,10 +7,8 @@
  * Everything is worked out from the stored records, whenever the app opens.
  * The weeks themselves (calendar weeks) are in `weeks.ts`.
  */
-import { type DayKey, addDays, daysBetween, daysFrom } from './days';
-import { SESSIONS, type Session } from './sessions';
-import type { Pause, WardRecord } from './types';
-
+import { type DayKey, type Pause, type Session, SESSIONS, type WardRecord } from '@/data/models';
+import { addDays, daysBetween, daysFrom } from './days';
 /** Days of a week a ward must be done (owner: missing 2–3 days a week is normal). */
 export const WEEK_TARGET = 4;
 export const WEEK_DAYS = 7;

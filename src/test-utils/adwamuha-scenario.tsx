@@ -9,11 +9,10 @@ import type { ReactElement } from 'react';
 import { act } from '@testing-library/react-native';
 
 import type { Repositories } from '@/data/DataProvider';
-import { type AdwamuhaValue, useAdwamuha } from '@/features/adwamuha/AdwamuhaProvider';
-import { type DayKey, addDays } from '@/features/adwamuha/logic/days';
-import type { Session } from '@/features/adwamuha/logic/sessions';
-import type { Weekday } from '@/features/adwamuha/logic/weeks';
-import { type ProgressView, useProgress } from '@/features/adwamuha/useProgress';
+import { type AdwamuhaValue, useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { addDays } from '@/features/adwamuha/logic/days';
+import { type ProgressView, useProgress } from '@/features/adwamuha/hooks/useProgress';
+import type { DayKey, Session, Weekday } from '@/data/models';
 
 import { createTestRepositories, renderWithApp } from './render-app';
 

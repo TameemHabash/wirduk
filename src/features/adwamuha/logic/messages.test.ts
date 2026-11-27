@@ -1,6 +1,6 @@
-import type { AdwamuhaMessage, AdwamuhaText } from '@/data/models';
+import type { AdwamuhaMessage, AdwamuhaText, MessagePick } from '@/data/models';
 
-import { type MessagePick, messagePool, nextPick, textFor } from './messages';
+import { messagePool, nextPick, textFor } from './messages';
 
 const message = (id: string, moments: AdwamuhaMessage['moments']): AdwamuhaMessage => ({
   id,

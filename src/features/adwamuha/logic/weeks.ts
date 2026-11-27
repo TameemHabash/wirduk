@@ -13,6 +13,7 @@
  * no end-of-week message). In a week the step began in, only the days since
  * it began count.
  */
+import type { DayKey, Pause, Session, WardRecord, Weekday } from '@/data/models';
 import {
   type SkippedWard,
   WEEK_DAYS,
@@ -21,16 +22,7 @@ import {
   isPaused,
   judgedUntil,
 } from './commitment';
-import { type DayKey, addDays, daysBetween } from './days';
-import type { Session } from './sessions';
-import type { Pause, WardRecord } from './types';
-
-/** A day of the week: 0 = Sunday … 6 = Saturday (as `Date.getDay()`). */
-export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-
-/** Saturday, until the user picks another day (owner, 2026-10-30). */
-export const DEFAULT_WEEK_START: Weekday = 6;
-
+import { addDays, daysBetween } from './days';
 /** The day of the week of a calendar date. */
 export function weekdayOf(day: DayKey): Weekday {
   const [y, m, d] = day.split('-').map(Number) as [number, number, number];

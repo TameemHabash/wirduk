@@ -1,1 +1,1 @@
-export { TabsLayout as default } from '@/features/tabs/TabsLayout';
+export { TabsLayout as default } from '@/components/navigation/TabsLayout';

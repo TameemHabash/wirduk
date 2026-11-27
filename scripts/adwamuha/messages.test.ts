@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { ADWAMUHA_MOMENTS } from '../../src/data/models';
+import { ADWAMUHA_MOMENTS } from '../../src/data/models/adwamuha';
 
 import {
   LIBRARY_FILE,

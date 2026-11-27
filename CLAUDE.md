@@ -113,24 +113,24 @@ README.md is long: read only the section you need.
 - `src/app/` thin routes. Deep links: `wirduk://category/<id>?dhikr=<dhikrId>`, `wirduk://custom`,
   `wirduk://custom/<-id>/dhikr/new`, `wirduk://settings`, `adhkar`, `search`, `audio`, `about`.
   Three tabs (redesign R2): `src/app/(tabs)/` = Home (`index`), `adhkar`, `settings`
-  (`features/tabs/TabsLayout.tsx`, our own `TabBar.tsx`, which lifts toasts above it with
+  (`components/navigation/TabsLayout.tsx`, our own `TabBar.tsx`, which lifts toasts above it with
   `useToastOffset`). Every other route is pushed above the tabs (no tab bar). `/search`
   redirects to `/adhkar?focus=search` (keyboard up). `/reorder` = the chapters' order, saved only
-  with «حفظ». The editors and `/reorder` draw their own top bar (`components/AppBar.tsx`).
+  with «حفظ». The editors and `/reorder` draw their own top bar (`components/layout/AppBar.tsx`).
 - `src/features/adhkar/` the «الأذكار» tab: `AdhkarScreen.tsx` (search box on top, results in
   place of the lists, «أذكاري» first, every chapter), `SearchResults.tsx`, `ReorderScreen.tsx`.
-  Home (`features/home/`) has the golden card of now (`TimeOfDayCards`, `components/GoldCard.tsx`)
+  Home (`features/home/`) has the golden card of now (`TimeOfDayCards`, `components/ui/GoldCard.tsx`)
   or «وردك اليوم», and the favorites as tiles; no chapter list.
 - `src/features/reader/` the reader: `ReaderScreen.tsx` (tap zone, auto-advance, "إتمام",
   reset on leaving), `DhikrPage.tsx`, `CompletionScreen.tsx`, `navigation.ts`.
-- `src/features/counter/counter-store.ts` in-memory counts.
-- `src/components/Toast.tsx` the app's toast (`useToast().show({ message, icon, tone, onPress })`).
-  `src/components/Dialog.tsx` the app's own dialog (`useDialog().show({ icon, tone, title, body,
+- `src/features/reader/state/counter-store.ts` in-memory counts.
+- `src/components/ui/Toast.tsx` the app's toast (`useToast().show({ message, icon, tone, onPress })`).
+  `src/components/ui/Dialog.tsx` the app's own dialog (`useDialog().show({ icon, tone, title, body,
 content, actions })`, the action first, `cancel: true` on the one a tap outside runs); never
   Android's `Alert.alert` (redesign). Tests press it with `src/test-utils/dialog.ts`. Buttons:
   `Button` (`kind`: primary, secondary, soft, danger, plain; `size="small"`), `TextButton`,
   `IconTile`, `Segmented`; `AppText roomy` for a label in a box as wide as its content.
-- `src/data/session.ts` + `SessionRepository` + `src/features/session/useSessionRestore.ts`
+- `src/data/session.ts` + `SessionRepository` + `src/features/reader/hooks/useSessionRestore.ts`
   "continue where I stopped" (5 hours).
 - `src/features/audio/` `useDhikrAudio.ts` (play, repeat × count, autoplay, lock screen),
   `audio-downloads.ts` (download manager; downloads have a scope: the morning and evening
@@ -161,7 +161,7 @@ content, actions })`, the action first, `cancel: true` on the one a tap outside 
   settings, Saturday by default; never the phone's region), changed with `setWeekStart`;
   `renderWithApp`'s `weekStartsOn` saves that setting. App state and actions: `AdwamuhaProvider` (`useAdwamuha`).
   The owner's Arabic texts: `node scripts/adwamuha/owner-texts.ts` GENERATES the labels and the
-  hadith (`src/features/adwamuha/owner-texts.ts`) and the messages and tips, each chosen by state
+  hadith (`src/features/adwamuha/generated/owner-texts.ts`) and the messages and tips, each chosen by state
   (`content-source/adwamuha-texts.json` → content table `AdwamuhaTexts`, read with
   `ContentRepository.listAdwamuhaTexts`; `textFor` / `chooseMessage` in `AdwamuhaProvider`).
   No message (after a ward, or Home's one-time ones) repeats before all of its moment were

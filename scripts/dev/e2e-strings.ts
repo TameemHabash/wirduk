@@ -13,7 +13,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { OWNER_TEXTS } from '../../src/features/adwamuha/owner-texts.ts';
+import { OWNER_TEXTS } from '../../src/features/adwamuha/generated/owner-texts.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const common = JSON.parse(

@@ -1,1 +1,1 @@
-export { CategoryEditorScreen as default } from '@/features/custom/CategoryEditorScreen';
+export { CategoryEditorScreen as default } from '@/features/custom/screens/CategoryEditorScreen';

@@ -4,7 +4,7 @@
  * `scripts/adwamuha/owner-texts.ts`), checked on every build, written to the
  * table AdwamuhaTexts.
  */
-import { ADWAMUHA_MOMENTS } from '../../../src/data/models.ts';
+import { ADWAMUHA_MOMENTS } from '../../../src/data/models/adwamuha.ts';
 
 import type { ContentText } from './types.ts';
 

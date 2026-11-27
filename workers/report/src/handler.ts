@@ -1,6 +1,6 @@
 /**
  * The relay for "report an issue": POST /report with the JSON the app sends
- * (src/features/report/report-protocol.ts). It keeps the GitHub token, so the
+ * (src/features/report/logic/report-protocol.ts). It keeps the GitHub token, so the
  * app never has one and the reporter needs no account.
  *
  * Spam limits: the body size, the report checks, and two rate limits (per IP
@@ -10,7 +10,7 @@ import {
   REPORT_LIMITS,
   type ReportError,
   parseReport,
-} from '../../../src/features/report/report-protocol';
+} from '../../../src/features/report/logic/report-protocol';
 
 import { type GitHubDeps, GitHubError, createIssue } from './github';
 

@@ -1,6 +1,6 @@
 import { daily, day, rec } from '@/test-utils/adwamuha';
+import type { Pause } from '@/data/models';
 
-import type { Pause } from './types';
 import { finishedWeeks, goodWeeks, stepWeeks, weekGrid, weekStartOf, weekdayOf } from './weeks';
 
 const SUNDAY = 0;

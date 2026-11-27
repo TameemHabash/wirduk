@@ -7,56 +7,11 @@
  * So the two windows cover the whole day, and 01:30 belongs to the evening of
  * the day before.
  */
-import { parseTime } from '@/features/reminders/reminder-time';
+import type { DayKey, Session, WardTimes } from '@/data/models';
+import { DAY_MINUTES, wardBounds } from '@/data/settings/ward-times';
+import { parseTime } from '@/lib/time';
 
-import { type DayKey, addDays, dayKeyOf, minuteOfDay } from './days';
-
-export type Session = 'morning' | 'evening';
-export const SESSIONS: readonly Session[] = ['morning', 'evening'];
-
-/** "HH:MM", 24 hours, as the settings store them. */
-export interface WardTimes {
-  morningStart: string;
-  morningOnTimeEnd: string;
-  eveningStart: string;
-  eveningOnTimeEnd: string;
-}
-
-export const DEFAULT_WARD_TIMES: WardTimes = {
-  morningStart: '04:00',
-  morningOnTimeEnd: '12:00',
-  eveningStart: '16:00',
-  eveningOnTimeEnd: '00:00',
-};
-
-const DAY = 24 * 60;
-const minutes = (time: string) => {
-  const { hour, minute } = parseTime(time);
-  return hour * 60 + minute;
-};
-
-/** The four times in minutes, the evening's end after the evening's start (it may pass midnight). */
-function bounds(times: WardTimes) {
-  const ms = minutes(times.morningStart);
-  const mo = minutes(times.morningOnTimeEnd);
-  const es = minutes(times.eveningStart);
-  let eo = minutes(times.eveningOnTimeEnd);
-  if (eo <= es) eo += DAY;
-  return { ms, mo, es, eo };
-}
-
-/**
- * Times make sense when: morning starts < morning on-time ends ≤ evening
- * starts < evening on-time ends ≤ the next morning start.
- */
-export function validWardTimes(times: WardTimes): boolean {
-  try {
-    const { ms, mo, es, eo } = bounds(times);
-    return ms < mo && mo <= es && es < eo && eo <= ms + DAY;
-  } catch {
-    return false;
-  }
-}
+import { addDays, dayKeyOf, minuteOfDay } from './days';
 
 export interface WardSlot {
   session: Session;
@@ -67,12 +22,12 @@ export interface WardSlot {
 
 /** The ward whose window is open at a moment. */
 export function slotAt(at: Date, times: WardTimes): WardSlot {
-  const { ms, mo, es, eo } = bounds(times);
+  const { ms, mo, es, eo } = wardBounds(times);
   const m = minuteOfDay(at);
   const today = dayKeyOf(at);
   if (m >= ms && m < es) return { session: 'morning', date: today, late: m >= mo };
   if (m >= es) return { session: 'evening', date: today, late: m >= eo };
-  return { session: 'evening', date: addDays(today, -1), late: m + DAY >= eo };
+  return { session: 'evening', date: addDays(today, -1), late: m + DAY_MINUTES >= eo };
 }
 
 /**

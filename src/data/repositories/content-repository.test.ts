@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { createContentDb, openShippedContentDb } from '@/test-utils/databases';
 
-import { ADWAMUHA_MOMENTS } from '../models';
+import { ADWAMUHA_MOMENTS } from '@/data/models/index';
 
 import { addLineBreaks } from '../../../scripts/content/lib/line-breaks';
 import { removeDoubleParens } from '../../../scripts/content/lib/quote-marks';

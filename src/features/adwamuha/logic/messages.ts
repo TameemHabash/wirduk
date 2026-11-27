@@ -1,4 +1,4 @@
-import type { AdwamuhaMessage, AdwamuhaMoment, AdwamuhaText } from '@/data/models';
+import type { AdwamuhaMessage, AdwamuhaMoment, AdwamuhaText, MessagePick } from '@/data/models';
 
 /**
  * What a moment shows: the app's own words (the owner's, from the content
@@ -62,15 +62,6 @@ export function stableRandom(key: string): number {
     h = Math.imul(h, 0x01000193);
   }
   return (h >>> 0) / 2 ** 32;
-}
-
-/** The message an occasion (a day's ward, an event, a week) got, kept in user.db. */
-export interface MessagePick {
-  occasion: string;
-  /** The message's `PoolMessage.key`. */
-  messageId: string;
-  /** Messages go in rounds: a round ends once each message of the pool came once. */
-  round: number;
 }
 
 /**

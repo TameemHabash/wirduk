@@ -12,9 +12,7 @@
  *   the current step, so its dhikr leaves the ward (`withEdits`).
  * The screen warns before saving any change and recommends the default plan.
  */
-import type { DayKey } from './days';
-import type { Session } from './sessions';
-import type { PlanState, UserPlan, UserPlanStep } from './types';
+import type { DayKey, PlanState, Session, UserPlan, UserPlanStep } from '@/data/models';
 
 export const MIN_STEP_WEEKS = 1;
 export const MAX_STEP_WEEKS = 8;

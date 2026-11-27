@@ -13,7 +13,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-import { audioFileName } from '../../src/features/audio/audio-plan.ts';
+import { audioFileName } from '../../src/features/audio/logic/audio-plan.ts';
 
 export const SHEET_FILE = join('docs', 'audio', 'morning-evening-audio.csv');
 const MORNING = 1;

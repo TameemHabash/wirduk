@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useRepositories } from '@/data/DataProvider';
-import { useAdwamuha } from '@/features/adwamuha/AdwamuhaProvider';
-import { setDevClock } from '@/features/adwamuha/dev-clock';
-import { type DayKey, addDays } from '@/features/adwamuha/logic/days';
+import { useAdwamuha } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { setDevClock } from '@/features/adwamuha/state/dev-clock';
+import { addDays } from '@/features/adwamuha/logic/days';
+import type { DayKey } from '@/data/models';
 
 /** A local time on a day. */
 function at(day: DayKey, hour: number): Date {

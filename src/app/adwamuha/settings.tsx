@@ -1,1 +1,1 @@
-export { AdwamuhaSettingsScreen as default } from '@/features/adwamuha/AdwamuhaSettingsScreen';
+export { AdwamuhaSettingsScreen as default } from '@/features/adwamuha/screens/AdwamuhaSettingsScreen';

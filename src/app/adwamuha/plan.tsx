@@ -1,1 +1,1 @@
-export { PlanEditorScreen as default } from '@/features/adwamuha/PlanEditorScreen';
+export { PlanEditorScreen as default } from '@/features/adwamuha/screens/PlanEditorScreen';

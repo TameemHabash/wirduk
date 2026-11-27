@@ -1,5 +1,5 @@
 /**
- * Test-only: the app's own dialog (`components/Dialog.tsx`), read and pressed like a user.
+ * Test-only: the app's own dialog (`components/ui/Dialog.tsx`), read and pressed like a user.
  */
 import { fireEvent, screen, within } from '@testing-library/react-native';
 

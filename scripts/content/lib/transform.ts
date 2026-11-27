@@ -1,4 +1,4 @@
-import { cleanDisplayText } from '../../../src/text/normalize.ts';
+import { cleanDisplayText } from '../../../src/lib/normalize.ts';
 
 import { addLineBreaks } from './line-breaks.ts';
 import { removeDoubleParens } from './quote-marks.ts';

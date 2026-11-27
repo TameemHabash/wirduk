@@ -1,6 +1,5 @@
-import type { DefaultPlan } from '@/data/models';
+import type { DefaultPlan, UserPlan } from '@/data/models';
 
-import type { UserPlan } from './types';
 import { copyDefaultPlan, orderWard, wardDhikrIds } from './ward';
 
 const plan: UserPlan = {

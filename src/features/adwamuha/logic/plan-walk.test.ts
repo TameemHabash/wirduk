@@ -6,9 +6,10 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { DayKey, PlanState, Session, UserPlan, WardRecord, Weekday } from '@/data/models';
 
 import { WEEK_TARGET } from './commitment';
-import { type DayKey, addDays, daysBetween } from './days';
+import { addDays, daysBetween } from './days';
 import {
   advance,
   evaluate,
@@ -18,9 +19,7 @@ import {
   startPlan,
   stepSkipped,
 } from './progress';
-import type { Session } from './sessions';
-import type { PlanState, UserPlan, WardRecord } from './types';
-import { type Weekday, stepWeeks, weekGrid, weekdayOf } from './weeks';
+import { stepWeeks, weekGrid, weekdayOf } from './weeks';
 
 /** The default plan, as the content build stores it (content-source/adwamuha-plan.json). */
 function defaultPlan(): UserPlan {

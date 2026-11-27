@@ -3,10 +3,7 @@
  * step up to the current one, in plan order. A morning-only or evening-only
  * step changes only that ward. In maintenance, the whole plan.
  */
-import type { DefaultPlan } from '@/data/models';
-
-import type { Session } from './sessions';
-import type { UserPlan } from './types';
+import type { DefaultPlan, Session, UserPlan, WardOrder } from '@/data/models';
 
 export function wardDhikrIds(plan: UserPlan, step: number, session: Session): number[] {
   const upTo = Math.min(Math.max(step, 0), plan.steps.length);
@@ -17,16 +14,6 @@ export function wardDhikrIds(plan: UserPlan, step: number, session: Session): nu
   }
   return ids;
 }
-
-/**
- * «ترتيب الورد» (owner, 2026-10-29): 'plan' (the default, recommended) reads
- * the ward in plan order, the new dhikr last; 'category' reads the same adhkar
- * in their order in the morning or evening category (the book's order). Only
- * the order changes; the opening is always first.
- */
-export type WardOrder = 'plan' | 'category';
-
-export const WARD_ORDERS: readonly WardOrder[] = ['plan', 'category'];
 
 /** The ward's ids (from `wardDhikrIds`) in the chosen order; `categoryIds`: the category in order. */
 export function orderWard(

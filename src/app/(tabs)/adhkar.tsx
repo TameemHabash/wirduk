@@ -1,1 +1,1 @@
-export { AdhkarScreen as default } from '@/features/adhkar/AdhkarScreen';
+export { AdhkarScreen as default } from '@/features/adhkar/screens/AdhkarScreen';

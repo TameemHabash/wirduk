@@ -6,8 +6,8 @@ import type { ReactElement } from 'react';
 import { act, render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { DialogProvider } from '@/components/Dialog';
-import { ToastProvider } from '@/components/Toast';
+import { DialogProvider } from '@/components/ui/Dialog';
+import { ToastProvider } from '@/components/ui/Toast';
 import { RepositoriesProvider, type Repositories } from '@/data/DataProvider';
 import { AdwamuhaRepository } from '@/data/repositories/adwamuha-repository';
 import { BackupRepository } from '@/data/repositories/backup-repository';
@@ -21,12 +21,12 @@ import {
   SettingsRepository,
 } from '@/data/repositories/user-repositories';
 import { SettingsProvider } from '@/data/settings/SettingsProvider';
-import { AdwamuhaProvider } from '@/features/adwamuha/AdwamuhaProvider';
-import type { Weekday } from '@/features/adwamuha/logic/weeks';
-import { setupShownKey } from '@/features/adwamuha/setup';
-import { AudioProvider } from '@/features/audio/AudioProvider';
+import { AdwamuhaProvider } from '@/features/adwamuha/state/AdwamuhaProvider';
+import { setupShownKey } from '@/features/adwamuha/logic/setup';
+import { AudioProvider } from '@/features/audio/state/AudioProvider';
 import type { ThemePreference } from '@/theme/resolve';
 import { AppThemeProvider } from '@/theme/ThemeProvider';
+import type { Weekday } from '@/data/models';
 
 import { createUserDb, openShippedContentDb } from './databases';
 

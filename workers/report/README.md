@@ -5,7 +5,7 @@ GitHub token, saves the screenshots in a **private** repo and opens an issue the
 needs no account, and the app holds no token.
 
 - Code: `src/handler.ts` (checks, limits), `src/github.ts` (the issue). The report format and limits
-  are shared with the app: `src/features/report/report-protocol.ts`.
+  are shared with the app: `src/features/report/logic/report-protocol.ts`.
 - Tests run with the app tests (`npm run verify`, or `npx jest workers`).
 - Limits: body ≤ 6 MB, description 10–4000 characters, ≤ 4 images (JPEG/PNG, ≤ 1 MB each, the
   app shrinks them first), 2 reports a minute per IP, 10 a minute for everyone (approximate, per

@@ -1,12 +1,15 @@
 import {
   DEFAULT_WARD_TIMES,
+  DEFAULT_WEEK_START,
+  WARD_ORDERS,
+  type WardOrder,
   type WardTimes,
-  validWardTimes,
-} from '@/features/adwamuha/logic/sessions';
-import { WARD_ORDERS, type WardOrder } from '@/features/adwamuha/logic/ward';
-import { DEFAULT_WEEK_START, type Weekday } from '@/features/adwamuha/logic/weeks';
+  type Weekday,
+} from '@/data/models';
 import { DEFAULT_DHIKR_FONT_ID, isDhikrFontId } from '@/theme/fonts';
 import type { ThemePreference } from '@/theme/resolve';
+
+import { validWardTimes } from './ward-times';
 
 export interface ReminderSetting {
   enabled: boolean;

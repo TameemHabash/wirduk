@@ -1,1 +1,1 @@
-export { ReaderScreen as default } from '@/features/reader/ReaderScreen';
+export { ReaderScreen as default } from '@/features/reader/screens/ReaderScreen';

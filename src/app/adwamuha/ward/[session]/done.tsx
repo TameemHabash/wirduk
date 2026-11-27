@@ -1,1 +1,1 @@
-export { WardDoneScreen as default } from '@/features/adwamuha/WardDoneScreen';
+export { WardDoneScreen as default } from '@/features/adwamuha/screens/WardDoneScreen';
